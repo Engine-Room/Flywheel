@@ -9,7 +9,8 @@ import dev.engine_room.flywheel.backend.compile.FlwProgramsReloader;
 import dev.engine_room.flywheel.backend.engine.uniform.Uniforms;
 import dev.engine_room.flywheel.impl.mixin.fabric.ArgumentTypeInfosAccessor;
 import dev.engine_room.flywheel.impl.visualization.VisualizationEventHandler;
-import dev.engine_room.flywheel.lib.model.baked.PartialModelEventHandler;
+import dev.engine_room.flywheel.lib.model.baked.FabricPartialModel;
+import dev.engine_room.flywheel.lib.util.IdentifierUtil;
 import dev.engine_room.flywheel.lib.util.RendererReloadCache;
 import dev.engine_room.flywheel.lib.util.ResourceReloadHolder;
 import net.fabricmc.api.ClientModInitializer;
@@ -17,10 +18,12 @@ import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallba
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientEntityEvents;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.model.loading.v1.ModelLoadingPlugin;
-import net.fabricmc.fabric.api.resource.ResourceManagerHelper;
+import net.fabricmc.fabric.api.resource.v1.ResourceLoader;
+import net.fabricmc.fabric.api.resource.v1.reloader.ResourceReloaderKeys;
 import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.api.ModContainer;
 import net.fabricmc.loader.api.Version;
+import net.minecraft.client.gui.components.debug.DebugScreenEntries;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.server.packs.PackType;
 
@@ -57,6 +60,8 @@ public final class FlywheelFabric implements ClientModInitializer {
 
 		ClientCommandRegistrationCallback.EVENT.register(FlwCommands::registerClientCommands);
 
+		DebugScreenEntries.register(IdentifierUtil.id("flw_debug_info"), new FlwDebugInfo.FlwDebugEntry());
+
 		EndClientResourceReloadCallback.EVENT.register((minecraft, resourceManager, initialReload, error) ->
 				BackendManagerImpl.onEndClientResourceReload(error.isPresent()));
 
@@ -72,14 +77,15 @@ public final class FlywheelFabric implements ClientModInitializer {
 		ReloadLevelRendererCallback.EVENT.register(level -> RendererReloadCache.onReloadLevelRenderer());
 		EndClientResourceReloadCallback.EVENT.register((minecraft, resourceManager, initialReload, error) -> ResourceReloadHolder.onEndClientResourceReload());
 
-		ModelLoadingPlugin.register(ctx -> ctx.addModels(PartialModelEventHandler.onRegisterAdditional()));
-		ResourceManagerHelper.get(PackType.CLIENT_RESOURCES).registerReloadListener(PartialModelEventHandler.ReloadListener.INSTANCE);
+		ModelLoadingPlugin.register(FabricPartialModel::registerAll);
+		ResourceLoader.get(PackType.CLIENT_RESOURCES).registerReloader(FabricPartialModel.ResourceReloadListener.ID, FabricPartialModel.ResourceReloadListener.INSTANCE);
+		ResourceLoader.get(PackType.CLIENT_RESOURCES).addReloaderOrdering(ResourceReloaderKeys.Client.MODELS, FabricPartialModel.ResourceReloadListener.ID);
 	}
 
 	private static void setupBackend() {
 		ReloadLevelRendererCallback.EVENT.register(level -> Uniforms.onReloadLevelRenderer());
 
-		ResourceManagerHelper.get(PackType.CLIENT_RESOURCES).registerReloadListener(FlwProgramsReloader.INSTANCE);
+		ResourceLoader.get(PackType.CLIENT_RESOURCES).registerReloader(FlwProgramsReloader.ID, FlwProgramsReloader.INSTANCE);
 	}
 
 	public static Version version() {

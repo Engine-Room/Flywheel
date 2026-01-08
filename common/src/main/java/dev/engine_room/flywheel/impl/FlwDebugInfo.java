@@ -253,10 +253,9 @@ public final class FlwDebugInfo {
 	}
 
 	public static class FlwDebugEntry implements DebugScreenEntry {
-		// TODO - Check if this should use a group instead
+		// TODO 1.21.11: Check if this should use a group instead, and if this information should be split across multiple entries
 		@Override
 		public void display(DebugScreenDisplayer displayer, @Nullable Level level, @Nullable LevelChunk clientChunk, @Nullable LevelChunk serverChunk) {
-			displayer.addLine("");
 			displayer.addLine("Flywheel: " + FlwImplXplat.INSTANCE.getVersionStr());
 			displayer.addLine("Backend: " + BackendManagerImpl.getBackendString());
 			displayer.addLine("Update limiting: " + (FlwConfig.INSTANCE.limitUpdates() ? "on" : "off"));

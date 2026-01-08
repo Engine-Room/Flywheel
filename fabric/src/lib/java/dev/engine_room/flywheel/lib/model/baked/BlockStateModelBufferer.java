@@ -1,7 +1,6 @@
 package dev.engine_room.flywheel.lib.model.baked;
 
 import java.util.Iterator;
-import java.util.List;
 
 import org.jspecify.annotations.Nullable;
 
@@ -13,12 +12,10 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.ItemBlockRenderTypes;
 import net.minecraft.client.renderer.block.BlockRenderDispatcher;
 import net.minecraft.client.renderer.block.ModelBlockRenderer;
-import net.minecraft.client.renderer.block.model.BlockModelPart;
 import net.minecraft.client.renderer.block.model.BlockStateModel;
 import net.minecraft.client.renderer.chunk.ChunkSectionLayer;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.core.BlockPos;
-import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.BlockAndTintGetter;
 import net.minecraft.world.level.block.RenderShape;
 import net.minecraft.world.level.block.state.BlockState;
@@ -35,24 +32,22 @@ final class BlockStateModelBufferer {
 		if (poseStack == null) {
 			poseStack = objects.identityPoseStack;
 		}
-		RandomSource random = objects.random;
 		FabricMeshEmitterManager emitters = objects.emitters;
 
 		emitters.prepare(blockMaterialFunction);
 
-		List<BlockModelPart> parts = model.collectParts(random);
+		long seed = state.getSeed(pos);
 
 		// See ModelBlockRenderer#tesselateBlock
 		boolean useAo = Minecraft.useAmbientOcclusion();
-		boolean defaultAo = useAo && state.getLightEmission() == 0 && parts.getFirst().useAmbientOcclusion();
+		boolean defaultAo = useAo && state.getLightEmission() == 0;
 		model = emitters.prepareForModel(model, useAo, defaultAo);
-		parts = model.collectParts(random);
 
 		poseStack.pushPose();
 		Minecraft.getInstance()
 				.getBlockRenderer()
 				.getModelRenderer()
-				.tesselateBlock(level, parts, state, pos, poseStack, emitters, false, OverlayTexture.NO_OVERLAY);
+				.render(level, model, state, pos, poseStack, emitters, false, seed, OverlayTexture.NO_OVERLAY);
 		poseStack.popPose();
 
 		return emitters.end();
@@ -63,7 +58,6 @@ final class BlockStateModelBufferer {
 		if (poseStack == null) {
 			poseStack = objects.identityPoseStack;
 		}
-		RandomSource random = objects.random;
 		FabricMeshEmitterManager emitters = objects.emitters;
 		TransformingVertexConsumer transformingWrapper = objects.transformingWrapper;
 
@@ -88,7 +82,7 @@ final class BlockStateModelBufferer {
 				if (!fluidState.isEmpty()) {
 					ChunkSectionLayer layer = ItemBlockRenderTypes.getRenderLayer(fluidState);
 
-					BufferBuilder bufferBuilder = emitters.getBuffer(layer, true, false);
+					BufferBuilder bufferBuilder = emitters.getEmitter(layer).getBuffer(true, false);
 
 					if (bufferBuilder != null) {
 						transformingWrapper.prepare(bufferBuilder, poseStack);
@@ -102,17 +96,16 @@ final class BlockStateModelBufferer {
 			}
 
 			if (state.getRenderShape() == RenderShape.MODEL) {
+				long seed = state.getSeed(pos);
 				BlockStateModel model = renderDispatcher.getBlockModel(state);
-				List<BlockModelPart> parts = model.collectParts(random);
 
 				// See ModelBlockRenderer#tesselateBlock
-				boolean defaultAo = useAo && state.getLightEmission() == 0 && parts.getFirst().useAmbientOcclusion();
+				boolean defaultAo = useAo && state.getLightEmission() == 0;
 				model = emitters.prepareForModel(model, useAo, defaultAo);
-				parts = model.collectParts(random);
 
 				poseStack.pushPose();
 				poseStack.translate(pos.getX(), pos.getY(), pos.getZ());
-				blockRenderer.tesselateBlock(level, parts, state, pos, poseStack, emitters, true, OverlayTexture.NO_OVERLAY);
+				blockRenderer.render(level, model, state, pos, poseStack, emitters, true, seed, OverlayTexture.NO_OVERLAY);
 				poseStack.popPose();
 			}
 		}
@@ -124,7 +117,6 @@ final class BlockStateModelBufferer {
 
 	private static class ThreadLocalObjects {
 		public final PoseStack identityPoseStack = new PoseStack();
-		public final RandomSource random = RandomSource.createNewThreadLocalInstance();
 
 		public final FabricMeshEmitterManager emitters = new FabricMeshEmitterManager();
 		public final TransformingVertexConsumer transformingWrapper = new TransformingVertexConsumer();

@@ -4,18 +4,14 @@ import java.util.Comparator;
 
 import org.jspecify.annotations.Nullable;
 import org.lwjgl.opengl.GL11;
-import org.lwjgl.opengl.GL32;
-import org.lwjgl.opengl.GL33C;
 
 import com.mojang.blaze3d.opengl.GlConst;
 import com.mojang.blaze3d.opengl.GlSampler;
 import com.mojang.blaze3d.opengl.GlStateManager;
-import com.mojang.blaze3d.opengl.GlTexture;
+import com.mojang.blaze3d.opengl.GlTextureView;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.textures.FilterMode;
 import com.mojang.blaze3d.textures.GpuSampler;
-import com.mojang.blaze3d.textures.GpuTexture;
-import com.mojang.blaze3d.textures.GpuTextureView;
 
 import dev.engine_room.flywheel.api.material.DepthTest;
 import dev.engine_room.flywheel.api.material.Material;
@@ -52,29 +48,18 @@ public final class MaterialRenderState {
 	}
 
 	private static void setupTexture(Material material) {
-		Samplers.DIFFUSE.makeActive();
 		AbstractTexture texture = Minecraft.getInstance()
 				.getTextureManager()
 				.getTexture(material.texture());
 
-		GpuTextureView textureView = texture.getTextureView();
-		GlTexture glTexture = ((GlTexture) texture.getTexture());
-		int i;
-		if ((glTexture.usage() & GpuTexture.USAGE_CUBEMAP_COMPATIBLE) != 0) {
-			i = GL32.GL_TEXTURE_CUBE_MAP;
-			GL11.glBindTexture(i, glTexture.glId());
-		} else {
-			i = GL32.GL_TEXTURE_2D;
-			GlStateManager._bindTexture(glTexture.glId());
-		}
-
+		// TODO 1.21.11: give the Material more control, such as using default filter mode, address modes, AF, max LOD?
 		FilterMode filterMode = material.blur() ? FilterMode.LINEAR : FilterMode.NEAREST;
-		GpuSampler textureSampler = texture.getSampler();
+		GpuSampler defaultSampler = texture.getSampler();
 		GlSampler sampler = (GlSampler) RenderSystem.getSamplerCache()
-				.getSampler(textureSampler.getAddressModeU(), textureSampler.getAddressModeV(), filterMode, filterMode, material.mipmap());
-		GL33C.glBindSampler(Samplers.DIFFUSE.number, sampler.getId());
-		GlStateManager._texParameter(i, GL32.GL_TEXTURE_BASE_LEVEL, textureView.baseMipLevel());
-		GlStateManager._texParameter(i, GL32.GL_TEXTURE_MAX_LEVEL, textureView.baseMipLevel() + textureView.mipLevels() - 1);
+				.getSampler(defaultSampler.getAddressModeU(), defaultSampler.getAddressModeV(), filterMode, filterMode, material.mipmap());
+
+		/// TODO 1.21.11: should cubemap textures be allowed?
+		TextureBinder.bind(Samplers.DIFFUSE.number, (GlTextureView) texture.getTextureView(), sampler);
 	}
 
 	private static void setupBackfaceCulling(boolean backfaceCulling) {
@@ -97,69 +82,69 @@ public final class MaterialRenderState {
 
 	private static void setupDepthTest(DepthTest depthTest) {
 		switch (depthTest) {
-			case OFF -> {
-				GlStateManager._disableDepthTest();
-			}
-			case NEVER -> {
-				GlStateManager._enableDepthTest();
-				GlStateManager._depthFunc(GL11.GL_NEVER);
-			}
-			case LESS -> {
-				GlStateManager._enableDepthTest();
-				GlStateManager._depthFunc(GL11.GL_LESS);
-			}
-			case EQUAL -> {
-				GlStateManager._enableDepthTest();
-				GlStateManager._depthFunc(GL11.GL_EQUAL);
-			}
-			case LEQUAL -> {
-				GlStateManager._enableDepthTest();
-				GlStateManager._depthFunc(GL11.GL_LEQUAL);
-			}
-			case GREATER -> {
-				GlStateManager._enableDepthTest();
-				GlStateManager._depthFunc(GL11.GL_GREATER);
-			}
-			case NOTEQUAL -> {
-				GlStateManager._enableDepthTest();
-				GlStateManager._depthFunc(GL11.GL_NOTEQUAL);
-			}
-			case GEQUAL -> {
-				GlStateManager._enableDepthTest();
-				GlStateManager._depthFunc(GL11.GL_GEQUAL);
-			}
-			case ALWAYS -> {
-				GlStateManager._enableDepthTest();
-				GlStateManager._depthFunc(GL11.GL_ALWAYS);
-			}
+		case OFF -> {
+			GlStateManager._disableDepthTest();
+		}
+		case NEVER -> {
+			GlStateManager._enableDepthTest();
+			GlStateManager._depthFunc(GL11.GL_NEVER);
+		}
+		case LESS -> {
+			GlStateManager._enableDepthTest();
+			GlStateManager._depthFunc(GL11.GL_LESS);
+		}
+		case EQUAL -> {
+			GlStateManager._enableDepthTest();
+			GlStateManager._depthFunc(GL11.GL_EQUAL);
+		}
+		case LEQUAL -> {
+			GlStateManager._enableDepthTest();
+			GlStateManager._depthFunc(GL11.GL_LEQUAL);
+		}
+		case GREATER -> {
+			GlStateManager._enableDepthTest();
+			GlStateManager._depthFunc(GL11.GL_GREATER);
+		}
+		case NOTEQUAL -> {
+			GlStateManager._enableDepthTest();
+			GlStateManager._depthFunc(GL11.GL_NOTEQUAL);
+		}
+		case GEQUAL -> {
+			GlStateManager._enableDepthTest();
+			GlStateManager._depthFunc(GL11.GL_GEQUAL);
+		}
+		case ALWAYS -> {
+			GlStateManager._enableDepthTest();
+			GlStateManager._depthFunc(GL11.GL_ALWAYS);
+		}
 		}
 	}
 
 	private static void setupTransparency(Transparency transparency) {
 		switch (transparency) {
-			case OPAQUE -> {
-				GlStateManager._disableBlend();
-			}
-			case ADDITIVE -> {
-				GlStateManager._enableBlend();
-				GlStateManager._blendFuncSeparate(GlConst.GL_ONE, GlConst.GL_ONE, GlConst.GL_ONE, GlConst.GL_ONE);
-			}
-			case LIGHTNING -> {
-				GlStateManager._enableBlend();
-				GlStateManager._blendFuncSeparate(GlConst.GL_SRC_ALPHA, GlConst.GL_ONE, GlConst.GL_SRC_ALPHA, GlConst.GL_ONE);
-			}
-			case GLINT -> {
-				GlStateManager._enableBlend();
-				GlStateManager._blendFuncSeparate(GlConst.GL_SRC_COLOR, GlConst.GL_ONE, GlConst.GL_ZERO, GlConst.GL_ONE);
-			}
-			case CRUMBLING -> {
-				GlStateManager._enableBlend();
-				GlStateManager._blendFuncSeparate(GlConst.GL_DST_COLOR, GlConst.GL_SRC_COLOR, GlConst.GL_ONE, GlConst.GL_ZERO);
-			}
-			case TRANSLUCENT -> {
-				GlStateManager._enableBlend();
-				GlStateManager._blendFuncSeparate(GlConst.GL_SRC_ALPHA, GlConst.GL_ONE_MINUS_SRC_ALPHA, GlConst.GL_ONE, GlConst.GL_ONE_MINUS_SRC_ALPHA);
-			}
+		case OPAQUE -> {
+			GlStateManager._disableBlend();
+		}
+		case ADDITIVE -> {
+			GlStateManager._enableBlend();
+			GlStateManager._blendFuncSeparate(GlConst.GL_ONE, GlConst.GL_ONE, GlConst.GL_ONE, GlConst.GL_ONE);
+		}
+		case LIGHTNING -> {
+			GlStateManager._enableBlend();
+			GlStateManager._blendFuncSeparate(GlConst.GL_SRC_ALPHA, GlConst.GL_ONE, GlConst.GL_SRC_ALPHA, GlConst.GL_ONE);
+		}
+		case GLINT -> {
+			GlStateManager._enableBlend();
+			GlStateManager._blendFuncSeparate(GlConst.GL_SRC_COLOR, GlConst.GL_ONE, GlConst.GL_ZERO, GlConst.GL_ONE);
+		}
+		case CRUMBLING -> {
+			GlStateManager._enableBlend();
+			GlStateManager._blendFuncSeparate(GlConst.GL_DST_COLOR, GlConst.GL_SRC_COLOR, GlConst.GL_ONE, GlConst.GL_ZERO);
+		}
+		case TRANSLUCENT -> {
+			GlStateManager._enableBlend();
+			GlStateManager._blendFuncSeparate(GlConst.GL_SRC_ALPHA, GlConst.GL_ONE_MINUS_SRC_ALPHA, GlConst.GL_ONE, GlConst.GL_ONE_MINUS_SRC_ALPHA);
+		}
 		}
 	}
 
@@ -167,43 +152,6 @@ public final class MaterialRenderState {
 		GlStateManager._depthMask(mask.depth());
 		boolean writeColor = mask.color();
 		GlStateManager._colorMask(writeColor, writeColor, writeColor, writeColor);
-	}
-
-	public static void reset() {
-		resetTexture();
-		resetBackfaceCulling();
-		resetPolygonOffset();
-		resetDepthTest();
-		resetTransparency();
-		resetWriteMask();
-	}
-
-	private static void resetTexture() {
-		Samplers.DIFFUSE.makeActive();
-	}
-
-	private static void resetBackfaceCulling() {
-		GlStateManager._enableCull();
-	}
-
-	private static void resetPolygonOffset() {
-		GlStateManager._polygonOffset(0.0F, 0.0F);
-		GlStateManager._disablePolygonOffset();
-	}
-
-	private static void resetDepthTest() {
-		GlStateManager._disableDepthTest();
-		GlStateManager._depthFunc(GL11.GL_LEQUAL);
-	}
-
-	private static void resetTransparency() {
-		GlStateManager._disableBlend();
-		GlStateManager._blendFuncSeparate(GlConst.GL_SRC_ALPHA, GlConst.GL_ONE_MINUS_SRC_ALPHA, GlConst.GL_ONE, GlConst.GL_ZERO);
-	}
-
-	private static void resetWriteMask() {
-		GlStateManager._depthMask(true);
-		GlStateManager._colorMask(true, true, true, true);
 	}
 
 	public static boolean materialEquals(Material lhs, Material rhs) {
@@ -317,6 +265,9 @@ public final class MaterialRenderState {
 		}
 		cmp = lhs.writeMask()
 				.compareTo(rhs.writeMask());
-		return cmp;
+		if (cmp != 0) {
+			return cmp;
+		}
+		return 0;
 	}
 }

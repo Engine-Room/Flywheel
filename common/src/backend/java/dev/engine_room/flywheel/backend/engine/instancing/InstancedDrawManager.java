@@ -142,9 +142,6 @@ public class InstancedDrawManager extends DrawManager<InstancedInstancer<?>> {
 
 			oitFramebuffer.composite();
 		}
-
-		MaterialRenderState.reset();
-		TextureBinder.resetLightAndOverlay();
 	}
 
 	private void submitDraws() {
@@ -293,9 +290,6 @@ public class InstancedDrawManager extends DrawManager<InstancedInstancer<?>> {
 				}
 			}
 		}
-
-		MaterialRenderState.reset();
-		TextureBinder.resetLightAndOverlay();
 	}
 
 	@Override

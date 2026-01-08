@@ -1,9 +1,5 @@
 package dev.engine_room.flywheel.impl;
 
-import dev.engine_room.flywheel.impl.FlwDebugInfo.FlwDebugEntry;
-import dev.engine_room.flywheel.lib.util.IdentifierUtil;
-import net.neoforged.neoforge.client.event.RegisterDebugEntriesEvent;
-
 import org.apache.maven.artifact.versioning.ArtifactVersion;
 import org.jetbrains.annotations.UnknownNullability;
 
@@ -13,7 +9,8 @@ import dev.engine_room.flywheel.api.event.ReloadLevelRendererEvent;
 import dev.engine_room.flywheel.backend.compile.FlwProgramsReloader;
 import dev.engine_room.flywheel.backend.engine.uniform.Uniforms;
 import dev.engine_room.flywheel.impl.visualization.VisualizationEventHandler;
-import dev.engine_room.flywheel.lib.model.baked.PartialModelEventHandler;
+import dev.engine_room.flywheel.lib.model.baked.NeoForgePartialModel;
+import dev.engine_room.flywheel.lib.util.IdentifierUtil;
 import dev.engine_room.flywheel.lib.util.LevelAttached;
 import dev.engine_room.flywheel.lib.util.RendererReloadCache;
 import dev.engine_room.flywheel.lib.util.ResourceReloadHolder;
@@ -25,7 +22,8 @@ import net.neoforged.fml.CrashReportCallables;
 import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
-import net.neoforged.neoforge.client.event.CustomizeGuiOverlayEvent;
+import net.neoforged.neoforge.client.event.AddClientReloadListenersEvent;
+import net.neoforged.neoforge.client.event.RegisterDebugEntriesEvent;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.entity.EntityJoinLevelEvent;
 import net.neoforged.neoforge.event.entity.EntityLeaveLevelEvent;
@@ -68,7 +66,7 @@ public final class FlywheelNeoForge {
 
 		gameEventBus.addListener(FlwCommands::registerClientCommands);
 
-		gameEventBus.addListener((RegisterDebugEntriesEvent e) -> e.register(IdentifierUtil.id("flw_debug_info"), new FlwDebugEntry()));
+		gameEventBus.addListener((RegisterDebugEntriesEvent e) -> e.register(IdentifierUtil.id("flw_debug_info"), new FlwDebugInfo.FlwDebugEntry()));
 
 		modEventBus.addListener((EndClientResourceReloadEvent e) -> BackendManagerImpl.onEndClientResourceReload(e.error().isPresent()));
 
@@ -87,15 +85,15 @@ public final class FlywheelNeoForge {
 		modEventBus.addListener((EndClientResourceReloadEvent e) -> RendererReloadCache.onReloadLevelRenderer());
 		modEventBus.addListener((EndClientResourceReloadEvent e) -> ResourceReloadHolder.onEndClientResourceReload());
 
-		modEventBus.addListener(PartialModelEventHandler::onRegisterAdditional);
-		modEventBus.addListener(PartialModelEventHandler::onBakingCompleted);
+		modEventBus.addListener(NeoForgePartialModel::registerAll);
+		modEventBus.addListener(NeoForgePartialModel::refreshAll);
 	}
 
 	private static void registerBackendEventListeners(IEventBus gameEventBus, IEventBus modEventBus) {
 		gameEventBus.addListener((ReloadLevelRendererEvent e) -> Uniforms.onReloadLevelRenderer());
 
-		modEventBus.addListener((RegisterClientReloadListenersEvent e) -> {
-			e.registerReloadListener(FlwProgramsReloader.INSTANCE);
+		modEventBus.addListener((AddClientReloadListenersEvent e) -> {
+			e.addListener(FlwProgramsReloader.ID, FlwProgramsReloader.INSTANCE);
 		});
 	}
 

@@ -10,12 +10,13 @@ import dev.engine_room.flywheel.lib.util.LevelAttached;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 
+// TODO 1.21.11: This mixin currently matches NeoForge's LevelEvent.Unload, but it may be a bug that it is not fired from Minecraft.clearClientLevel.
 @Mixin(Minecraft.class)
 abstract class MinecraftMixin {
 	@Shadow
 	public ClientLevel level;
 
-	@Inject(method = "setLevel", at = @At("HEAD"))
+	@Inject(method = "setLevel(Lnet/minecraft/client/multiplayer/ClientLevel;)V", at = @At("HEAD"))
 	private void flywheel$onSetLevel(CallbackInfo ci) {
 		if (level != null) {
 			LevelAttached.invalidateLevel(level);

@@ -12,10 +12,13 @@ float flw_timeOfDay;
 uint flw_levelHasSkyLight;
 
 float flw_sunAngle;
+float flw_moonAngle;
+float flw_starAngle;
 
 float flw_moonBrightness;
 /** There are normally only 8 moon phases. */
 uint flw_moonPhase;
+float flw_starBrightness;
 
 uint flw_isRaining;
 float flw_rainLevel;
@@ -24,7 +27,7 @@ float flw_thunderLevel;
 
 float flw_skyDarken;
 
-uint flw_constantAmbientLight;
+uint flw_cardinalLightType;
 
 /** Use FLW_DIMENSION_* ids to determine the dimension. May eventually be implemented for custom dimensions. */
 uint flw_dimension;

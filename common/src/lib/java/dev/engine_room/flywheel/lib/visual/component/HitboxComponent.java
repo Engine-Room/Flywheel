@@ -16,6 +16,7 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 
+// TODO 1.21.11: vanilla changed hitbox rendering and moved it to the debug renderer system (EntityHitboxDebugRenderer)
 public final class HitboxComponent implements EntityComponent {
 	//    010------110
 	//    /|       /|

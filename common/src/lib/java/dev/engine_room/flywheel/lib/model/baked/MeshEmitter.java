@@ -3,18 +3,20 @@ package dev.engine_room.flywheel.lib.model.baked;
 import java.util.Arrays;
 
 import org.jetbrains.annotations.UnknownNullability;
+import org.jspecify.annotations.Nullable;
 
 import com.google.common.collect.ImmutableList;
 import com.mojang.blaze3d.pipeline.RenderPipeline;
 import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.ByteBufferBuilder;
+import com.mojang.blaze3d.vertex.VertexConsumer;
 
 import dev.engine_room.flywheel.api.material.Material;
 import dev.engine_room.flywheel.api.model.Mesh;
 import dev.engine_room.flywheel.api.model.Model;
 import net.minecraft.client.renderer.chunk.ChunkSectionLayer;
 
-class MeshEmitter {
+abstract class MeshEmitter implements VertexConsumer {
 	private static final int INITIAL_CAPACITY = 1;
 
 	private final ByteBufferBuilderStack byteBufferBuilderStack;
@@ -103,6 +105,17 @@ class MeshEmitter {
 		++numBufferBuildersPopulated;
 
 		return bufferBuilder;
+	}
+
+	// TODO 1.21.11: cache the last used buffer?
+	@Nullable
+	public BufferBuilder getBuffer(boolean shade, boolean ao) {
+		Material key = blockMaterialFunction.apply(chunkSectionLayer, shade, ao);
+		if (key != null) {
+			return getBuffer(key);
+		} else {
+			return null;
+		}
 	}
 
 	private void resize(int capacity) {

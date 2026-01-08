@@ -2,14 +2,14 @@ package dev.engine_room.flywheel.backend.compile;
 
 import dev.engine_room.flywheel.backend.NoiseTextures;
 import dev.engine_room.flywheel.lib.util.IdentifierUtil;
-import net.fabricmc.fabric.api.resource.SimpleSynchronousResourceReloadListener;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.packs.resources.ResourceManager;
+import net.minecraft.server.packs.resources.ResourceManagerReloadListener;
 
-public final class FlwProgramsReloader implements SimpleSynchronousResourceReloadListener {
-	public static final FlwProgramsReloader INSTANCE = new FlwProgramsReloader();
-
+public final class FlwProgramsReloader implements ResourceManagerReloadListener {
 	public static final Identifier ID = IdentifierUtil.id("programs");
+
+	public static final FlwProgramsReloader INSTANCE = new FlwProgramsReloader();
 
 	private FlwProgramsReloader() {
 	}
@@ -18,10 +18,5 @@ public final class FlwProgramsReloader implements SimpleSynchronousResourceReloa
 	public void onResourceManagerReload(ResourceManager manager) {
 		FlwPrograms.reload(manager);
 		NoiseTextures.reload(manager);
-	}
-
-	@Override
-	public Identifier getFabricId() {
-		return ID;
 	}
 }

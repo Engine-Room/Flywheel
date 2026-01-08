@@ -2,16 +2,12 @@ package dev.engine_room.flywheel.lib.util;
 
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 
 import dev.engine_room.flywheel.api.Flywheel;
 import net.minecraft.IdentifierException;
-import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 
 public final class IdentifierUtil {
-	private static final SimpleCommandExceptionType ERROR_INVALID = new SimpleCommandExceptionType(Component.translatable("argument.id.invalid"));
-
 	private IdentifierUtil() {
 	}
 
@@ -53,7 +49,7 @@ public final class IdentifierUtil {
 		   return parseFlywheelDefault(s);
 		} catch (IdentifierException e) {
 		   reader.setCursor(i);
-		   throw ERROR_INVALID.createWithContext(reader);
+		   throw Identifier.ERROR_INVALID.createWithContext(reader);
 		}
 	}
 

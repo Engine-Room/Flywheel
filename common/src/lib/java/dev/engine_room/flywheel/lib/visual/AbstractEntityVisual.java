@@ -90,7 +90,7 @@ public abstract class AbstractEntityVisual<T extends Entity> extends AbstractVis
 	}
 
 	public boolean isVisible(FrustumIntersection frustum) {
-		return FlwLibLink.INSTANCE.isAffectedByCulling(entity) || visibilityTester.check(frustum);
+		return !FlwLibLink.INSTANCE.affectedByCulling(entity) || visibilityTester.check(frustum);
 	}
 
 	protected int computePackedLight(float partialTick) {

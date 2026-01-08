@@ -90,7 +90,7 @@ class VertexWriter implements VertexConsumer {
 	}
 
 	@Override
-	public VertexConsumer setLineWidth(float f) {
+	public VertexConsumer setLineWidth(float width) {
 		// ignore line width
 		return this;
 	}

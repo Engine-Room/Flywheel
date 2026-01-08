@@ -11,10 +11,9 @@ import net.minecraft.world.attribute.EnvironmentAttributeProbe;
 import net.minecraft.world.attribute.EnvironmentAttributes;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.dimension.DimensionType;
-import net.minecraft.world.level.dimension.DimensionType.CardinalLightType;
 
 public final class LevelUniforms extends UniformWriter {
-	private static final int SIZE = 16 * 4 + 4 * 12;
+	private static final int SIZE = 16 * 4 + 4 * 15;
 	static final UniformBuffer BUFFER = new UniformBuffer(Uniforms.LEVEL_INDEX, SIZE);
 
 	public static final Vector3f LIGHT0_DIRECTION = new Vector3f();
@@ -49,10 +48,16 @@ public final class LevelUniforms extends UniformWriter {
 
 		float sunAngle = probe.getValue(EnvironmentAttributes.SUN_ANGLE, partialTick);
 		ptr = writeFloat(ptr, sunAngle);
+		float moonAngle = probe.getValue(EnvironmentAttributes.MOON_ANGLE, partialTick);
+		ptr = writeFloat(ptr, moonAngle);
+		float starAngle = probe.getValue(EnvironmentAttributes.STAR_ANGLE, partialTick);
+		ptr = writeFloat(ptr, starAngle);
 
 		int moonPhase = probe.getValue(EnvironmentAttributes.MOON_PHASE, partialTick).index();
 		ptr = writeFloat(ptr, DimensionType.MOON_BRIGHTNESS_PER_PHASE[moonPhase]);
 		ptr = writeInt(ptr, moonPhase);
+		float starBrightness = probe.getValue(EnvironmentAttributes.STAR_BRIGHTNESS, partialTick);
+		ptr = writeFloat(ptr, starBrightness);
 
 		ptr = writeInt(ptr, level.isRaining() ? 1 : 0);
 		ptr = writeFloat(ptr, level.getRainLevel(partialTick));
@@ -61,8 +66,7 @@ public final class LevelUniforms extends UniformWriter {
 
 		ptr = writeFloat(ptr, level.getSkyDarken());
 
-		CardinalLightType lightType = level.dimensionType().cardinalLightType();
-		ptr = writeInt(ptr, lightType == CardinalLightType.NETHER ? 1 : 0);
+		ptr = writeInt(ptr, level.dimensionType().cardinalLightType().ordinal());
 
 		// TODO: use defines for custom dimension ids
         int dimensionId;

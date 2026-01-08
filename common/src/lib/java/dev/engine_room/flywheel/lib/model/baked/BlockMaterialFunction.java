@@ -7,5 +7,5 @@ import net.minecraft.client.renderer.chunk.ChunkSectionLayer;
 
 public interface BlockMaterialFunction {
 	@Nullable
-	Material apply(ChunkSectionLayer chunkRenderType, boolean shaded, boolean ambientOcclusion);
+	Material apply(ChunkSectionLayer chunkSectionLayer, boolean shaded, boolean ambientOcclusion);
 }

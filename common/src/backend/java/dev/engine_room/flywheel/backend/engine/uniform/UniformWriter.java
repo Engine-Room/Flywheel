@@ -2,7 +2,7 @@ package dev.engine_room.flywheel.backend.engine.uniform;
 
 import org.joml.Matrix4f;
 import org.joml.Vector3fc;
-import org.joml.Vector4f;
+import org.joml.Vector4fc;
 import org.lwjgl.system.MemoryUtil;
 
 import dev.engine_room.flywheel.lib.util.ExtraMemoryOps;
@@ -51,7 +51,7 @@ class UniformWriter {
 		return ptr + 16;
 	}
 
-	static long writeVec4(long ptr, Vector4f vec) {
+	static long writeVec4(long ptr, Vector4fc vec) {
 		return writeVec4(ptr, vec.x(), vec.y(), vec.z(), vec.w());
 	}
 

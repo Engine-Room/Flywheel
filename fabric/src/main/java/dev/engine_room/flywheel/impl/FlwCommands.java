@@ -16,7 +16,9 @@ import dev.engine_room.flywheel.backend.engine.uniform.FrameUniforms;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandManager;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.commands.CommandBuildContext;
+import net.minecraft.commands.CommandSource;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.arguments.coordinates.BlockPosArgument;
 import net.minecraft.commands.arguments.coordinates.Coordinates;
@@ -200,7 +202,10 @@ public final class FlwCommands {
 	}
 
 	// Client version of BlockPosArgument.getBlockPos
-	public static BlockPos getBlockPos(CommandContext<FabricClientCommandSource> context, String name) {
-		return context.getArgument(name, Coordinates.class).getBlockPos((CommandSourceStack) context.getSource());
+	private static BlockPos getBlockPos(CommandContext<FabricClientCommandSource> context, String name) {
+		FabricClientCommandSource clientSource = context.getSource();
+		LocalPlayer player = clientSource.getPlayer();
+		CommandSourceStack commandSourceStack = new CommandSourceStack(CommandSource.NULL, clientSource.getPosition(), clientSource.getRotation(), null, clientSource.permissions(), player.getPlainTextName(), player.getDisplayName(), null, player);
+		return context.getArgument(name, Coordinates.class).getBlockPos(commandSourceStack);
 	}
 }

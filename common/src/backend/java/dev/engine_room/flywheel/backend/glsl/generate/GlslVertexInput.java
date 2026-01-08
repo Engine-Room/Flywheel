@@ -22,6 +22,6 @@ public class GlslVertexInput implements GlslBuilder.Declaration {
 
 	@Override
 	public String prettyPrint() {
-		return "layout(id = " + binding + ") in " + type + " " + name + ";";
+		return "layout(location = " + binding + ") in " + type + " " + name + ";";
 	}
 }

@@ -27,6 +27,10 @@ public interface FlwLibLink {
 
 	Deque<PoseStack.Pose> getPoseStack(PoseStack stack);
 
+	<T extends Entity> boolean affectedByCulling(T entity);
+
+	<T extends Entity> AABB getBoundingBoxForCulling(T entity);
+
 	boolean isIrisLoaded();
 
 	boolean isOptifineInstalled();
@@ -34,8 +38,4 @@ public interface FlwLibLink {
 	boolean isShaderPackInUse();
 
 	boolean isRenderingShadowPass();
-
-	<T extends Entity> boolean isAffectedByCulling(T entity);
-
-	<T extends Entity> AABB getCullingBoundingBox(T entity);
 }

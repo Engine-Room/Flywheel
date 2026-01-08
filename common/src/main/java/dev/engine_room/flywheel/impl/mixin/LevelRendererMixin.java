@@ -52,8 +52,8 @@ abstract class LevelRendererMixin {
 
 	//	@Inject(method = "renderLevel", at = @At("HEAD"))
 	@Inject(method = "renderLevel", at = @At(value = "INVOKE_ASSIGN", target = "Lnet/minecraft/world/level/lighting/LevelLightEngine;runLightUpdates()I"))
-	private void flywheel$beginRender(GraphicsResourceAllocator graphicsResourceAllocator, DeltaTracker deltaTracker, boolean renderBlockOutline, Camera camera, Matrix4f frustumMatrix, Matrix4f projectionMatrix, Matrix4f cullingProjectionMatrix, GpuBufferSlice shaderFog, Vector4f fogColor, boolean renderSky, CallbackInfo ci) {
-		flywheel$renderContext = RenderContextImpl.create((LevelRenderer) (Object) this, level, renderBuffers, frustumMatrix, projectionMatrix, camera, deltaTracker.getGameTimeDeltaPartialTick(false));
+	private void flywheel$beginRender(GraphicsResourceAllocator resourceAllocator, DeltaTracker deltaTracker, boolean renderOutline, Camera camera, Matrix4f modelViewMatrix, Matrix4f projectionMatrix, Matrix4f cullingProjectionMatrix, GpuBufferSlice shaderFog, Vector4f fogColor, boolean renderSky, CallbackInfo ci) {
+		flywheel$renderContext = RenderContextImpl.create((LevelRenderer) (Object) this, level, renderBuffers, modelViewMatrix, projectionMatrix, camera, deltaTracker.getGameTimeDeltaPartialTick(false));
 
 		VisualizationManager manager = VisualizationManager.get(level);
 		if (manager != null) {
@@ -73,7 +73,8 @@ abstract class LevelRendererMixin {
 		}
 	}
 
-	@Inject(method = "renderLevel", at = @At(value = "INVOKE_STRING", target = "Lnet/minecraft/util/profiling/ProfilerFiller;popPush(Ljava/lang/String;)V", args = "ldc=blockEntities"))
+	// TODO 1.21.11: update this injection point
+	@Inject(method = "lambda$addMainPass$1", at = @At(value = "INVOKE_STRING", target = "Lnet/minecraft/util/profiling/ProfilerFiller;popPush(Ljava/lang/String;)V", args = "ldc=submitBlockEntities"))
 	private void flywheel$beforeBlockEntities(CallbackInfo ci) {
 		if (flywheel$renderContext != null) {
 			VisualizationManager manager = VisualizationManager.get(level);
@@ -83,7 +84,7 @@ abstract class LevelRendererMixin {
 		}
 	}
 
-	@Inject(method = "renderBlockDestroyAnimation", at = @At("HEAD"))
+	@Inject(method = "lambda$addMainPass$1", at = @At(value = "INVOKE_STRING", target = "Lnet/minecraft/util/profiling/ProfilerFiller;push(Ljava/lang/String;)V", args = "ldc=destroyProgress"))
 	private void flywheel$beforeRenderCrumbling(CallbackInfo ci) {
 		if (flywheel$renderContext != null) {
 			VisualizationManager manager = VisualizationManager.get(level);

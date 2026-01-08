@@ -5,9 +5,9 @@ import java.util.List;
 import java.util.SortedSet;
 
 import org.jetbrains.annotations.Contract;
-import org.jspecify.annotations.Nullable;
 import org.joml.FrustumIntersection;
 import org.joml.Matrix4f;
+import org.jspecify.annotations.Nullable;
 
 import dev.engine_room.flywheel.api.backend.BackendManager;
 import dev.engine_room.flywheel.api.backend.Engine;
@@ -135,7 +135,7 @@ public class VisualizationManagerImpl implements VisualizationManager {
 		private DynamicVisual.Context createVisualFrameContext(RenderContext ctx) {
 			Vec3i renderOrigin = engine.renderOrigin();
 			var cameraPos = ctx.camera()
-					.getPosition();
+					.position();
 
 			Matrix4f viewProjection = new Matrix4f(ctx.viewProjection());
 			viewProjection.translate((float) (renderOrigin.getX() - cameraPos.x), (float) (renderOrigin.getY() - cameraPos.y), (float) (renderOrigin.getZ() - cameraPos.z));

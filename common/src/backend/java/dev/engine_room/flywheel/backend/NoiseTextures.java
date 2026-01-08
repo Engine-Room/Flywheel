@@ -36,17 +36,19 @@ public class NoiseTextures {
 				.open()) {
 			var image = NativeImage.read(NativeImage.Format.LUMINANCE, is);
 
+			// TODO 1.21.11: maybe we should not use DynamicTexture here and do gen/upload manually
 			BLUE_NOISE = new DynamicTexture(() -> "Flywheel Blue Noise", image);
 
 			GlTextureUnit.T0.makeActive();
 			GlStateManager._bindTexture(((GlTexture) BLUE_NOISE.getTexture()).glId());
 
-			NoiseTextures.BLUE_NOISE.setFilter(true, false);
+			GlStateManager._texParameter(GL32.GL_TEXTURE_2D, GL32.GL_TEXTURE_MIN_FILTER, GL32.GL_LINEAR);
+			GlStateManager._texParameter(GL32.GL_TEXTURE_2D, GL32.GL_TEXTURE_MAG_FILTER, GL32.GL_LINEAR);
 			GlStateManager._texParameter(GL32.GL_TEXTURE_2D, GL32.GL_TEXTURE_WRAP_S, GL32.GL_REPEAT);
 			GlStateManager._texParameter(GL32.GL_TEXTURE_2D, GL32.GL_TEXTURE_WRAP_T, GL32.GL_REPEAT);
 
 			GlStateManager._bindTexture(0);
-		} catch (IOException ignored) {
+		} catch (IOException e) {
 
 		}
 	}

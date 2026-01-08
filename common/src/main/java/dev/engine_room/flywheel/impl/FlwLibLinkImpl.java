@@ -49,6 +49,22 @@ public class FlwLibLinkImpl implements FlwLibLink {
 	}
 
 	@Override
+	public <T extends Entity> boolean affectedByCulling(T entity) {
+		EntityRenderer<? super T, ?> renderer = Minecraft.getInstance()
+				.getEntityRenderDispatcher()
+				.getRenderer(entity);
+		return ((EntityRendererAccessor) renderer).flywheel$affectedByCulling(entity);
+	}
+
+	@Override
+	public <T extends Entity> AABB getBoundingBoxForCulling(T entity) {
+		EntityRenderer<? super T, ?> renderer = Minecraft.getInstance()
+				.getEntityRenderDispatcher()
+				.getRenderer(entity);
+		return ((EntityRendererAccessor) renderer).flywheel$getBoundingBoxForCulling(entity);
+	}
+
+	@Override
 	public boolean isIrisLoaded() {
 		return IrisCompat.ACTIVE;
 	}
@@ -78,21 +94,5 @@ public class FlwLibLinkImpl implements FlwLibLink {
 		} else {
 			return false;
 		}
-	}
-
-	@Override
-	public <T extends Entity> boolean isAffectedByCulling(T entity) {
-		EntityRenderer<? super T, ?> renderer = Minecraft.getInstance()
-				.getEntityRenderDispatcher()
-				.getRenderer(entity);
-		return ((EntityRendererAccessor) renderer).flywheel$affectedByCulling(entity);
-	}
-
-	@Override
-	public <T extends Entity> AABB getCullingBoundingBox(T entity) {
-		EntityRenderer<? super T, ?> renderer = Minecraft.getInstance()
-				.getEntityRenderDispatcher()
-				.getRenderer(entity);
-		return ((EntityRendererAccessor) renderer).flywheel$getBoundingBoxForCulling(entity);
 	}
 }

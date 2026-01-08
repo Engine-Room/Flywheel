@@ -1,5 +1,6 @@
 package dev.engine_room.flywheel.lib.model.baked;
 
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
@@ -19,7 +20,6 @@ import net.minecraft.client.renderer.chunk.ChunkSectionLayer;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.core.BlockPos;
 import net.minecraft.util.RandomSource;
-import net.minecraft.util.TriState;
 import net.minecraft.world.level.BlockAndTintGetter;
 import net.minecraft.world.level.block.RenderShape;
 import net.minecraft.world.level.block.state.BlockState;
@@ -37,34 +37,31 @@ final class BlockStateModelBufferer {
 		if (poseStack == null) {
 			poseStack = objects.identityPoseStack;
 		}
+		List<BlockModelPart> parts = objects.parts;
 		RandomSource random = objects.random;
-		MeshEmitterManager<NeoforgeMeshEmitter> emitters = objects.emitters;
+		NeoForgeMeshEmitterManager emitters = objects.emitters;
 
 		emitters.prepare(blockMaterialFunction);
 
-		ModelBlockRenderer blockRenderer = Minecraft.getInstance()
-				.getBlockRenderer()
-				.getModelRenderer();
-
-		List<BlockModelPart> parts = model.collectParts(level, pos, state, random);
-
 		long seed = state.getSeed(pos);
 		random.setSeed(seed);
-		ChunkSectionLayer layer = parts.getFirst().getRenderType(state);
+		model.collectParts(level, pos, state, random, parts);
 
 		// See ModelBlockRenderer#tesselateBlock
-		boolean aoEnabled = Minecraft.useAmbientOcclusion();
-		boolean perPartAO = NeoForgeClientConfig.INSTANCE.handleAmbientOcclusionPerPart.getAsBoolean();
-		boolean defaultAo = state.getLightEmission(level, pos) == 0;
-		TriState useAo = parts.getFirst().ambientOcclusion();
-
-		boolean defaultAoLayer = aoEnabled && ((perPartAO && useAo.isTrue()) || (useAo.isDefault() && defaultAo));
-
-		NeoforgeMeshEmitter emitter = emitters.getEmitter(layer);
-		emitter.prepareForModelLayer(defaultAoLayer);
+		boolean useAo = Minecraft.useAmbientOcclusion();
+		boolean perPartAo = NeoForgeClientConfig.INSTANCE.handleAmbientOcclusionPerPart.getAsBoolean();
+		boolean ao = useAo && (perPartAo || parts.isEmpty() || switch(parts.getFirst().ambientOcclusion()) {
+			case TRUE -> true;
+			case DEFAULT -> state.getLightEmission(level, pos) == 0;
+			case FALSE -> false;
+		});
+		emitters.prepareForModel(ao);
 
 		poseStack.pushPose();
-		blockRenderer.tesselateBlock(level, parts, state, pos, poseStack, emitter, false, OverlayTexture.NO_OVERLAY);
+		Minecraft.getInstance()
+				.getBlockRenderer()
+				.getModelRenderer()
+				.tesselateBlock(level, parts, state, pos, poseStack, emitters, false, OverlayTexture.NO_OVERLAY);
 		poseStack.popPose();
 
 		return emitters.end();
@@ -75,8 +72,9 @@ final class BlockStateModelBufferer {
 		if (poseStack == null) {
 			poseStack = objects.identityPoseStack;
 		}
+		List<BlockModelPart> parts = objects.parts;
 		RandomSource random = objects.random;
-		MeshEmitterManager<NeoforgeMeshEmitter> emitters = objects.emitters;
+		NeoForgeMeshEmitterManager emitters = objects.emitters;
 		TransformingVertexConsumer transformingWrapper = objects.transformingWrapper;
 
 		emitters.prepare(blockMaterialFunction);
@@ -86,7 +84,8 @@ final class BlockStateModelBufferer {
 		ModelBlockRenderer blockRenderer = renderDispatcher.getModelRenderer();
 		ModelBlockRenderer.enableCaching();
 
-		boolean aoEnabled = Minecraft.useAmbientOcclusion();
+		boolean useAo = Minecraft.useAmbientOcclusion();
+		boolean perPartAo = NeoForgeClientConfig.INSTANCE.handleAmbientOcclusionPerPart.getAsBoolean();
 
 		while (posIterator.hasNext()) {
 			BlockPos pos = posIterator.next();
@@ -100,7 +99,7 @@ final class BlockStateModelBufferer {
 				if (!fluidState.isEmpty()) {
 					ChunkSectionLayer layer = ItemBlockRenderTypes.getRenderLayer(fluidState);
 
-					BufferBuilder bufferBuilder = emitters.getBuffer(layer, true, false);
+					BufferBuilder bufferBuilder = emitters.getEmitter(layer).getBuffer(true, false);
 
 					if (bufferBuilder != null) {
 						transformingWrapper.prepare(bufferBuilder, poseStack);
@@ -118,23 +117,19 @@ final class BlockStateModelBufferer {
 				random.setSeed(seed);
 
 				BlockStateModel model = renderDispatcher.getBlockModel(state);
-				List<BlockModelPart> parts = model.collectParts(level, pos, state, random);
-
-				ChunkSectionLayer layer = ItemBlockRenderTypes.getChunkRenderType(state);
+				model.collectParts(level, pos, state, random, parts);
 
 				// See ModelBlockRenderer#tesselateBlock
-				boolean perPartAO = NeoForgeClientConfig.INSTANCE.handleAmbientOcclusionPerPart.getAsBoolean();
-				boolean defaultAo = state.getLightEmission(level, pos) == 0;
-				TriState useAo = parts.getFirst().ambientOcclusion();
-
-				boolean defaultAoLayer = aoEnabled && ((perPartAO && useAo.isTrue()) || (useAo.isDefault() && defaultAo));
-
-				NeoforgeMeshEmitter emitter = emitters.getEmitter(layer);
-				emitter.prepareForModelLayer(defaultAoLayer);
+				boolean ao = useAo && (perPartAo || parts.isEmpty() || switch(parts.getFirst().ambientOcclusion()) {
+					case TRUE -> true;
+					case DEFAULT -> state.getLightEmission(level, pos) == 0;
+					case FALSE -> false;
+				});
+				emitters.prepareForModel(ao);
 
 				poseStack.pushPose();
 				poseStack.translate(pos.getX(), pos.getY(), pos.getZ());
-				blockRenderer.tesselateBlock(level, parts, state, pos, poseStack, emitter, true, OverlayTexture.NO_OVERLAY);
+				blockRenderer.tesselateBlock(level, parts, state, pos, poseStack, emitters, true, OverlayTexture.NO_OVERLAY);
 				poseStack.popPose();
 			}
 		}
@@ -146,9 +141,10 @@ final class BlockStateModelBufferer {
 
 	private static class ThreadLocalObjects {
 		public final PoseStack identityPoseStack = new PoseStack();
+		public final List<BlockModelPart> parts = new ArrayList<>();
 		public final RandomSource random = RandomSource.createNewThreadLocalInstance();
 
-		public final MeshEmitterManager<NeoforgeMeshEmitter> emitters = new MeshEmitterManager<>(NeoforgeMeshEmitter::new);
+		public final NeoForgeMeshEmitterManager emitters = new NeoForgeMeshEmitterManager();
 		public final TransformingVertexConsumer transformingWrapper = new TransformingVertexConsumer();
 	}
 }

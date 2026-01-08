@@ -5,8 +5,7 @@
   "compatibilityLevel": "JAVA_21",
   "refmap": "vanillin.refmap.json",
   "client": [
-    "ChestRendererAccessor",
-    "item.ItemOverridesAccessor"
+    "ChestRendererAccessor"
   ],
   "injectors": {
     "defaultRequire": 1

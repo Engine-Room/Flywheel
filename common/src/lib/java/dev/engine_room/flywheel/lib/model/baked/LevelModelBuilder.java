@@ -41,7 +41,7 @@ public final class LevelModelBuilder {
 	@Deprecated(forRemoval = true)
 	public LevelModelBuilder materialFunc(@Nullable BiFunction<ChunkSectionLayer, Boolean, @Nullable Material> materialFunc) {
 		if (materialFunc != null) {
-			this.materialFunc = (chunkRenderType, shaded, ambientOcclusion) -> materialFunc.apply(chunkRenderType, shaded);
+			this.materialFunc = (chunkSectionLayer, shaded, ambientOcclusion) -> materialFunc.apply(chunkSectionLayer, shaded);
 		} else {
 			this.materialFunc = null;
 		}

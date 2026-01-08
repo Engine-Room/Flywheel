@@ -188,9 +188,6 @@ public class IndirectDrawManager extends DrawManager<IndirectInstancer<?>> {
 
 			oitFramebuffer.composite();
 		}
-
-		MaterialRenderState.reset();
-		TextureBinder.resetLightAndOverlay();
 	}
 
 	@Override
@@ -276,9 +273,6 @@ public class IndirectDrawManager extends DrawManager<IndirectInstancer<?>> {
 
 			}
 		}
-
-		MaterialRenderState.reset();
-		TextureBinder.resetLightAndOverlay();
 
 		block.free();
 	}

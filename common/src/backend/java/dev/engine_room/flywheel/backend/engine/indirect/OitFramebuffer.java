@@ -1,6 +1,7 @@
 package dev.engine_room.flywheel.backend.engine.indirect;
 
 import org.lwjgl.opengl.GL32;
+import org.lwjgl.opengl.GL33C;
 import org.lwjgl.opengl.GL46;
 
 import com.mojang.blaze3d.opengl.GlConst;
@@ -63,7 +64,7 @@ public class OitFramebuffer {
 		maybeResizeFBO(renderTarget.width, renderTarget.height);
 
 		Samplers.COEFFICIENTS.makeActive();
-		// Bind zero to render system to make sure we clear their internal state
+		// Bind zero to state manager to make sure we clear its internal state
 		GlStateManager._bindTexture(0);
 		GL32.glBindTexture(GL32.GL_TEXTURE_2D_ARRAY, coefficients);
 
@@ -74,7 +75,8 @@ public class OitFramebuffer {
 		GlStateManager._bindTexture(((GlTexture) NoiseTextures.BLUE_NOISE.getTexture()).glId());
 
 		GlStateManager._glBindFramebuffer(GL32.GL_FRAMEBUFFER, fbo);
-		GL32.glFramebufferTexture(GL32.GL_FRAMEBUFFER, GL32.GL_DEPTH_ATTACHMENT, ((GlTexture) renderTarget.getDepthTexture()).glId(), 0);
+		GlTexture depthTexture = (GlTexture) renderTarget.getDepthTexture();
+		GL32.glFramebufferTexture(GL32.GL_FRAMEBUFFER, GL32.GL_DEPTH_ATTACHMENT, depthTexture != null ? depthTexture.glId() : 0, 0);
 	}
 
 	/**
@@ -209,6 +211,16 @@ public class OitFramebuffer {
 		bindRenderTarget(Minecraft.getInstance().getMainRenderTarget());
 	}
 
+	private static void bindRenderTarget(RenderTarget target) {
+		GlTexture colorTexture = (GlTexture) target.getColorTexture();
+		int i = colorTexture.getFbo(
+				((GlDevice) RenderSystem.getDevice()).directStateAccess(),
+				target.getDepthTexture()
+		);
+		GL32.glBindFramebuffer(GL33C.GL_FRAMEBUFFER, i);
+		GlStateManager._viewport(0, 0, colorTexture.getWidth(0), colorTexture.getHeight(0));
+	}
+
 	public void delete() {
 		deleteTextures();
 		GL32.glDeleteVertexArrays(vao);
@@ -241,14 +253,6 @@ public class OitFramebuffer {
 		GlStateManager._bindTexture(0);
 		Samplers.DEPTH_RANGE.makeActive();
 		GlStateManager._bindTexture(0);
-	}
-
-	private void bindRenderTarget(RenderTarget target) {
-		int i = ((GlTexture) target.getColorTexture()).getFbo(
-				((GlDevice) RenderSystem.getDevice()).directStateAccess(),
-				target.getDepthTexture()
-		);
-		GL32.glBindFramebuffer(GlConst.GL_FRAMEBUFFER, i);
 	}
 
 	private void maybeResizeFBO(int width, int height) {

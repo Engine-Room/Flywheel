@@ -16,7 +16,7 @@ public class FlywheelTestModClient {
 	private static final Logger LOGGER = LoggerFactory.getLogger(NAME);
 
 	public FlywheelTestModClient() {
-		LOGGER.info("Starting {} on Dist: {}", NAME, FMLLoader.getDist());
+		LOGGER.info("Starting {} on Dist: {}", NAME, FMLLoader.getCurrent().getDist());
 
 		NeoForge.EVENT_BUS.addListener((ClientTickEvent.Post e) -> {
 			LOGGER.info("Running mixin audit");

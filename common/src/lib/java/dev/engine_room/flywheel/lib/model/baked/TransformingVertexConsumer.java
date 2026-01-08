@@ -76,8 +76,8 @@ class TransformingVertexConsumer implements VertexConsumer {
 	}
 
 	@Override
-	public VertexConsumer setLineWidth(float f) {
-		delegate.setLineWidth(f);
+	public VertexConsumer setLineWidth(float width) {
+		delegate.setLineWidth(width);
 		return this;
 	}
 }

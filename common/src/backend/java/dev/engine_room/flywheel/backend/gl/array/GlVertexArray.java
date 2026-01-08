@@ -3,6 +3,7 @@ package dev.engine_room.flywheel.backend.gl.array;
 import java.util.List;
 
 import org.lwjgl.opengl.GL32;
+import org.lwjgl.opengl.GL33C;
 
 import dev.engine_room.flywheel.backend.gl.GlObject;
 import dev.engine_room.flywheel.backend.gl.GlStateTracker;
@@ -39,6 +40,6 @@ public abstract class GlVertexArray extends GlObject {
 
 	@Override
 	protected void deleteInternal(int handle) {
-		GL32.glDeleteVertexArrays(handle);
+		GL33C.glDeleteVertexArrays(handle);
 	}
 }

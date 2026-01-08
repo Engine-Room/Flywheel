@@ -1,36 +1,49 @@
 package dev.engine_room.flywheel.backend.engine;
 
+import org.lwjgl.opengl.GL33C;
+
+import com.mojang.blaze3d.opengl.GlConst;
+import com.mojang.blaze3d.opengl.GlSampler;
 import com.mojang.blaze3d.opengl.GlStateManager;
 import com.mojang.blaze3d.opengl.GlTexture;
+import com.mojang.blaze3d.opengl.GlTextureView;
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.textures.FilterMode;
+import com.mojang.blaze3d.textures.GpuTexture;
 
 import dev.engine_room.flywheel.backend.Samplers;
 import net.minecraft.client.Minecraft;
 import net.minecraft.resources.Identifier;
 
 public class TextureBinder {
+	// TODO 1.21.11
 	public static void bind(Identifier id) {
 		GlStateManager._bindTexture(byName(id));
 	}
 
-	public static void bindLightAndOverlay() {
-		var gameRenderer = Minecraft.getInstance().gameRenderer;
+	// Taken from GlCommandEncoder.trySetup
+	public static void bind(int unit, GlTextureView textureView, GlSampler sampler) {
+		GlStateManager._activeTexture(GlConst.GL_TEXTURE0 + unit);
+		GlTexture texture = textureView.texture();
+		int i;
+		if ((texture.usage() & GpuTexture.USAGE_CUBEMAP_COMPATIBLE) != 0) {
+			i = GL33C.GL_TEXTURE_CUBE_MAP;
+			GL33C.glBindTexture(i, texture.glId());
+		} else {
+			i = GL33C.GL_TEXTURE_2D;
+			GlStateManager._bindTexture(texture.glId());
+		}
 
-		Samplers.OVERLAY.makeActive();
-		gameRenderer.overlayTexture().setupOverlayColor();
-		GlStateManager._bindTexture(RenderSystem.getShaderTexture(1));
-
-
-		Samplers.LIGHT.makeActive();
-		gameRenderer.lightTexture().turnOnLightLayer();
-		GlStateManager._bindTexture(RenderSystem.getShaderTexture(2));
+		GL33C.glBindSampler(unit, sampler.getId());
+		GlStateManager._texParameter(i, GL33C.GL_TEXTURE_BASE_LEVEL, textureView.baseMipLevel());
+		GlStateManager._texParameter(i, GL33C.GL_TEXTURE_MAX_LEVEL, textureView.baseMipLevel() + textureView.mipLevels() - 1);
 	}
 
-	public static void resetLightAndOverlay() {
+	public static void bindLightAndOverlay() {
 		var gameRenderer = Minecraft.getInstance().gameRenderer;
-
-		gameRenderer.overlayTexture().teardownOverlayColor();
-		gameRenderer.lightTexture().turnOffLightLayer();
+		GlSampler sampler = (GlSampler) RenderSystem.getSamplerCache().getClampToEdge(FilterMode.LINEAR);
+		bind(Samplers.OVERLAY.number, (GlTextureView) gameRenderer.overlayTexture().getTextureView(), sampler);
+		bind(Samplers.LIGHT.number, (GlTextureView) gameRenderer.lightTexture().getTextureView(), sampler);
 	}
 
 	/**

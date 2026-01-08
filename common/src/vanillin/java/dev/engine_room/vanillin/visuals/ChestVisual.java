@@ -75,6 +75,7 @@ public class ChestVisual<T extends BlockEntity & LidBlockEntity> extends Abstrac
 		Block block = blockState.getBlock();
 		if (block instanceof AbstractChestBlock<?> chestBlock) {
 			ChestType chestType = blockState.hasProperty(ChestBlock.TYPE) ? blockState.getValue(ChestBlock.TYPE) : ChestType.SINGLE;
+			// TODO 1.21.11: should we be using unchecked casts here?
 			ChestRenderer<?> renderer = (ChestRenderer) Minecraft.getInstance().getBlockEntityRenderDispatcher().getRenderer(blockEntity);
 			net.minecraft.client.resources.model.Material texture = Sheets.chooseMaterial(
 					((ChestRendererAccessor) renderer).flywheel$getChestMaterial(blockEntity, ChestRenderer.xmasTextures()),

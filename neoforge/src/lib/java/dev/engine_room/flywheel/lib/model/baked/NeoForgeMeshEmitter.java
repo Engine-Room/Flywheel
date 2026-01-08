@@ -7,47 +7,26 @@ import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 
-import dev.engine_room.flywheel.api.material.Material;
-import net.minecraft.client.renderer.block.ModelBlockRenderer;
 import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.renderer.chunk.ChunkSectionLayer;
 
 @ApiStatus.Internal
-public class NeoforgeMeshEmitter extends MeshEmitter implements VertexConsumer {
-	private final ChunkSectionLayer chunkSectionLayer;
+public class NeoForgeMeshEmitter extends MeshEmitter {
+	private boolean ao;
 
-	private boolean defaultAo;
-
-	NeoforgeMeshEmitter(ByteBufferBuilderStack byteBufferBuilderStack, ChunkSectionLayer chunkSectionLayer) {
+	NeoForgeMeshEmitter(ByteBufferBuilderStack byteBufferBuilderStack, ChunkSectionLayer chunkSectionLayer) {
 		super(byteBufferBuilderStack, chunkSectionLayer);
-		this.chunkSectionLayer = chunkSectionLayer;
 	}
 
-	/**
-	 * Some mods, like FramedBlocks, have custom hooks to determine the default AO. This method is invoked a second time
-	 * from within a mixin to {@link ModelBlockRenderer} after the accurate value is computed, so we don't need to
-	 * support those custom hooks manually. It is possible that the mixin injector will never run (primarily due to
-	 * implementations of Fabric Renderer API on Forge, like Indigo in Forgified Fabric API), so we always compute the
-	 * value manually beforehand too.
-	 */
-	public void prepareForModelLayer(boolean defaultAo) {
-		this.defaultAo = defaultAo;
-	}
-
-	@Nullable
-	private BufferBuilder getBuffer(boolean shade, boolean ao) {
-		Material key = blockMaterialFunction.apply(chunkSectionLayer, shade, ao);
-		if (key != null) {
-			return getBuffer(key);
-		} else {
-			return null;
-		}
+	// Called from ModelBlockRendererMixin if AO is on for the model before each part is buffered
+	public void prepareForPart(boolean ao) {
+		this.ao = ao;
 	}
 
 	@Nullable
 	private BufferBuilder getBuffer(BakedQuad quad) {
 		boolean shade = quad.shade();
-		boolean ao = quad.hasAmbientOcclusion() && defaultAo;
+		boolean ao = quad.hasAmbientOcclusion() && this.ao;
 		return getBuffer(shade, ao);
 	}
 
@@ -103,7 +82,7 @@ public class NeoforgeMeshEmitter extends MeshEmitter implements VertexConsumer {
 	}
 
 	@Override
-	public VertexConsumer setLineWidth(float f) {
+	public VertexConsumer setLineWidth(float width) {
 		throw new UnsupportedOperationException("NeoForgeMeshEmitter only supports putBulkData!");
 	}
 }

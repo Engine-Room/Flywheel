@@ -20,7 +20,6 @@ import dev.engine_room.vanillin.visuals.BlockDisplayVisual;
 import dev.engine_room.vanillin.visuals.ChestVisual;
 import dev.engine_room.vanillin.visuals.ItemDisplayVisual;
 import dev.engine_room.vanillin.visuals.ItemFrameVisual;
-import dev.engine_room.vanillin.visuals.ItemVisual;
 import dev.engine_room.vanillin.visuals.MinecartVisual;
 import dev.engine_room.vanillin.visuals.ShulkerBoxVisual;
 import net.minecraft.client.model.geom.ModelLayerLocation;
@@ -93,15 +92,16 @@ public class VanillaVisuals {
 		itemFrame(EntityType.ITEM_FRAME).apply(EXPERIMENTAL);
 		itemFrame(EntityType.GLOW_ITEM_FRAME).apply(EXPERIMENTAL);
 
-		composable(EntityType.ITEM).apply(VanillaVisuals::commonElements)
-				.with(element(VisualElements.FIRE).build())
-				.with(element(VisualElements.SHADOW).configure(new ShadowElement.Config(0.15f, 0.75f))
-						.build())
-				.with(element(VisualElements.ITEM_ENTITY).build())
-				.shouldVisualize(((ctx, entity) -> ItemVisual.isSupported(entity)))
-				.build()
-				.skipVanillaRender(ItemVisual::isSupported)
-				.apply(EXPERIMENTAL);
+		// FIXME 1.21.11: port
+//		composable(EntityType.ITEM).apply(VanillaVisuals::commonElements)
+//				.with(element(VisualElements.FIRE).build())
+//				.with(element(VisualElements.SHADOW).configure(new ShadowElement.Config(0.15f, 0.75f))
+//						.build())
+//				.with(element(VisualElements.ITEM_ENTITY).build())
+//				.shouldVisualize(((ctx, entity) -> ItemVisual.isSupported(entity)))
+//				.build()
+//				.skipVanillaRender(ItemVisual::isSupported)
+//				.apply(EXPERIMENTAL);
 
 	}
 
