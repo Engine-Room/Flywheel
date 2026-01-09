@@ -13,7 +13,6 @@
     "LevelRendererMixin",
     "MinecraftMixin",
     "ModelPartAccessor",
-    "PoseStackAccessor",
     "PoseStackMixin",
     "fix.FixFabulousDepthMixin",
     "visualmanage.BlockEntityMixin",
