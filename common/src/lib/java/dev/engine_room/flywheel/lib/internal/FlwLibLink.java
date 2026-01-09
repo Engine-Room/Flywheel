@@ -1,12 +1,10 @@
 package dev.engine_room.flywheel.lib.internal;
 
-import java.util.List;
 import java.util.Map;
 
 import org.slf4j.Logger;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.blaze3d.vertex.PoseStack.Pose;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 
 import dev.engine_room.flywheel.api.internal.DependencyInjection;
@@ -25,8 +23,6 @@ public interface FlwLibLink {
 	Map<String, ModelPart> getModelPartChildren(ModelPart part);
 
 	void compileModelPart(ModelPart part, PoseStack.Pose pose, VertexConsumer consumer, int light, int overlay, int color);
-
-	List<Pose> getPoses(PoseStack stack);
 
 	<T extends Entity> boolean affectedByCulling(T entity);
 
