@@ -63,7 +63,7 @@ public class TestShaderSourceLoading extends TestBase {
 		var malformedInclude = assertSimpleNestedErrorsToDepth(LoadError.MalformedInclude.class, aErr, 1);
 		var message = malformedInclude.exception()
 				.getMessage();
-		assertEquals("Non [a-z0-9/._-] character in path of id: flywheel:evil - wow", message);
+		assertEquals("Non [a-z0-9/._-] character in path of location: flywheel:evil - wow", message);
 	}
 
 	@Test
