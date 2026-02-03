@@ -1,5 +1,12 @@
 package dev.engine_room.vanillin.visuals;
 
+import com.mojang.math.Axis;
+
+import net.minecraft.world.entity.vehicle.minecart.MinecartBehavior;
+import net.minecraft.world.entity.vehicle.minecart.NewMinecartBehavior;
+
+import net.minecraft.world.entity.vehicle.minecart.OldMinecartBehavior;
+
 import org.joml.Matrix4f;
 import org.joml.Matrix4fStack;
 import org.jspecify.annotations.Nullable;
@@ -56,12 +63,8 @@ public class MinecartVisual<T extends AbstractMinecart> extends AbstractEntityVi
 	private TransformedInstance createContentsInstance() {
 		RenderShape shape = blockState.getRenderShape();
 
-		if (shape == RenderShape.ENTITYBLOCK_ANIMATED) {
-			instances.visible(false);
-			return null;
-		}
-
 		if (shape == RenderShape.INVISIBLE) {
+			instances.visible(false);
 			return null;
 		}
 
@@ -104,7 +107,6 @@ public class MinecartVisual<T extends AbstractMinecart> extends AbstractEntityVi
 
 		var renderOrigin = renderOrigin();
 		stack.translate((float) (posX - renderOrigin.getX()), (float) (posY - renderOrigin.getY()), (float) (posZ - renderOrigin.getZ()));
-		float yaw = Mth.lerp(partialTick, entity.yRotO, entity.getYRot());
 
 		long randomBits = entity.getId() * 493286711L;
 		randomBits = randomBits * randomBits * 4392167121L + randomBits * 98761L;
@@ -113,32 +115,12 @@ public class MinecartVisual<T extends AbstractMinecart> extends AbstractEntityVi
 		float nudgeZ = (((float) (randomBits >> 24 & 7L) + 0.5f) / 8.0f - 0.5F) * 0.004f;
 		stack.translate(nudgeX, nudgeY, nudgeZ);
 
-		Vec3 pos = entity.getPos(posX, posY, posZ);
-		float pitch = Mth.lerp(partialTick, entity.xRotO, entity.getXRot());
-		if (pos != null) {
-			Vec3 offset1 = entity.getPosOffs(posX, posY, posZ, 0.3F);
-			Vec3 offset2 = entity.getPosOffs(posX, posY, posZ, -0.3F);
-
-			if (offset1 == null) {
-				offset1 = pos;
-			}
-
-			if (offset2 == null) {
-				offset2 = pos;
-			}
-
-			stack.translate((float) (pos.x - posX), (float) ((offset1.y + offset2.y) / 2.0D - posY), (float) (pos.z - posZ));
-			Vec3 vec = offset2.add(-offset1.x, -offset1.y, -offset1.z);
-			if (vec.length() != 0.0D) {
-				vec = vec.normalize();
-				yaw = (float) (Math.atan2(vec.z, vec.x) * 180.0D / Math.PI);
-				pitch = (float) (Math.atan(vec.y) * 73.0D);
-			}
+		MinecartBehavior behaviour = entity.getBehavior();
+		if (behaviour instanceof NewMinecartBehavior nmb) {
+			newRender(partialTick, nmb);
+		} else if (behaviour instanceof OldMinecartBehavior omb) {
+			oldRender(partialTick, omb, posX, posY, posZ);
 		}
-
-		stack.translate(0.0F, 0.375F, 0.0F);
-		stack.rotateY((180 - yaw) * Mth.DEG_TO_RAD);
-		stack.rotateZ(-pitch * Mth.DEG_TO_RAD);
 
 		float hurtTime = entity.getHurtTime() - partialTick;
 		float damage = entity.getDamage() - partialTick;
@@ -168,6 +150,34 @@ public class MinecartVisual<T extends AbstractMinecart> extends AbstractEntityVi
 		updateLight(partialTick);
 	}
 
+	private void newRender(float partialTick, NewMinecartBehavior behavior) {
+		stack.rotateY(behavior.getCartLerpYRot(partialTick) * Mth.DEG_TO_RAD);
+		stack.rotateZ(-behavior.getCartLerpXRot(partialTick) * Mth.DEG_TO_RAD);
+		stack.translate(0.0F, 0.375F, 0.0F);
+	}
+
+	private void oldRender(float partialTick, OldMinecartBehavior behavior, double posX, double posY, double posZ) {
+		Vec3 pos = behavior.getPos(posX, posY, posZ);
+		float pitch = Mth.lerp(partialTick, entity.xRotO, entity.getXRot());
+		float yaw = Mth.lerp(partialTick, entity.yRotO, entity.getYRot());
+		if (pos != null) {
+			Vec3 frontPos = behavior.getPosOffs(posX, posY, posZ, 0.3F);
+			Vec3 backPos = behavior.getPosOffs(posX, posY, posZ, -0.3F);
+
+			stack.translate((float) (pos.x - posX), (float) ((frontPos.y + backPos.y) / 2.0D - posY), (float) (pos.z - posZ));
+			Vec3 vec = backPos.add(-frontPos.x, -frontPos.y, -frontPos.z);
+			if (vec.length() != 0.0D) {
+				vec = vec.normalize();
+				yaw = (float) (Math.atan2(vec.z, vec.x) * 180.0D / Math.PI);
+				pitch = (float) (Math.atan(vec.y) * 73.0D);
+			}
+		}
+
+		stack.translate(0.0F, 0.375F, 0.0F);
+		stack.rotateY((180 - yaw) * Mth.DEG_TO_RAD);
+		stack.rotateZ(-pitch * Mth.DEG_TO_RAD);
+	}
+
 	protected void updateContents(TransformedInstance contents, Matrix4f pose, float partialTick) {
 		contents.setTransform(pose)
 				.setChanged();
@@ -191,6 +201,6 @@ public class MinecartVisual<T extends AbstractMinecart> extends AbstractEntityVi
 	}
 
 	public static boolean shouldSkipRender(AbstractMinecart minecart) {
-		return minecart.getDisplayBlockState().getRenderShape() != RenderShape.ENTITYBLOCK_ANIMATED;
+		return minecart.getDisplayBlockState().getRenderShape() != RenderShape.MODEL;
 	}
 }
