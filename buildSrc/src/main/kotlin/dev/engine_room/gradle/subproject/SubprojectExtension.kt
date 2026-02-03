@@ -106,7 +106,7 @@ open class SubprojectExtension(val project: Project) {
             add("minecraft", "com.mojang:minecraft:${minecraft_version}")
 
             add("mappings", loom.layered {
-                officialMojangMappings()
+                officialMojangMappings { nameSyntheticMembers = false }
                 if (parchment_version != "none")
                     parchment("org.parchmentmc.data:parchment-${parchment_minecraft_version}:${parchment_version}@zip")
             })
@@ -137,9 +137,10 @@ open class SubprojectExtension(val project: Project) {
             }
 
             withType<Jar>().configureEach {
-                from("${project.rootDir}/LICENSE.md") {
-                    into("META-INF")
-                }
+                // TODO
+//                from("${project.rootDir}/LICENSE.md") {
+//                    into("META-INF")
+//                }
             }
 
             withType<Javadoc>().configureEach {

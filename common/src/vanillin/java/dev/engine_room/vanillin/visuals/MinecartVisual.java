@@ -1,12 +1,5 @@
 package dev.engine_room.vanillin.visuals;
 
-import com.mojang.math.Axis;
-
-import net.minecraft.world.entity.vehicle.minecart.MinecartBehavior;
-import net.minecraft.world.entity.vehicle.minecart.NewMinecartBehavior;
-
-import net.minecraft.world.entity.vehicle.minecart.OldMinecartBehavior;
-
 import org.joml.Matrix4f;
 import org.joml.Matrix4fStack;
 import org.jspecify.annotations.Nullable;
@@ -29,6 +22,9 @@ import net.minecraft.client.model.geom.ModelLayerLocation;
 import net.minecraft.resources.Identifier;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.vehicle.minecart.AbstractMinecart;
+import net.minecraft.world.entity.vehicle.minecart.MinecartBehavior;
+import net.minecraft.world.entity.vehicle.minecart.NewMinecartBehavior;
+import net.minecraft.world.entity.vehicle.minecart.OldMinecartBehavior;
 import net.minecraft.world.level.block.RenderShape;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;

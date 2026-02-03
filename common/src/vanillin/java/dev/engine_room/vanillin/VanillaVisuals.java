@@ -18,15 +18,12 @@ import dev.engine_room.vanillin.elements.ShadowElement;
 import dev.engine_room.vanillin.visuals.BellVisual;
 import dev.engine_room.vanillin.visuals.BlockDisplayVisual;
 import dev.engine_room.vanillin.visuals.ChestVisual;
-import dev.engine_room.vanillin.visuals.ItemDisplayVisual;
-import dev.engine_room.vanillin.visuals.ItemFrameVisual;
 import dev.engine_room.vanillin.visuals.MinecartVisual;
 import dev.engine_room.vanillin.visuals.ShulkerBoxVisual;
 import net.minecraft.client.model.geom.ModelLayerLocation;
 import net.minecraft.client.model.geom.ModelLayers;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.decoration.ItemFrame;
 import net.minecraft.world.entity.vehicle.minecart.AbstractMinecart;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
@@ -61,11 +58,12 @@ public class VanillaVisuals {
 		builder(EntityType.BLOCK_DISPLAY).factory(BlockDisplayVisual::new)
 				.apply(STABLE);
 
-		composable(EntityType.ITEM_DISPLAY).with(element(VisualElements.ITEM_DISPLAY).build())
-				.shouldVisualize((ctx, e) -> ItemDisplayVisual.shouldVisualize(e))
-				.build()
-				.skipVanillaRender(ItemDisplayVisual::shouldVisualize)
-				.apply(EXPERIMENTAL);
+		// FIXME 1.21.11: port
+//		composable(EntityType.ITEM_DISPLAY).with(element(VisualElements.ITEM_DISPLAY).build())
+//				.shouldVisualize((ctx, e) -> ItemDisplayVisual.shouldVisualize(e))
+//				.build()
+//				.skipVanillaRender(ItemDisplayVisual::shouldVisualize)
+//				.apply(EXPERIMENTAL);
 
 		minecart(EntityType.CHEST_MINECART, ModelLayers.CHEST_MINECART)
 				.apply(STABLE);
@@ -89,8 +87,9 @@ public class VanillaVisuals {
 				.skipVanillaRender(MinecartVisual::shouldSkipRender)
 				.apply(STABLE);
 
-		itemFrame(EntityType.ITEM_FRAME).apply(EXPERIMENTAL);
-		itemFrame(EntityType.GLOW_ITEM_FRAME).apply(EXPERIMENTAL);
+		// FIXME 1.21.11: port
+//		itemFrame(EntityType.ITEM_FRAME).apply(EXPERIMENTAL);
+//		itemFrame(EntityType.GLOW_ITEM_FRAME).apply(EXPERIMENTAL);
 
 		// FIXME 1.21.11: port
 //		composable(EntityType.ITEM).apply(VanillaVisuals::commonElements)
@@ -110,13 +109,14 @@ public class VanillaVisuals {
 				.build());
 	}
 
-	public static <T extends ItemFrame> EntityVisualizerBuilder<T> itemFrame(EntityType<T> type) {
-		return composable(type).apply(VanillaVisuals::commonElements)
-				.with(element(VisualElements.ITEM_FRAME).build())
-				.shouldVisualize((ctx, entity) -> ItemFrameVisual.shouldVisualize(entity))
-				.build()
-				.skipVanillaRender(ItemFrameVisual::shouldVisualize);
-	}
+	// FIXME 1.21.11: port
+//	public static <T extends ItemFrame> EntityVisualizerBuilder<T> itemFrame(EntityType<T> type) {
+//		return composable(type).apply(VanillaVisuals::commonElements)
+//				.with(element(VisualElements.ITEM_FRAME).build())
+//				.shouldVisualize((ctx, entity) -> ItemFrameVisual.shouldVisualize(entity))
+//				.build()
+//				.skipVanillaRender(ItemFrameVisual::shouldVisualize);
+//	}
 
 	public static <T extends AbstractMinecart> EntityVisualizerBuilder<T> minecart(EntityType<T> type, ModelLayerLocation variant) {
 		return composable(type).apply(VanillaVisuals::commonElements)

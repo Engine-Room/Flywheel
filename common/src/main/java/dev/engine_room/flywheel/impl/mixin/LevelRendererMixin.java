@@ -73,8 +73,7 @@ abstract class LevelRendererMixin {
 		}
 	}
 
-	// TODO 1.21.11: update this injection point
-	@Inject(method = "lambda$addMainPass$1", at = @At(value = "INVOKE_STRING", target = "Lnet/minecraft/util/profiling/ProfilerFiller;popPush(Ljava/lang/String;)V", args = "ldc=submitBlockEntities"))
+	@Inject(method = "method_62214", at = @At(value = "INVOKE_STRING", target = "Lnet/minecraft/util/profiling/ProfilerFiller;popPush(Ljava/lang/String;)V", args = "ldc=submitBlockEntities"))
 	private void flywheel$beforeBlockEntities(CallbackInfo ci) {
 		if (flywheel$renderContext != null) {
 			VisualizationManager manager = VisualizationManager.get(level);
@@ -84,7 +83,7 @@ abstract class LevelRendererMixin {
 		}
 	}
 
-	@Inject(method = "lambda$addMainPass$1", at = @At(value = "INVOKE_STRING", target = "Lnet/minecraft/util/profiling/ProfilerFiller;push(Ljava/lang/String;)V", args = "ldc=destroyProgress"))
+	@Inject(method = "method_62214", at = @At(value = "INVOKE_STRING", target = "Lnet/minecraft/util/profiling/ProfilerFiller;push(Ljava/lang/String;)V", args = "ldc=destroyProgress"))
 	private void flywheel$beforeRenderCrumbling(CallbackInfo ci) {
 		if (flywheel$renderContext != null) {
 			VisualizationManager manager = VisualizationManager.get(level);

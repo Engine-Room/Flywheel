@@ -6,7 +6,6 @@
   "refmap": "flywheel.refmap.json",
   "client": [
     "ArgumentTypeInfosAccessor",
-    "DebugScreenOverlayMixin",
     "MinecraftMixin",
     "SystemReportMixin"
   ],
