@@ -11,7 +11,7 @@ import dev.engine_room.flywheel.backend.gl.GlCompat;
 
 @Mixin(value = RenderSystem.class, remap = false)
 abstract class RenderSystemMixin {
-	@Inject(method = "initRenderer(JIZLcom/mojang/blaze3d/shaders/ShaderSource;Z)V", at = @At("RETURN"))
+	@Inject(method = "initRenderer", at = @At("RETURN"))
 	private static void flywheel$onInitRenderer(CallbackInfo ci) {
 		GlCompat.init();
 	}
