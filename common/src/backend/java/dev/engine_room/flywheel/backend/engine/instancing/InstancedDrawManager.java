@@ -118,6 +118,9 @@ public class InstancedDrawManager extends DrawManager<InstancedInstancer<?>> {
 		TextureBinder.bindLightAndOverlay();
 		light.bind();
 
+		TextureBinder.bindRenderTarget(Minecraft.getInstance().getMainRenderTarget());
+
+
 		submitDraws();
 
 		if (!oitDraws.isEmpty()) {
@@ -259,7 +262,9 @@ public class InstancedDrawManager extends DrawManager<InstancedInstancer<?>> {
 
 		Uniforms.bindAll();
 		vao.bindForDraw();
+
 		TextureBinder.bindLightAndOverlay();
+		TextureBinder.bindRenderTarget(Minecraft.getInstance().getMainRenderTarget());
 
 		for (var groupEntry : byType.entrySet()) {
 			var byProgress = groupEntry.getValue();

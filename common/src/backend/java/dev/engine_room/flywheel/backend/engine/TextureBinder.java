@@ -1,5 +1,9 @@
 package dev.engine_room.flywheel.backend.engine;
 
+import com.mojang.blaze3d.opengl.GlDevice;
+import com.mojang.blaze3d.pipeline.RenderTarget;
+
+import org.lwjgl.opengl.GL32;
 import org.lwjgl.opengl.GL33C;
 
 import com.mojang.blaze3d.opengl.GlConst;
@@ -44,6 +48,15 @@ public class TextureBinder {
 		GlSampler sampler = (GlSampler) RenderSystem.getSamplerCache().getClampToEdge(FilterMode.LINEAR);
 		bind(Samplers.OVERLAY.number, (GlTextureView) gameRenderer.overlayTexture().getTextureView(), sampler);
 		bind(Samplers.LIGHT.number, (GlTextureView) gameRenderer.lightTexture().getTextureView(), sampler);
+	}
+
+	public static void bindRenderTarget(RenderTarget target) {
+		GlTexture colorTexture = (GlTexture) target.getColorTexture();
+		int i = colorTexture.getFbo(
+				((GlDevice) RenderSystem.getDevice()).directStateAccess(),
+				target.getDepthTexture()
+		);
+		GL32.glBindFramebuffer(GL33C.GL_FRAMEBUFFER, i);
 	}
 
 	/**
