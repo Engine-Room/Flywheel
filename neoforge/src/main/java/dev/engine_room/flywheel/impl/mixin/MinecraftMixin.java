@@ -28,12 +28,12 @@ abstract class MinecraftMixin {
 		FlwImpl.freezeRegistries();
 	}
 
-	@Inject(method = "lambda$new$8", at = @At("HEAD"), remap = false)
+	@Inject(method = "method_53522", at = @At("HEAD"), remap = false)
 	private void flywheel$onEndInitialResourceReload(@Coerce Object gameLoadCookie, Optional<Throwable> error, CallbackInfo ci) {
 		ModLoader.postEvent(new EndClientResourceReloadEvent((Minecraft) (Object) this, resourceManager, true, error));
 	}
 
-	@Inject(method = "lambda$reloadResourcePacks$21", at = @At("HEAD"), remap = false)
+	@Inject(method = "lambda$reloadResourcePacks$20", at = @At("HEAD"), remap = false)
 	private void flywheel$onEndManualResourceReload(boolean recovery, @Coerce Object gameLoadCookie, CompletableFuture<Void> completablefuture, Optional<Throwable> error, CallbackInfo ci) {
 		ModLoader.postEvent(new EndClientResourceReloadEvent((Minecraft) (Object) this, resourceManager, false, error));
 	}
