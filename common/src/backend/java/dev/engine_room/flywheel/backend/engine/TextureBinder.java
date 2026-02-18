@@ -1,16 +1,14 @@
 package dev.engine_room.flywheel.backend.engine;
 
-import com.mojang.blaze3d.opengl.GlDevice;
-import com.mojang.blaze3d.pipeline.RenderTarget;
-
-import org.lwjgl.opengl.GL32;
 import org.lwjgl.opengl.GL33C;
 
 import com.mojang.blaze3d.opengl.GlConst;
+import com.mojang.blaze3d.opengl.GlDevice;
 import com.mojang.blaze3d.opengl.GlSampler;
 import com.mojang.blaze3d.opengl.GlStateManager;
 import com.mojang.blaze3d.opengl.GlTexture;
 import com.mojang.blaze3d.opengl.GlTextureView;
+import com.mojang.blaze3d.pipeline.RenderTarget;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.textures.FilterMode;
 import com.mojang.blaze3d.textures.GpuTexture;
@@ -34,7 +32,7 @@ public class TextureBinder {
 			i = GL33C.GL_TEXTURE_CUBE_MAP;
 			GL33C.glBindTexture(i, texture.glId());
 		} else {
-			i = GL33C.GL_TEXTURE_2D;
+			i = GlConst.GL_TEXTURE_2D;
 			GlStateManager._bindTexture(texture.glId());
 		}
 
@@ -56,7 +54,7 @@ public class TextureBinder {
 				((GlDevice) RenderSystem.getDevice()).directStateAccess(),
 				target.getDepthTexture()
 		);
-		GL32.glBindFramebuffer(GL33C.GL_FRAMEBUFFER, i);
+		GlStateManager._glBindFramebuffer(GlConst.GL_FRAMEBUFFER, i);
 	}
 
 	/**

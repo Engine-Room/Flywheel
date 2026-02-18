@@ -8,7 +8,7 @@ import dev.engine_room.flywheel.backend.gl.buffer.GlBufferUsage;
 import dev.engine_room.flywheel.lib.math.MoreMath;
 import dev.engine_room.flywheel.lib.memory.MemoryBlock;
 
-public class UniformBuffer {
+	public class UniformBuffer {
 	private final int index;
 	private final MemoryBlock clientBuffer;
 	@Nullable

@@ -1,7 +1,6 @@
 package dev.engine_room.flywheel.backend.gl;
 
-import static org.lwjgl.opengl.GL13.GL_TEXTURE0;
-
+import com.mojang.blaze3d.opengl.GlConst;
 import com.mojang.blaze3d.opengl.GlStateManager;
 
 import dev.engine_room.flywheel.backend.mixin.GlStateManagerAccessor;
@@ -49,7 +48,7 @@ public enum GlTextureUnit {
 
 	GlTextureUnit(int unit) {
 		this.number = unit;
-		this.glEnum = GL_TEXTURE0 + unit;
+		this.glEnum = GlConst.GL_TEXTURE0 + unit;
 	}
 
 	public void makeActive() {
@@ -61,7 +60,7 @@ public enum GlTextureUnit {
 	}
 
 	public static GlTextureUnit fromGlEnum(int glEnum) {
-		return VALUES[glEnum - GL_TEXTURE0];
+		return VALUES[glEnum - GlConst.GL_TEXTURE0];
 	}
 
 	public static GlTextureUnit fromIndex(int index) {

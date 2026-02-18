@@ -91,19 +91,19 @@ public final class MaterialRenderState {
 		}
 		case LESS -> {
 			GlStateManager._enableDepthTest();
-			GlStateManager._depthFunc(GL11.GL_LESS);
+			GlStateManager._depthFunc(GlConst.GL_LESS);
 		}
 		case EQUAL -> {
 			GlStateManager._enableDepthTest();
-			GlStateManager._depthFunc(GL11.GL_EQUAL);
+			GlStateManager._depthFunc(GlConst.GL_EQUAL);
 		}
 		case LEQUAL -> {
 			GlStateManager._enableDepthTest();
-			GlStateManager._depthFunc(GL11.GL_LEQUAL);
+			GlStateManager._depthFunc(GlConst.GL_LEQUAL);
 		}
 		case GREATER -> {
 			GlStateManager._enableDepthTest();
-			GlStateManager._depthFunc(GL11.GL_GREATER);
+			GlStateManager._depthFunc(GlConst.GL_GREATER);
 		}
 		case NOTEQUAL -> {
 			GlStateManager._enableDepthTest();
@@ -111,11 +111,11 @@ public final class MaterialRenderState {
 		}
 		case GEQUAL -> {
 			GlStateManager._enableDepthTest();
-			GlStateManager._depthFunc(GL11.GL_GEQUAL);
+			GlStateManager._depthFunc(GlConst.GL_GEQUAL);
 		}
 		case ALWAYS -> {
 			GlStateManager._enableDepthTest();
-			GlStateManager._depthFunc(GL11.GL_ALWAYS);
+			GlStateManager._depthFunc(GlConst.GL_ALWAYS);
 		}
 		}
 	}

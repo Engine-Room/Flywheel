@@ -5,11 +5,13 @@ import java.util.List;
 import org.lwjgl.opengl.GL32;
 import org.lwjgl.opengl.GL33C;
 
+import com.mojang.blaze3d.opengl.GlStateManager;
+
 import dev.engine_room.flywheel.backend.gl.GlObject;
 import dev.engine_room.flywheel.backend.gl.GlStateTracker;
 
 public abstract class GlVertexArray extends GlObject {
-	protected static final int MAX_ATTRIBS = GL32.glGetInteger(GL32.GL_MAX_VERTEX_ATTRIBS);
+	protected static final int MAX_ATTRIBS = GlStateManager._getInteger(GL32.GL_MAX_VERTEX_ATTRIBS);
 	protected static final int MAX_ATTRIB_BINDINGS = 16;
 
 	public static GlVertexArray create() {

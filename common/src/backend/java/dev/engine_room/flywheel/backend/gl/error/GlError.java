@@ -5,6 +5,8 @@ import java.util.function.Supplier;
 import org.lwjgl.opengl.GL20;
 import org.lwjgl.opengl.GL30;
 
+import com.mojang.blaze3d.opengl.GlConst;
+
 import it.unimi.dsi.fastutil.ints.Int2ObjectArrayMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 
@@ -13,7 +15,7 @@ public enum GlError {
 	INVALID_VALUE(GL20.GL_INVALID_VALUE),
 	INVALID_OPERATION(GL20.GL_INVALID_OPERATION),
 	INVALID_FRAMEBUFFER_OPERATION(GL30.GL_INVALID_FRAMEBUFFER_OPERATION),
-	OUT_OF_MEMORY(GL20.GL_OUT_OF_MEMORY),
+	OUT_OF_MEMORY(GlConst.GL_OUT_OF_MEMORY),
 	STACK_UNDERFLOW(GL20.GL_STACK_UNDERFLOW),
 	STACK_OVERFLOW(GL20.GL_STACK_OVERFLOW),
 	;

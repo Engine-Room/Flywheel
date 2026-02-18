@@ -1,9 +1,8 @@
 package dev.engine_room.flywheel.backend.engine.indirect;
 
-import static org.lwjgl.opengl.GL15.glDeleteBuffers;
-import static org.lwjgl.opengl.GL45.glCopyNamedBufferSubData;
-import static org.lwjgl.opengl.GL45.glCreateBuffers;
-import static org.lwjgl.opengl.GL45.glNamedBufferStorage;
+import org.lwjgl.opengl.GL45;
+
+import com.mojang.blaze3d.opengl.GlStateManager;
 
 import dev.engine_room.flywheel.backend.gl.GlObject;
 import dev.engine_room.flywheel.lib.memory.FlwMemoryTracker;
@@ -17,7 +16,7 @@ public class ResizableStorageBuffer extends GlObject {
 	private long capacity = 0;
 
 	public ResizableStorageBuffer() {
-		handle(glCreateBuffers());
+		handle(GL45.glCreateBuffers());
 	}
 
 	public long capacity() {
@@ -29,17 +28,17 @@ public class ResizableStorageBuffer extends GlObject {
 
 		if (this.capacity > 0) {
 			int oldHandle = handle();
-			int newHandle = glCreateBuffers();
+			int newHandle = GL45.glCreateBuffers();
 
-			glNamedBufferStorage(newHandle, capacity, 0);
+			GL45.glNamedBufferStorage(newHandle, capacity, 0);
 
-			glCopyNamedBufferSubData(oldHandle, newHandle, 0, 0, this.capacity);
+			GL45.glCopyNamedBufferSubData(oldHandle, newHandle, 0, 0, this.capacity);
 
 			deleteInternal(oldHandle);
 
 			handle(newHandle);
 		} else {
-			glNamedBufferStorage(handle(), capacity, 0);
+			GL45.glNamedBufferStorage(handle(), capacity, 0);
 		}
 		this.capacity = capacity;
 		FlwMemoryTracker._allocGpuMemory(this.capacity);
@@ -47,7 +46,7 @@ public class ResizableStorageBuffer extends GlObject {
 
 	@Override
 	protected void deleteInternal(int handle) {
-		glDeleteBuffers(handle);
+		GlStateManager._glDeleteBuffers(handle);
 	}
 
 	@Override

@@ -3,6 +3,7 @@ package dev.engine_room.flywheel.backend.engine.indirect;
 import org.lwjgl.opengl.GL32;
 import org.lwjgl.opengl.GL46;
 
+import com.mojang.blaze3d.opengl.GlConst;
 import com.mojang.blaze3d.opengl.GlStateManager;
 import com.mojang.blaze3d.opengl.GlTexture;
 import com.mojang.blaze3d.textures.GpuTexture;
@@ -45,7 +46,7 @@ public class DepthPyramid {
 		var downsampleFirstProgram = programs.getDownsampleFirstProgram();
 		downsampleFirstProgram.bind();
 
-		GL46.glBindImageTexture(1, pyramidTextureId, 0, false, 0, GL32.GL_WRITE_ONLY, GL32.GL_R32F);
+		GL46.glBindImageTexture(1, pyramidTextureId, 0, false, 0, GlConst.GL_WRITE_ONLY, GL32.GL_R32F);
 		GL46.glDispatchCompute(MoreMath.ceilingDiv(width << 1, 64), MoreMath.ceilingDiv(height << 1, 64), 1);
 
 		var downsampleSecondProgram = programs.getDownsampleSecondProgram();
@@ -58,7 +59,7 @@ public class DepthPyramid {
 			downsampleSecondProgram.setUInt("base_mip_level", baseMipLevel);
 
 			for (int i = 0; i < Math.min(7, mipLevels - baseMipLevel); i++) {
-				GL46.glBindImageTexture(i, pyramidTextureId, baseMipLevel + i, false, 0, GL32.GL_WRITE_ONLY, GL32.GL_R32F);
+				GL46.glBindImageTexture(i, pyramidTextureId, baseMipLevel + i, false, 0, GlConst.GL_WRITE_ONLY, GL32.GL_R32F);
 			}
 
 			GL46.glDispatchCompute(MoreMath.ceilingDiv(width >> baseMipLevel, 64), MoreMath.ceilingDiv(height >> baseMipLevel, 64), 1);
@@ -89,14 +90,14 @@ public class DepthPyramid {
 
 		delete();
 
-		pyramidTextureId = GL46.glCreateTextures(GL46.GL_TEXTURE_2D);
+		pyramidTextureId = GL46.glCreateTextures(GlConst.GL_TEXTURE_2D);
 		GL46.glTextureStorage2D(pyramidTextureId, mipLevels, GL32.GL_R32F, width, height);
 
-		GL46.glTextureParameteri(pyramidTextureId, GL32.GL_TEXTURE_MIN_FILTER, GL32.GL_NEAREST);
-		GL46.glTextureParameteri(pyramidTextureId, GL32.GL_TEXTURE_MAG_FILTER, GL32.GL_NEAREST);
-		GL46.glTextureParameteri(pyramidTextureId, GL32.GL_TEXTURE_COMPARE_MODE, GL32.GL_NONE);
-		GL46.glTextureParameteri(pyramidTextureId, GL32.GL_TEXTURE_WRAP_S, GL32.GL_CLAMP_TO_EDGE);
-		GL46.glTextureParameteri(pyramidTextureId, GL32.GL_TEXTURE_WRAP_T, GL32.GL_CLAMP_TO_EDGE);
+		GL46.glTextureParameteri(pyramidTextureId, GlConst.GL_TEXTURE_MIN_FILTER, GlConst.GL_NEAREST);
+		GL46.glTextureParameteri(pyramidTextureId, GlConst.GL_TEXTURE_MAG_FILTER, GlConst.GL_NEAREST);
+		GL46.glTextureParameteri(pyramidTextureId, GlConst.GL_TEXTURE_COMPARE_MODE, GlConst.GL_NONE);
+		GL46.glTextureParameteri(pyramidTextureId, GlConst.GL_TEXTURE_WRAP_S, GlConst.GL_CLAMP_TO_EDGE);
+		GL46.glTextureParameteri(pyramidTextureId, GlConst.GL_TEXTURE_WRAP_T, GlConst.GL_CLAMP_TO_EDGE);
 	}
 
 	public static int mip0Size(int screenSize) {

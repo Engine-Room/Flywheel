@@ -3,15 +3,16 @@ package dev.engine_room.flywheel.backend.gl;
 import org.jetbrains.annotations.UnknownNullability;
 import org.lwjgl.PointerBuffer;
 import org.lwjgl.opengl.GL;
-import org.lwjgl.opengl.GL20;
 import org.lwjgl.opengl.GL20C;
-import org.lwjgl.opengl.GL31C;
 import org.lwjgl.opengl.GL40;
 import org.lwjgl.opengl.GL43;
 import org.lwjgl.opengl.GLCapabilities;
 import org.lwjgl.opengl.KHRShaderSubgroup;
 import org.lwjgl.system.MemoryStack;
 import org.lwjgl.system.MemoryUtil;
+
+import com.mojang.blaze3d.opengl.GlConst;
+import com.mojang.blaze3d.opengl.GlStateManager;
 
 import dev.engine_room.flywheel.backend.FlwBackend;
 import dev.engine_room.flywheel.backend.compile.core.Compilation;
@@ -127,7 +128,7 @@ public final class GlCompat {
 			return 32;
 		}
 		if (CAPABILITIES.GL_KHR_shader_subgroup) {
-			return GL31C.glGetInteger(KHRShaderSubgroup.GL_SUBGROUP_SIZE_KHR);
+			return GlStateManager._getInteger(KHRShaderSubgroup.GL_SUBGROUP_SIZE_KHR);
 		}
 
 		// Try to guess.
@@ -197,7 +198,7 @@ public final class GlCompat {
 	}
 
 	private static boolean canCompileVersion(GlslVersion version) {
-		int handle = GL20.glCreateShader(GL20.GL_VERTEX_SHADER);
+		int handle = GlStateManager.glCreateShader(GlConst.GL_VERTEX_SHADER);
 
 		// Compile the simplest possible shader.
 		var source = """
@@ -206,11 +207,11 @@ public final class GlCompat {
 				""".formatted(version.version);
 
 		safeShaderSource(handle, source);
-		GL20.glCompileShader(handle);
+		GlStateManager.glCompileShader(handle);
 
 		boolean success = Compilation.compiledSuccessfully(handle);
 
-		GL20.glDeleteShader(handle);
+		GlStateManager.glDeleteShader(handle);
 
 		return success;
 	}
@@ -222,7 +223,7 @@ public final class GlCompat {
 		if (CAPABILITIES == null) {
 			return "invalid";
 		}
-		String str = GL20C.glGetString(name);
+		String str = GlStateManager._getString(name);
 		return str == null ? "null" : str;
 	}
 }

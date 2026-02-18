@@ -1,18 +1,14 @@
 package dev.engine_room.flywheel.backend.compile.core;
 
-import static org.lwjgl.opengl.GL11.GL_TRUE;
-import static org.lwjgl.opengl.GL20.GL_LINK_STATUS;
-import static org.lwjgl.opengl.GL20.glAttachShader;
-import static org.lwjgl.opengl.GL20.glCreateProgram;
-import static org.lwjgl.opengl.GL20.glGetProgramInfoLog;
-import static org.lwjgl.opengl.GL20.glGetProgrami;
-import static org.lwjgl.opengl.GL20.glLinkProgram;
-
 import java.util.List;
 import java.util.function.Consumer;
 
+import com.mojang.blaze3d.opengl.GlConst;
+import com.mojang.blaze3d.opengl.GlStateManager;
+
 import dev.engine_room.flywheel.backend.gl.shader.GlProgram;
 import dev.engine_room.flywheel.backend.gl.shader.GlShader;
+import net.minecraft.client.renderer.ShaderManager;
 
 public class ProgramLinker {
 
@@ -25,17 +21,18 @@ public class ProgramLinker {
 	}
 
 	private LinkResult linkInternal(List<GlShader> shaders, Consumer<GlProgram> preLink) {
-		int handle = glCreateProgram();
+		int handle = GlStateManager.glCreateProgram();
 		var out = new GlProgram(handle);
 
 		for (GlShader shader : shaders) {
-			glAttachShader(handle, shader.handle());
+			GlStateManager.glAttachShader(handle, shader.handle());
 		}
 
 		preLink.accept(out);
 
-		glLinkProgram(handle);
-		String log = glGetProgramInfoLog(handle);
+		GlStateManager.glLinkProgram(handle);
+		int logLength = GlStateManager.glGetProgrami(handle, ShaderManager.MAX_LOG_LENGTH);
+		String log = GlStateManager.glGetProgramInfoLog(handle, logLength);
 
 		if (linkSuccessful(handle)) {
 			return LinkResult.success(out, log);
@@ -46,7 +43,7 @@ public class ProgramLinker {
 	}
 
 	private static boolean linkSuccessful(int handle) {
-		return glGetProgrami(handle, GL_LINK_STATUS) == GL_TRUE;
+		return GlStateManager.glGetProgrami(handle, GlConst.GL_LINK_STATUS) == GlConst.GL_TRUE;
 	}
 
 }

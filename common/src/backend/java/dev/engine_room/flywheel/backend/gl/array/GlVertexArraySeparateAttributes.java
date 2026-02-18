@@ -7,6 +7,8 @@ import java.util.List;
 import org.lwjgl.opengl.GL43C;
 import org.lwjgl.system.Checks;
 
+import com.mojang.blaze3d.opengl.GlStateManager;
+
 import dev.engine_room.flywheel.backend.gl.GlCompat;
 import dev.engine_room.flywheel.backend.gl.GlStateTracker;
 import dev.engine_room.flywheel.backend.gl.buffer.GlBufferType;
@@ -25,7 +27,7 @@ public class GlVertexArraySeparateAttributes extends GlVertexArray {
 	private int elementBufferBinding = 0;
 
 	public GlVertexArraySeparateAttributes() {
-		handle(GL43C.glGenVertexArrays());
+		handle(GlStateManager._glGenVertexArrays());
 	}
 
 	@Override
@@ -55,7 +57,7 @@ public class GlVertexArraySeparateAttributes extends GlVertexArray {
 
 		for (var attribute : vertexAttributes) {
 			if (!attributeEnabled.get(attribIndex)) {
-				GL43C.glEnableVertexAttribArray(attribIndex);
+				GlStateManager._enableVertexAttribArray(attribIndex);
 				attributeEnabled.set(attribIndex);
 			}
 

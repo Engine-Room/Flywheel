@@ -1,16 +1,16 @@
 package dev.engine_room.flywheel.backend.gl;
 
-import org.lwjgl.opengl.GL11;
+import com.mojang.blaze3d.opengl.GlConst;
 
 public enum GlNumericType {
-	FLOAT(4, "float", GL11.GL_FLOAT),
-	UBYTE(1, "ubyte", GL11.GL_UNSIGNED_BYTE),
-	BYTE(1, "byte", GL11.GL_BYTE),
-	USHORT(2, "ushort", GL11.GL_UNSIGNED_SHORT),
-	SHORT(2, "short", GL11.GL_SHORT),
-	UINT(4, "uint", GL11.GL_UNSIGNED_INT),
-	INT(4, "int", GL11.GL_INT),
-	DOUBLE(8, "double", GL11.GL_DOUBLE),
+	FLOAT(4, "float", GlConst.GL_FLOAT),
+	UBYTE(1, "ubyte", GlConst.GL_UNSIGNED_BYTE),
+	BYTE(1, "byte", GlConst.GL_BYTE),
+	USHORT(2, "ushort", GlConst.GL_UNSIGNED_SHORT),
+	SHORT(2, "short", GlConst.GL_SHORT),
+	UINT(4, "uint", GlConst.GL_UNSIGNED_INT),
+	INT(4, "int", GlConst.GL_INT),
+	DOUBLE(8, "double", GlConst.GL_DOUBLE),
 	;
 
 	public final int byteWidth;
