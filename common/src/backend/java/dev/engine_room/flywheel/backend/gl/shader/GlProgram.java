@@ -15,6 +15,7 @@ import dev.engine_room.flywheel.backend.gl.GlTextureUnit;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 
+@Deprecated(forRemoval = true)
 public class GlProgram extends GlObject {
 	private static final Logger LOGGER = LogUtils.getLogger();
 
