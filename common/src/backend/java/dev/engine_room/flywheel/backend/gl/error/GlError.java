@@ -6,6 +6,7 @@ import org.lwjgl.opengl.GL20;
 import org.lwjgl.opengl.GL30;
 
 import com.mojang.blaze3d.opengl.GlConst;
+import com.mojang.blaze3d.opengl.GlStateManager;
 
 import it.unimi.dsi.fastutil.ints.Int2ObjectArrayMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
@@ -37,7 +38,7 @@ public enum GlError {
 
 	// Great for use in your debugger's expression evaluator
 	public static GlError poll() {
-		return errorLookup.get(GL20.glGetError());
+		return errorLookup.get(GlStateManager._getError());
 	}
 
 	public static void pollAndThrow(Supplier<String> context) {

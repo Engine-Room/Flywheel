@@ -3,6 +3,8 @@ package dev.engine_room.flywheel.backend;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.mojang.blaze3d.vertex.VertexFormatElement;
+
 import dev.engine_room.flywheel.api.layout.ArrayElementType;
 import dev.engine_room.flywheel.api.layout.ElementType;
 import dev.engine_room.flywheel.api.layout.FloatRepr;
@@ -13,7 +15,6 @@ import dev.engine_room.flywheel.api.layout.ScalarElementType;
 import dev.engine_room.flywheel.api.layout.UnsignedIntegerRepr;
 import dev.engine_room.flywheel.api.layout.ValueRepr;
 import dev.engine_room.flywheel.api.layout.VectorElementType;
-import dev.engine_room.flywheel.backend.gl.GlNumericType;
 import dev.engine_room.flywheel.backend.gl.array.VertexAttribute;
 
 public class LayoutAttributes {
@@ -79,31 +80,34 @@ public class LayoutAttributes {
 		}
 	}
 
-	private static GlNumericType toGlType(IntegerRepr repr) {
+	// TODO 1.21.11: Is there a better way to do this perhaps?
+	private static VertexFormatElement.Type toGlType(IntegerRepr repr) {
 		return switch (repr) {
-			case BYTE -> GlNumericType.BYTE;
-			case SHORT -> GlNumericType.SHORT;
-			case INT -> GlNumericType.INT;
+			case BYTE -> VertexFormatElement.Type.BYTE;
+			case SHORT -> VertexFormatElement.Type.SHORT;
+			case INT -> VertexFormatElement.Type.INT;
 		};
 	}
 
-	private static GlNumericType toGlType(UnsignedIntegerRepr repr) {
+	// TODO 1.21.11: Is there a better way to do this perhaps?
+	private static VertexFormatElement.Type toGlType(UnsignedIntegerRepr repr) {
 		return switch (repr) {
-			case UNSIGNED_BYTE -> GlNumericType.UBYTE;
-			case UNSIGNED_SHORT -> GlNumericType.USHORT;
-			case UNSIGNED_INT -> GlNumericType.UINT;
+			case UNSIGNED_BYTE -> VertexFormatElement.Type.UBYTE;
+			case UNSIGNED_SHORT -> VertexFormatElement.Type.USHORT;
+			case UNSIGNED_INT -> VertexFormatElement.Type.UINT;
 		};
 	}
 
-	private static GlNumericType toGlType(FloatRepr repr) {
+	// TODO 1.21.11: Is there a better way to do this perhaps?
+	private static VertexFormatElement.Type toGlType(FloatRepr repr) {
 		return switch (repr) {
-			case BYTE, NORMALIZED_BYTE -> GlNumericType.BYTE;
-			case UNSIGNED_BYTE, NORMALIZED_UNSIGNED_BYTE -> GlNumericType.UBYTE;
-			case SHORT, NORMALIZED_SHORT -> GlNumericType.SHORT;
-			case UNSIGNED_SHORT, NORMALIZED_UNSIGNED_SHORT -> GlNumericType.USHORT;
-			case INT, NORMALIZED_INT -> GlNumericType.INT;
-			case UNSIGNED_INT, NORMALIZED_UNSIGNED_INT -> GlNumericType.UINT;
-			case FLOAT -> GlNumericType.FLOAT;
+			case BYTE, NORMALIZED_BYTE -> VertexFormatElement.Type.BYTE;
+			case UNSIGNED_BYTE, NORMALIZED_UNSIGNED_BYTE -> VertexFormatElement.Type.UBYTE;
+			case SHORT, NORMALIZED_SHORT -> VertexFormatElement.Type.SHORT;
+			case UNSIGNED_SHORT, NORMALIZED_UNSIGNED_SHORT -> VertexFormatElement.Type.USHORT;
+			case INT, NORMALIZED_INT -> VertexFormatElement.Type.INT;
+			case UNSIGNED_INT, NORMALIZED_UNSIGNED_INT -> VertexFormatElement.Type.UINT;
+			case FLOAT -> VertexFormatElement.Type.FLOAT;
 		};
 	}
 

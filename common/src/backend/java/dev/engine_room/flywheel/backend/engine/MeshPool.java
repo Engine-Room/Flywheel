@@ -9,10 +9,10 @@ import org.jspecify.annotations.Nullable;
 import org.lwjgl.opengl.GL32;
 
 import com.mojang.blaze3d.opengl.GlConst;
+import com.mojang.blaze3d.vertex.VertexFormat;
 
 import dev.engine_room.flywheel.api.model.Mesh;
 import dev.engine_room.flywheel.backend.InternalVertex;
-import dev.engine_room.flywheel.backend.gl.GlPrimitive;
 import dev.engine_room.flywheel.backend.gl.array.GlVertexArray;
 import dev.engine_room.flywheel.backend.gl.buffer.GlBuffer;
 import dev.engine_room.flywheel.backend.gl.buffer.GlBufferUsage;
@@ -183,9 +183,10 @@ public class MeshPool {
 
 		public void draw(int instanceCount) {
 			if (instanceCount > 1) {
-				GL32.glDrawElementsInstancedBaseVertex(GlPrimitive.TRIANGLES.glEnum, mesh.indexCount(), GlConst.GL_UNSIGNED_INT, firstIndexByteOffset(), instanceCount, baseVertex);
+
+				GL32.glDrawElementsInstancedBaseVertex(GlConst.toGl(VertexFormat.Mode.TRIANGLES), mesh.indexCount(), GlConst.GL_UNSIGNED_INT, firstIndexByteOffset(), instanceCount, baseVertex);
 			} else {
-				GL32.glDrawElementsBaseVertex(GlPrimitive.TRIANGLES.glEnum, mesh.indexCount(), GlConst.GL_UNSIGNED_INT, firstIndexByteOffset(), baseVertex);
+				GL32.glDrawElementsBaseVertex(GlConst.toGl(VertexFormat.Mode.TRIANGLES), mesh.indexCount(), GlConst.GL_UNSIGNED_INT, firstIndexByteOffset(), baseVertex);
 			}
 		}
 
