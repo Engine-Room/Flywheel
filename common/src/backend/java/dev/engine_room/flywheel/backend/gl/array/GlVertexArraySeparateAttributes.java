@@ -7,6 +7,7 @@ import java.util.List;
 import org.lwjgl.opengl.GL43C;
 import org.lwjgl.system.Checks;
 
+import com.mojang.blaze3d.opengl.GlConst;
 import com.mojang.blaze3d.opengl.GlStateManager;
 
 import dev.engine_room.flywheel.backend.gl.GlCompat;
@@ -63,9 +64,9 @@ public class GlVertexArraySeparateAttributes extends GlVertexArray {
 
 			if (!attribute.equals(attributes[attribIndex])) {
 				if (attribute instanceof VertexAttribute.Float f) {
-					GL43C.glVertexAttribFormat(attribIndex, f.size(), f.type().glEnum, f.normalized(), offset);
+					GL43C.glVertexAttribFormat(attribIndex, f.size(), GlConst.toGl(f.type()), f.normalized(), offset);
 				} else if (attribute instanceof VertexAttribute.Int vi) {
-					GL43C.glVertexAttribIFormat(attribIndex, vi.size(), vi.type().glEnum, offset);
+					GL43C.glVertexAttribIFormat(attribIndex, vi.size(), GlConst.toGl(vi.type()), offset);
 				}
 				attributes[attribIndex] = attribute;
 			}

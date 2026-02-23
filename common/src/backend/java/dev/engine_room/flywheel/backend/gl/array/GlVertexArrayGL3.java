@@ -8,6 +8,7 @@ import org.lwjgl.opengl.ARBInstancedArrays;
 import org.lwjgl.opengl.GL33C;
 import org.lwjgl.system.Checks;
 
+import com.mojang.blaze3d.opengl.GlConst;
 import com.mojang.blaze3d.opengl.GlStateManager;
 
 import dev.engine_room.flywheel.backend.gl.GlCompat;
@@ -111,11 +112,9 @@ public abstract class GlVertexArrayGL3 extends GlVertexArray {
 		int stride = bindingStrides[bindingIndex];
 
 		if (attribute instanceof VertexAttribute.Float f) {
-			GlStateManager._vertexAttribPointer(attribIndex, f.size(), f.type()
-					.glEnum(), f.normalized(), stride, offset);
+			GlStateManager._vertexAttribPointer(attribIndex, f.size(), GlConst.toGl(f.type()), f.normalized(), stride, offset);
 		} else if (attribute instanceof VertexAttribute.Int vi) {
-			GlStateManager._vertexAttribIPointer(attribIndex, vi.size(), vi.type()
-					.glEnum(), stride, offset);
+			GlStateManager._vertexAttribIPointer(attribIndex, vi.size(), GlConst.toGl(vi.type()), stride, offset);
 		}
 
 		int divisor = bindingDivisors[bindingIndex];

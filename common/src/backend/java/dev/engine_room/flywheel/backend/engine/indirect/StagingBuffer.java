@@ -7,6 +7,7 @@ import org.lwjgl.opengl.GL45;
 import org.lwjgl.opengl.GL45C;
 import org.lwjgl.system.MemoryUtil;
 
+import com.mojang.blaze3d.buffers.GpuFence;
 import com.mojang.blaze3d.opengl.GlFence;
 
 import dev.engine_room.flywheel.backend.compile.IndirectPrograms;
@@ -196,7 +197,7 @@ public class StagingBuffer {
 	public void reclaim() {
 		while (!fencedRegions.isEmpty()) {
 			var region = fencedRegions.first();
-			try (GlFence fence = region.fence) {
+			try (GpuFence fence = region.fence) {
 				if (!fence.awaitCompletion(0L)) {
 					// We can't reclaim this region yet, and we know that all the regions after it are also not ready.
 					break;
@@ -334,7 +335,7 @@ public class StagingBuffer {
 		}
 	}
 
-	private record FencedRegion(GlFence fence, long capacity) {
+	private record FencedRegion(GpuFence fence, long capacity) {
 	}
 
 	private static class OverflowStagingBuffer {
