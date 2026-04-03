@@ -2,7 +2,7 @@ plugins {
     idea
     java
     `maven-publish`
-    id("dev.architectury.loom")
+    alias(libs.plugins.loom)
     id("flywheel.subproject")
     id("flywheel.platform")
 }
@@ -68,7 +68,7 @@ platform {
     setupTestMod(testMod)
 }
 
-var flywheelVersion = "${property("flywheel_version")}+${property("minecraft_version")}"
+var flywheelVersion = "${property("flywheel_version")}+${libs.versions.minecraft.get()}"
 
 if (subproject.buildNumber != null) {
     flywheelVersion += ".build.${subproject.buildNumber}"
@@ -95,22 +95,20 @@ tasks.withType<ProcessResources>().configureEach {
     }
 }
 
+loom {
+    accessWidenerPath = file("src/main/resources/flywheel.accesswidener")
+}
+
 jarSets {
-    mainSet.publishWithRemappedSources {
+    mainSet.publishWithRawSources {
         artifactId = "flywheel-fabric-${property("artifact_minecraft_version")}"
     }
     mainSet.outgoing("flywheel")
 
     create("api", api, lib).apply {
         addToAssemble()
-        publishWithRemappedSources {
+        publishWithRawSources {
             artifactId = "flywheel-fabric-api-${property("artifact_minecraft_version")}"
-        }
-
-        configureJar {
-            manifest {
-                attributes("Fabric-Loom-Remap" to "true")
-            }
         }
     }
 }
@@ -119,24 +117,13 @@ defaultPackageInfos {
     sources(api, lib, backend, main)
 }
 
-loom {
-    mixin {
-        useLegacyMixinAp = true
-        add(main, "flywheel.refmap.json")
-        add(backend, "backend-flywheel.refmap.json")
-    }
-}
-
-repositories {
-    maven("https://maven.caffeinemc.net/releases/")
-}
-
 dependencies {
-    modImplementation("net.fabricmc:fabric-loader:${property("fabric_loader_version")}")
-    modApi("net.fabricmc.fabric-api:fabric-api:${property("fabric_api_version")}")
+    minecraft(libs.minecraft)
+    implementation(libs.fabric.loader)
+    api(libs.fabric.api)
 
-    modCompileOnly("net.caffeinemc:sodium-fabric-api:${property("sodium_version")}")
-    modCompileOnly("maven.modrinth:iris:${property("iris_version")}-fabric")
+    compileOnly(libs.sodium.fabric.api)
+    compileOnly("maven.modrinth:iris:${libs.versions.iris.get()}-fabric")
 
     "forApi"(project(path = common, configuration = "apiClasses"))
     "forLib"(project(path = common, configuration = "libClasses"))

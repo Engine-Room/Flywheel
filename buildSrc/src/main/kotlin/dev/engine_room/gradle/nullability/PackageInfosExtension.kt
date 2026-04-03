@@ -28,7 +28,7 @@ open class PackageInfosExtension(private val project: Project) {
         }
         sourceSet.java.srcDir(task)
 
-        project.tasks.named("ideaSyncTask").configure {
+        project.tasks.matching { it.name == "ideaSyncTask" || it.name == "neoForgeIdeSync" }.configureEach {
             finalizedBy(task)
         }
 

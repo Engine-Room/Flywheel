@@ -3,12 +3,11 @@ package dev.engine_room.flywheel.backend.engine.uniform;
 import org.joml.Vector3f;
 
 import dev.engine_room.flywheel.api.backend.RenderContext;
-import net.minecraft.client.Camera;
+import dev.engine_room.flywheel.backend.mixin.LevelRendererAccessor;
 import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.client.renderer.state.level.LevelRenderState;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.util.ARGB;
-import net.minecraft.world.attribute.EnvironmentAttributeProbe;
-import net.minecraft.world.attribute.EnvironmentAttributes;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.dimension.DimensionType;
 
@@ -27,18 +26,17 @@ public final class LevelUniforms extends UniformWriter {
 
 		ClientLevel level = context.level();
 		float partialTick = context.partialTick();
-		Camera camera = context.camera();
-		EnvironmentAttributeProbe probe = camera.attributeProbe();
+		LevelRenderState levelRenderState = ((LevelRendererAccessor) context.renderer()).flywheel$getLevelRenderState();
 
-		int skyColor = probe.getValue(EnvironmentAttributes.SKY_COLOR, partialTick);
-		int cloudColor = probe.getValue(EnvironmentAttributes.CLOUD_COLOR, partialTick);
+		int skyColor = levelRenderState.skyRenderState.skyColor;
+		int cloudColor = levelRenderState.cloudColor;
 		ptr = writeVec4(ptr, ARGB.redFloat(skyColor), ARGB.greenFloat(skyColor), ARGB.blueFloat(skyColor), 1f);
 		ptr = writeVec4(ptr, ARGB.redFloat(cloudColor), ARGB.greenFloat(cloudColor), ARGB.blueFloat(cloudColor), 1f);
 
 		ptr = writeVec3(ptr, LIGHT0_DIRECTION);
 		ptr = writeVec3(ptr, LIGHT1_DIRECTION);
 
-		long dayTime = level.getDayTime();
+		long dayTime = level.getDefaultClockTime();
 		long levelDay = dayTime / 24000L;
 		float timeOfDay = (float) (dayTime - levelDay * 24000L) / 24000f;
 		ptr = writeInt(ptr, (int) (levelDay % 0x7FFFFFFFL));
@@ -46,17 +44,17 @@ public final class LevelUniforms extends UniformWriter {
 
 		ptr = writeInt(ptr, level.dimensionType().hasSkyLight() ? 1 : 0);
 
-		float sunAngle = probe.getValue(EnvironmentAttributes.SUN_ANGLE, partialTick);
+		float sunAngle = levelRenderState.skyRenderState.sunAngle;
 		ptr = writeFloat(ptr, sunAngle);
-		float moonAngle = probe.getValue(EnvironmentAttributes.MOON_ANGLE, partialTick);
+		float moonAngle = levelRenderState.skyRenderState.moonAngle;
 		ptr = writeFloat(ptr, moonAngle);
-		float starAngle = probe.getValue(EnvironmentAttributes.STAR_ANGLE, partialTick);
+		float starAngle = levelRenderState.skyRenderState.starAngle;
 		ptr = writeFloat(ptr, starAngle);
 
-		int moonPhase = probe.getValue(EnvironmentAttributes.MOON_PHASE, partialTick).index();
+		int moonPhase = levelRenderState.skyRenderState.moonPhase.index();
 		ptr = writeFloat(ptr, DimensionType.MOON_BRIGHTNESS_PER_PHASE[moonPhase]);
 		ptr = writeInt(ptr, moonPhase);
-		float starBrightness = probe.getValue(EnvironmentAttributes.STAR_BRIGHTNESS, partialTick);
+		float starBrightness = levelRenderState.skyRenderState.starBrightness;
 		ptr = writeFloat(ptr, starBrightness);
 
 		ptr = writeInt(ptr, level.isRaining() ? 1 : 0);
