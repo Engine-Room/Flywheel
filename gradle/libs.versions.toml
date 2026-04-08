@@ -1,0 +1,42 @@
+[versions]
+minecraft = "26.1.1"
+
+# https://neoforged.net/
+neoforge = "26.1.1.1-beta"
+mdg = "2.0.+"
+
+# https://fabricmc.net/develop/
+loom = "1.15.+"
+fabric-loader = "0.18.5"
+fabric-api = "0.145.3+26.1.1"
+
+# we need to manually depend on mixin (+extras) in common
+mixin = "0.16.5+mixin.0.8.7"
+mixin-extras = "0.5.3"
+
+# https://maven.caffeinemc.net/#/releases/net/caffeinemc/sodium-fabric
+sodium = "0.8.9+mc26.1.1"
+# https://modrinth.com/mod/iris/versions
+iris = "1.10.9+26.1"
+
+[libraries]
+minecraft = { module = "com.mojang:minecraft", version.ref = "minecraft" }
+fabric-loader = { module = "net.fabricmc:fabric-loader", version.ref = "fabric-loader" }
+fabric-api = { module = "net.fabricmc.fabric-api:fabric-api", version.ref = "fabric-api" }
+mixin = { module = "net.fabricmc:sponge-mixin", version.ref = "mixin" }
+mixin-extras = { module = "io.github.llamalad7:mixinextras-common", version.ref = "mixin-extras" }
+
+mdg = { module = "net.neoforged:moddev-gradle", version.ref = "mdg" }
+fabric-loom = { module = "net.fabricmc:fabric-loom", version.ref = "loom" }
+
+sodium-fabric = { module = "net.caffeinemc:sodium-fabric", version.ref = "sodium" }
+sodium-fabric-api = { module = "net.caffeinemc:sodium-fabric-api", version.ref = "sodium" }
+sodium-neoforge = { module = "net.caffeinemc:sodium-neoforge", version.ref = "sodium" }
+sodium-neoforge-api = { module = "net.caffeinemc:sodium-neoforge-api", version.ref = "sodium" }
+
+[bundles]
+mixin = [ "mixin", "mixin-extras" ]
+
+[plugins]
+mdg = { id = "net.neoforged.moddev" }
+loom = { id = "net.fabricmc.fabric-loom" }

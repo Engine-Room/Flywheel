@@ -16,7 +16,8 @@ import dev.engine_room.flywheel.lib.util.RendererReloadCache;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.geom.ModelLayerLocation;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.client.resources.model.AtlasManager;
+import net.minecraft.client.resources.model.sprite.AtlasManager;
+import net.minecraft.client.resources.model.sprite.SpriteId;
 
 public final class ModelTrees {
 	private static final RendererReloadCache<ModelTreeKey, ModelTree> CACHE = new RendererReloadCache<>(k -> {
@@ -37,7 +38,7 @@ public final class ModelTrees {
 		return CACHE.get(new ModelTreeKey(layer, Collections.emptySet(), null, material));
 	}
 
-	public static ModelTree of(ModelLayerLocation layer, net.minecraft.client.resources.model.Material texture, Material material) {
+	public static ModelTree of(ModelLayerLocation layer, SpriteId texture, Material material) {
 		return CACHE.get(new ModelTreeKey(layer, Collections.emptySet(), texture, material));
 	}
 
@@ -45,7 +46,7 @@ public final class ModelTrees {
 		return CACHE.get(new ModelTreeKey(layer, Set.copyOf(pathsToPrune), null, material));
 	}
 
-	public static ModelTree of(ModelLayerLocation layer, Set<String> pathsToPrune, net.minecraft.client.resources.model.Material texture, Material material) {
+	public static ModelTree of(ModelLayerLocation layer, Set<String> pathsToPrune, SpriteId texture, Material material) {
 		return CACHE.get(new ModelTreeKey(layer, Set.copyOf(pathsToPrune), texture, material));
 	}
 
@@ -81,6 +82,6 @@ public final class ModelTrees {
 		return new ModelTree(model, meshTree.initialPose(), children);
 	}
 
-	private record ModelTreeKey(ModelLayerLocation layer, Set<String> pathsToPrune, net.minecraft.client.resources.model.@Nullable Material texture, Material material) {
+	private record ModelTreeKey(ModelLayerLocation layer, Set<String> pathsToPrune, @Nullable SpriteId texture, Material material) {
 	}
 }

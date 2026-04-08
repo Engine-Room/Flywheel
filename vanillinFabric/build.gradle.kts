@@ -2,7 +2,7 @@ plugins {
     idea
     java
     `maven-publish`
-    id("dev.architectury.loom")
+    alias(libs.plugins.loom)
     id("flywheel.subproject")
     id("flywheel.platform")
 }
@@ -26,7 +26,7 @@ transitiveSourceSets {
     }
 }
 
-var vanillinVersion = "${property("vanillin_version")}+${property("minecraft_version")}"
+var vanillinVersion = "${property("vanillin_version")}+${libs.versions.minecraft.get()}"
 
 if (subproject.buildNumber != null) {
     vanillinVersion += ".build.${subproject.buildNumber}"
@@ -56,7 +56,7 @@ tasks.withType<ProcessResources>().configureEach {
 }
 
 jarSets {
-    mainSet.publishWithRemappedSources {
+    mainSet.publishWithRawSources {
         artifactId = "vanillin-fabric-${property("artifact_minecraft_version")}"
     }
 }
@@ -65,29 +65,17 @@ defaultPackageInfos {
     sources(main)
 }
 
-loom {
-    mixin {
-        useLegacyMixinAp = true
-        add(main, "vanillin.refmap.json")
-    }
-}
-
-repositories {
-    maven("https://maven.caffeinemc.net/releases/")
-}
-
 dependencies {
-    modImplementation("net.fabricmc:fabric-loader:${property("fabric_loader_version")}")
-    modApi("net.fabricmc.fabric-api:fabric-api:${property("fabric_api_version")}")
+    minecraft(libs.minecraft)
+    implementation(libs.fabric.loader)
+    api(libs.fabric.api)
 
-    modCompileOnly("net.caffeinemc:sodium-fabric-api:${property("sodium_version")}")
+    compileOnly(libs.sodium.fabric.api)
 
     compileOnly(project(path = common, configuration = "vanillinClasses"))
     compileOnly(project(path = common, configuration = "vanillinResources"))
 
     compileOnly(project(path = platform, configuration = "apiClasses"))
 
-    // JiJ flywheel proper
-    include(project(path = platform, configuration = "flywheelRemap"))
-    runtimeOnly(project(path = platform, configuration = "flywheelDev"))
+    include(runtimeOnly(project(path = platform, configuration = "flywheel"))!!)
 }

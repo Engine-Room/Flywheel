@@ -19,7 +19,7 @@ import dev.engine_room.flywheel.backend.engine.embed.EnvironmentStorage;
 import dev.engine_room.flywheel.backend.engine.uniform.Uniforms;
 import dev.engine_room.flywheel.backend.gl.GlStateTracker;
 import it.unimi.dsi.fastutil.longs.LongSet;
-import net.minecraft.client.Camera;
+import net.minecraft.client.renderer.state.level.CameraRenderState;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.SectionPos;
 import net.minecraft.core.Vec3i;
@@ -59,8 +59,8 @@ public class EngineImpl implements Engine {
 	}
 
 	@Override
-	public boolean updateRenderOrigin(Camera camera) {
-		Vec3 cameraPos = camera.position();
+	public boolean updateRenderOrigin(CameraRenderState camera) {
+		Vec3 cameraPos = camera.pos;
 		double dx = renderOrigin.getX() - cameraPos.x;
 		double dy = renderOrigin.getY() - cameraPos.y;
 		double dz = renderOrigin.getZ() - cameraPos.z;

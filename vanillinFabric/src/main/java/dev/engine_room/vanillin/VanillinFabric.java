@@ -3,7 +3,7 @@ package dev.engine_room.vanillin;
 import dev.engine_room.flywheel.api.event.ReloadLevelRendererCallback;
 import dev.engine_room.vanillin.item.SodiumAnimatedTextureCompat;
 import net.fabricmc.api.ClientModInitializer;
-import net.fabricmc.fabric.api.client.rendering.v1.world.WorldRenderEvents;
+import net.fabricmc.fabric.api.client.rendering.v1.level.LevelRenderEvents;
 
 public class VanillinFabric implements ClientModInitializer {
 	@Override
@@ -14,6 +14,6 @@ public class VanillinFabric implements ClientModInitializer {
 		FabricVanillinConfig.INSTANCE.save();
 
 		ReloadLevelRendererCallback.EVENT.register(level -> SodiumAnimatedTextureCompat.onReloadRenderer());
-		WorldRenderEvents.START_MAIN.register(context -> SodiumAnimatedTextureCompat.beginFrame());
+		LevelRenderEvents.START_MAIN.register(context -> SodiumAnimatedTextureCompat.beginFrame());
 	}
 }

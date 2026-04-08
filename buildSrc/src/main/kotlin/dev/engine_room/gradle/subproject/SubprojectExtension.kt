@@ -1,6 +1,5 @@
 package dev.engine_room.gradle.subproject
 
-import net.fabricmc.loom.api.LoomGradleExtensionAPI
 import org.gradle.api.JavaVersion
 import org.gradle.api.Project
 import org.gradle.api.plugins.BasePluginExtension
@@ -24,8 +23,6 @@ open class SubprojectExtension(val project: Project) {
         setBaseProperties(archiveBase, group, version)
         setupJava()
         addRepositories()
-        setupLoom()
-        setupDependencies()
         configureTasks()
         setupPublishing()
     }
@@ -49,11 +46,6 @@ open class SubprojectExtension(val project: Project) {
         project.the<BasePluginExtension>().apply {
             archivesName = "${archiveBase}-${project.property("artifact_minecraft_version")}"
         }
-    }
-
-    private fun setupLoom() {
-        val loom = project.the<LoomGradleExtensionAPI>()
-        loom.silentMojangMappingsLicense()
     }
 
     private fun setupJava() {
@@ -86,32 +78,18 @@ open class SubprojectExtension(val project: Project) {
                     includeGroup("curse.maven")
                 }
             }
+            maven("https://maven.caffeinemc.net/releases") {
+                name = "CaffeineMC"
+                content {
+                    includeGroup("net.caffeinemc")
+                }
+            }
             maven("https://api.modrinth.com/maven") {
                 name = "Modrinth"
                 content {
                     includeGroup("maven.modrinth")
                 }
             }
-        }
-    }
-
-    @Suppress("UnstableApiUsage")
-    private fun setupDependencies() {
-        project.dependencies.apply {
-            val minecraft_version: String by project
-            val parchment_minecraft_version: String by project
-            val parchment_version: String by project
-            val loom = project.the<LoomGradleExtensionAPI>()
-
-            add("minecraft", "com.mojang:minecraft:${minecraft_version}")
-
-            add("mappings", loom.layered {
-                officialMojangMappings { nameSyntheticMembers = false }
-                if (parchment_version != "none")
-                    parchment("org.parchmentmc.data:parchment-${parchment_minecraft_version}:${parchment_version}@zip")
-            })
-
-            add("api", "com.google.code.findbugs:jsr305:3.0.2")
         }
     }
 

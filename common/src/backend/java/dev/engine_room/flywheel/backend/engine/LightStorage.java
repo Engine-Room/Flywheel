@@ -25,9 +25,9 @@ import it.unimi.dsi.fastutil.longs.Long2IntMap;
 import it.unimi.dsi.fastutil.longs.Long2IntOpenHashMap;
 import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
 import it.unimi.dsi.fastutil.longs.LongSet;
-import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.core.SectionPos;
 import net.minecraft.core.Vec3i;
+import net.minecraft.util.LightCoordsUtil;
 import net.minecraft.world.level.LevelAccessor;
 
 /**
@@ -292,7 +292,7 @@ public class LightStorage implements Effect {
 								.translate(x + 1, y + 1, z + 1)
 								.scale(14)
 								.color(255, 255, 0)
-								.light(LightTexture.FULL_BRIGHT)
+								.light(LightCoordsUtil.FULL_BRIGHT)
 								.setChanged();
 					});
 		}
@@ -357,7 +357,7 @@ public class LightStorage implements Effect {
 								.translate(x2, y2, debug3)
 								.scale(1, 1, size3 * 16)
 								.color(0, 0, 255)
-								.light(LightTexture.FULL_BRIGHT)
+								.light(LightCoordsUtil.FULL_BRIGHT)
 								.setChanged();
 					}
 				}
@@ -367,7 +367,7 @@ public class LightStorage implements Effect {
 						.translate(debug2, y2, minLocal3 * 16 - renderOrigin.getZ())
 						.scale(size2 * 16, 1, (maxLocal3 - minLocal3) * 16)
 						.color(255, 0, 0)
-						.light(LightTexture.FULL_BRIGHT)
+						.light(LightCoordsUtil.FULL_BRIGHT)
 						.setChanged();
 			}
 
@@ -376,7 +376,7 @@ public class LightStorage implements Effect {
 					.translate(min2 * 16 - renderOrigin.getX(), debug1, min3 * 16 - renderOrigin.getZ())
 					.scale((max2 - min2) * 16, size1 * 16, (max3 - min3) * 16)
 					.color(0, 255, 0)
-					.light(LightTexture.FULL_BRIGHT)
+					.light(LightCoordsUtil.FULL_BRIGHT)
 					.setChanged();
 		}
 

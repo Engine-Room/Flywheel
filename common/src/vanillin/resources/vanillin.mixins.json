@@ -2,8 +2,7 @@
   "required": true,
   "minVersion": "0.8",
   "package": "dev.engine_room.vanillin.mixin",
-  "compatibilityLevel": "JAVA_21",
-  "refmap": "vanillin.refmap.json",
+  "compatibilityLevel": "JAVA_25",
   "client": [
     "ChestRendererAccessor"
   ],

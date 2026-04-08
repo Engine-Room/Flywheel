@@ -2,7 +2,7 @@ plugins {
     idea
     java
     `maven-publish`
-    id("dev.architectury.loom")
+    alias(libs.plugins.loom)
     id("flywheel.subproject")
 }
 
@@ -14,6 +14,10 @@ val backend = sourceSets.create("backend")
 val stubs = sourceSets.create("stubs")
 val main = sourceSets.getByName("main")
 val vanillin = sourceSets.create("vanillin")
+
+loom {
+    accessWidenerPath = file("flywheel-common.accesswidener")
+}
 
 transitiveSourceSets {
     compileClasspath = main.compileClasspath
@@ -58,59 +62,19 @@ jarSets {
     // For publishing.
     create("api", api, lib).apply {
         addToAssemble()
-        publishWithRemappedSources {
-            artifactId = "flywheel-common-intermediary-api-${property("artifact_minecraft_version")}"
-        }
 
-        configureJar {
-            manifest {
-                attributes("Fabric-Loom-Remap" to "true")
-            }
-        }
-
-        // Don't publish the un-remapped jars because they don't have the correct manifest populated by Loom.
-        forkRemap("apiMojmap").apply {
-            addToAssemble()
-            configureRemap {
-                // "named" == mojmap
-                // We're probably remapping from named to named so Loom should noop this.
-                targetNamespace = "named"
-            }
-
-            publishWithRawSources {
-                artifactId = "flywheel-common-mojmap-api-${property("artifact_minecraft_version")}"
-            }
+        publishWithRawSources {
+            artifactId = "flywheel-common-api-${property("artifact_minecraft_version")}"
         }
     }
 
     create("vanillin", vanillin).apply {
         addToAssemble()
-        publishWithRemappedSources {
-            artifactId = "vanillin-common-intermediary-${property("artifact_minecraft_version")}"
+
+        publishWithRawSources {
+            artifactId = "vanillin-common-${property("artifact_minecraft_version")}"
             version = property("vanillin_version") as String
             groupId = property("vanillin_group") as String
-        }
-
-        configureJar {
-            manifest {
-                attributes("Fabric-Loom-Remap" to "true")
-            }
-        }
-
-        // Don't publish the un-remapped jars because they don't have the correct manifest populated by Loom.
-        forkRemap("vanillinMojmap").apply {
-            addToAssemble()
-            configureRemap {
-                // "named" == mojmap
-                // We're probably remapping from named to named so Loom should noop this.
-                targetNamespace = "named"
-            }
-
-            publishWithRawSources {
-                artifactId = "vanillin-common-mojmap-${property("artifact_minecraft_version")}"
-                version = property("vanillin_version") as String
-                groupId = property("vanillin_group") as String
-            }
         }
     }
 }
@@ -120,10 +84,11 @@ repositories {
 }
 
 dependencies {
-    modCompileOnly("net.fabricmc:fabric-loader:${property("fabric_loader_version")}")
+    minecraft(libs.minecraft)
+    compileOnly(libs.bundles.mixin)
 
-    modCompileOnly("net.caffeinemc:sodium-fabric-api:${property("sodium_version")}")
-    modCompileOnly("maven.modrinth:iris:${property("iris_version")}-fabric")
+    compileOnly(libs.sodium.fabric.api)
+    compileOnly("maven.modrinth:iris:${libs.versions.iris.get()}-fabric")
 
     compileOnly(annotationProcessor("io.github.llamalad7:mixinextras-common:0.4.1")!!)
 

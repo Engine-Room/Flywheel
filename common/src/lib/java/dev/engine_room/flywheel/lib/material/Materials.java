@@ -5,7 +5,7 @@ import dev.engine_room.flywheel.api.material.DepthTest;
 import dev.engine_room.flywheel.api.material.Material;
 import dev.engine_room.flywheel.api.material.Transparency;
 import dev.engine_room.flywheel.api.material.WriteMask;
-import net.minecraft.client.renderer.entity.ItemRenderer;
+import net.minecraft.client.renderer.feature.ItemFeatureRenderer;
 import net.minecraft.client.renderer.texture.TextureAtlas;
 
 // FIXME 1.21.11: use default blur/mipmap from AbstractTexture for all materials here, and by default
@@ -40,7 +40,7 @@ public final class Materials {
 			.build();
 
 	public static final Material GLINT = SimpleMaterial.builder()
-			.texture(ItemRenderer.ENCHANTED_GLINT_ITEM)
+			.texture(ItemFeatureRenderer.ENCHANTED_GLINT_ITEM)
 			.shaders(StandardMaterialShaders.GLINT)
 			.transparency(Transparency.GLINT)
 			.writeMask(WriteMask.COLOR)

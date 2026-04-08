@@ -1,5 +1,3 @@
-import java.util.Properties
-
 plugins {
     `kotlin-dsl`
     idea
@@ -11,11 +9,9 @@ repositories {
     maven("https://maven.neoforged.net/releases/") {
         name = "NeoForged"
     }
-    maven("https://maven.architectury.dev/") {
-        name = "Architectury"
+    maven("https://maven.fabricmc.net/") {
+        name = "FabricMC"
     }
-    maven("https://repo.spongepowered.org/repository/maven-public")
-    maven("https://maven.parchmentmc.org")
 }
 
 idea.module {
@@ -36,12 +32,7 @@ gradlePlugin {
     }
 }
 
-val properties by lazy {
-    Properties().apply {
-        load(rootDir.parentFile.resolve("gradle.properties").inputStream())
-    }
-}
-
 dependencies {
-    implementation("dev.architectury.loom:dev.architectury.loom.gradle.plugin:${properties["arch_loom_version"]}")
+    implementation(libs.fabric.loom)
+    implementation(libs.mdg)
 }
