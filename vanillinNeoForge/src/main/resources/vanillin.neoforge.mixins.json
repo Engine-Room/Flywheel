@@ -1,12 +1,11 @@
 {
-  "required" : true,
-  "minVersion" : "0.8",
-  "package" : "dev.engine_room.vanillin.neoforge.mixin",
-  "compatibilityLevel" : "JAVA_17",
-  "refmap" : "vanillin.refmap.json",
-  "client" : [
+  "required": true,
+  "minVersion": "0.8",
+  "package": "dev.engine_room.vanillin.neoforge.mixin",
+  "compatibilityLevel": "JAVA_25",
+  "client": [
   ],
-  "injectors" : {
-    "defaultRequire" : 1
+  "injectors": {
+    "defaultRequire": 1
   }
 }
