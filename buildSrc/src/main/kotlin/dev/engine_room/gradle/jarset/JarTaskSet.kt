@@ -60,6 +60,11 @@ class JarTaskSet(
         val config = project.configurations.register(name) {
             isCanBeConsumed = true
             isCanBeResolved = false
+
+            outgoing {
+                capabilities.clear()
+                capability("${project.group}:flywheel-${project.name}-${project.rootProject.property("minecraft_version")}:${project.version}")
+            }
         }
 
         project.artifacts.add(config.name, remapJar)
