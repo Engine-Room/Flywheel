@@ -2,11 +2,10 @@ package dev.engine_room.flywheel.lib.model.baked;
 
 import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.blaze3d.vertex.QuadInstance;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 
+import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.renderer.chunk.ChunkSectionLayer;
-import net.minecraft.client.resources.model.geometry.BakedQuad;
 
 class FabricMeshEmitter extends MeshEmitter {
 	private boolean shade;
@@ -102,18 +101,18 @@ class FabricMeshEmitter extends MeshEmitter {
 	}
 
 	@Override
-	public void putBakedQuad(PoseStack.Pose pose, BakedQuad quad, QuadInstance instance) {
+	public void putBulkData(PoseStack.Pose pose, BakedQuad quad, float red, float green, float blue, float alpha, int packedLight, int packedOverlay) {
 		BufferBuilder bufferBuilder = getBuffer(shade, ao);
 		if (bufferBuilder != null) {
-			bufferBuilder.putBakedQuad(pose, quad, instance);
+			bufferBuilder.putBulkData(pose, quad, red, green, blue, alpha, packedLight, packedOverlay);
 		}
 	}
 
 	@Override
-	public void putBlockBakedQuad(float x, float y, float z, BakedQuad quad, QuadInstance instance) {
+	public void putBulkData(PoseStack.Pose pose, BakedQuad quad, float[] brightness, float red, float green, float blue, float alpha, int[] lightmap, int packedOverlay) {
 		BufferBuilder bufferBuilder = getBuffer(shade, ao);
 		if (bufferBuilder != null) {
-			bufferBuilder.putBlockBakedQuad(x, y, z, quad, instance);
+			bufferBuilder.putBulkData(pose, quad, brightness, red, green, blue, alpha, lightmap, packedOverlay);
 		}
 	}
 }

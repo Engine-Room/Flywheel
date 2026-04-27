@@ -1,8 +1,10 @@
 package dev.engine_room.flywheel.lib.visual.component;
 
+import net.minecraft.resources.Identifier;
+
+import org.jspecify.annotations.Nullable;
 import org.joml.Vector4f;
 import org.joml.Vector4fc;
-import org.jspecify.annotations.Nullable;
 
 import dev.engine_room.flywheel.api.material.Material;
 import dev.engine_room.flywheel.api.material.Transparency;
@@ -18,13 +20,11 @@ import dev.engine_room.flywheel.lib.model.QuadMesh;
 import dev.engine_room.flywheel.lib.model.SingleMeshModel;
 import dev.engine_room.flywheel.lib.visual.util.InstanceRecycler;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.Lightmap;
+import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.BlockPos.MutableBlockPos;
 import net.minecraft.core.Direction.Axis;
-import net.minecraft.resources.Identifier;
-import net.minecraft.util.LightCoordsUtil;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.Level;
@@ -158,7 +158,7 @@ public final class ShadowComponent implements EntityComponent {
 			// Too dark to render.
 			return;
 		}
-		float blockBrightness = Lightmap.getBrightness(level.dimensionType(), maxLocalRawBrightness);
+		float blockBrightness = LightTexture.getBrightness(level.dimensionType(), maxLocalRawBrightness);
 		float alpha = strength * 0.5F * blockBrightness;
 		if (alpha < 0.0F) {
 			// Too far away/too weak to render.
@@ -257,7 +257,7 @@ public final class ShadowComponent implements EntityComponent {
 			vertexList.b(i, 1);
 			vertexList.u(i, 0);
 			vertexList.v(i, 0);
-			vertexList.light(i, LightCoordsUtil.FULL_BRIGHT);
+			vertexList.light(i, LightTexture.FULL_BRIGHT);
 			vertexList.overlay(i, OverlayTexture.NO_OVERLAY);
 			vertexList.normalX(i, 0);
 			vertexList.normalY(i, 1);

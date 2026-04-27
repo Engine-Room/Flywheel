@@ -14,7 +14,6 @@ import com.mojang.blaze3d.textures.FilterMode;
 import com.mojang.blaze3d.textures.GpuTexture;
 
 import dev.engine_room.flywheel.backend.Samplers;
-import dev.engine_room.flywheel.backend.mixin.GpuDeviceAccessor;
 import net.minecraft.client.Minecraft;
 import net.minecraft.resources.Identifier;
 
@@ -46,13 +45,13 @@ public class TextureBinder {
 		var gameRenderer = Minecraft.getInstance().gameRenderer;
 		GlSampler sampler = (GlSampler) RenderSystem.getSamplerCache().getClampToEdge(FilterMode.LINEAR);
 		bind(Samplers.OVERLAY.number, (GlTextureView) gameRenderer.overlayTexture().getTextureView(), sampler);
-		bind(Samplers.LIGHT.number, (GlTextureView) gameRenderer.lightmap(), sampler);
+		bind(Samplers.LIGHT.number, (GlTextureView) gameRenderer.lightTexture().getTextureView(), sampler);
 	}
 
 	public static void bindRenderTarget(RenderTarget target) {
 		GlTexture colorTexture = (GlTexture) target.getColorTexture();
 		int i = colorTexture.getFbo(
-				((GlDevice) ((GpuDeviceAccessor) RenderSystem.getDevice()).getBackend()).directStateAccess(),
+				((GlDevice) RenderSystem.getDevice()).directStateAccess(),
 				target.getDepthTexture()
 		);
 		GlStateManager._glBindFramebuffer(GlConst.GL_FRAMEBUFFER, i);

@@ -14,8 +14,8 @@ import net.minecraft.client.renderer.fog.FogRenderer;
 
 @Mixin(FogRenderer.class)
 abstract class FogRendererMixin {
-	@Inject(method = "setupFog", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/fog/FogRenderer;computeFogColor(Lnet/minecraft/client/Camera;FLnet/minecraft/client/multiplayer/ClientLevel;IFLorg/joml/Vector4f;)V"))
-	private static void flywheel$onReturnSetupFog(CallbackInfoReturnable<Vector4f> cir, @Local FogData fogData) {
-		FogUniforms.update(fogData.color, fogData.environmentalStart, fogData.environmentalEnd, fogData.renderDistanceStart, fogData.renderDistanceEnd, fogData.skyEnd, fogData.cloudEnd);
+	@Inject(method = "setupFog(Lnet/minecraft/client/Camera;ILnet/minecraft/client/DeltaTracker;FLnet/minecraft/client/multiplayer/ClientLevel;)Lorg/joml/Vector4f;", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/fog/FogRenderer;updateBuffer(Ljava/nio/ByteBuffer;ILorg/joml/Vector4f;FFFFFF)V"))
+	private static void flywheel$onReturnSetupFog(CallbackInfoReturnable<Vector4f> cir, @Local Vector4f fogColor, @Local FogData fogData) {
+		FogUniforms.update(fogColor, fogData.environmentalStart, fogData.environmentalEnd, fogData.renderDistanceStart, fogData.renderDistanceEnd, fogData.skyEnd, fogData.cloudEnd);
 	}
 }

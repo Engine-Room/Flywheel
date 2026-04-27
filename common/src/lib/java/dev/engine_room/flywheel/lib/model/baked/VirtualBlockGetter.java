@@ -3,9 +3,10 @@ package dev.engine_room.flywheel.lib.model.baked;
 import java.util.function.ToIntFunction;
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.block.BlockAndTintGetter;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.core.registries.Registries;
+import net.minecraft.world.level.BlockAndTintGetter;
 import net.minecraft.world.level.ColorResolver;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.Biomes;
@@ -22,6 +23,11 @@ public abstract class VirtualBlockGetter implements BlockAndTintGetter {
 	@Override
 	public FluidState getFluidState(BlockPos pos) {
 		return getBlockState(pos).getFluidState();
+	}
+
+	@Override
+	public float getShade(Direction direction, boolean shaded) {
+		return 1f;
 	}
 
 	@Override

@@ -4,8 +4,8 @@ import org.joml.FrustumIntersection;
 
 import dev.engine_room.flywheel.api.visual.DistanceUpdateLimiter;
 import dev.engine_room.flywheel.api.visual.DynamicVisual;
-import net.minecraft.client.renderer.state.level.CameraRenderState;
+import net.minecraft.client.Camera;
 
-public record DynamicVisualContextImpl(CameraRenderState cameraRenderState, FrustumIntersection frustum, float partialTick,
-                                       DistanceUpdateLimiter limiter) implements DynamicVisual.Context {
+public record DynamicVisualContextImpl(Camera camera, FrustumIntersection frustum, float partialTick,
+									   DistanceUpdateLimiter limiter) implements DynamicVisual.Context {
 }

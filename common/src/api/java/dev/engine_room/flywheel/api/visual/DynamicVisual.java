@@ -6,7 +6,7 @@ import org.joml.FrustumIntersection;
 import dev.engine_room.flywheel.api.instance.Instance;
 import dev.engine_room.flywheel.api.instance.Instancer;
 import dev.engine_room.flywheel.api.task.Plan;
-import net.minecraft.client.renderer.state.level.CameraRenderState;
+import net.minecraft.client.Camera;
 
 /**
  * An interface giving {@link Visual}s a hook to have a function called at
@@ -32,7 +32,7 @@ public interface DynamicVisual extends Visual {
 	 */
 	@ApiStatus.NonExtendable
 	interface Context {
-		CameraRenderState cameraRenderState();
+		Camera camera();
 
 		FrustumIntersection frustum();
 

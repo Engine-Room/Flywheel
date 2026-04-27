@@ -112,7 +112,7 @@ public class VisualizationManagerImpl implements VisualizationManager {
 			var update = MapContextPlan.map(this::createVisualFrameContext)
 					.to(NestedPlan.of(blockEntities.framePlan(visualizationContext), entities.framePlan(visualizationContext), effects.framePlan(visualizationContext)));
 
-			framePlan = IfElsePlan.on((RenderContext ctx) -> engine.updateRenderOrigin(ctx.cameraRenderState()))
+			framePlan = IfElsePlan.on((RenderContext ctx) -> engine.updateRenderOrigin(ctx.camera()))
 					.ifTrue(recreate)
 					.ifFalse(update)
 					.plan()
@@ -134,14 +134,14 @@ public class VisualizationManagerImpl implements VisualizationManager {
 
 		private DynamicVisual.Context createVisualFrameContext(RenderContext ctx) {
 			Vec3i renderOrigin = engine.renderOrigin();
-			var cameraPos = ctx.cameraRenderState()
-					.pos;
+			var cameraPos = ctx.camera()
+					.position();
 
 			Matrix4f viewProjection = new Matrix4f(ctx.viewProjection());
 			viewProjection.translate((float) (renderOrigin.getX() - cameraPos.x), (float) (renderOrigin.getY() - cameraPos.y), (float) (renderOrigin.getZ() - cameraPos.z));
 			FrustumIntersection frustum = new FrustumIntersection(viewProjection);
 
-			return new DynamicVisualContextImpl(ctx.cameraRenderState(), frustum, ctx.partialTick(), frameLimiter);
+			return new DynamicVisualContextImpl(ctx.camera(), frustum, ctx.partialTick(), frameLimiter);
 		}
 	}
 

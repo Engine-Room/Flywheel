@@ -78,14 +78,14 @@ public final class FlywheelFabric implements ClientModInitializer {
 		EndClientResourceReloadCallback.EVENT.register((minecraft, resourceManager, initialReload, error) -> ResourceReloadHolder.onEndClientResourceReload());
 
 		ModelLoadingPlugin.register(FabricPartialModel::registerAll);
-		ResourceLoader.get(PackType.CLIENT_RESOURCES).registerReloadListener(FabricPartialModel.ResourceReloadListener.ID, FabricPartialModel.ResourceReloadListener.INSTANCE);
-		ResourceLoader.get(PackType.CLIENT_RESOURCES).addListenerOrdering(ResourceReloaderKeys.Client.MODELS, FabricPartialModel.ResourceReloadListener.ID);
+		ResourceLoader.get(PackType.CLIENT_RESOURCES).registerReloader(FabricPartialModel.ResourceReloadListener.ID, FabricPartialModel.ResourceReloadListener.INSTANCE);
+		ResourceLoader.get(PackType.CLIENT_RESOURCES).addReloaderOrdering(ResourceReloaderKeys.Client.MODELS, FabricPartialModel.ResourceReloadListener.ID);
 	}
 
 	private static void setupBackend() {
 		ReloadLevelRendererCallback.EVENT.register(level -> Uniforms.onReloadLevelRenderer());
 
-		ResourceLoader.get(PackType.CLIENT_RESOURCES).registerReloadListener(FlwProgramsReloader.ID, FlwProgramsReloader.INSTANCE);
+		ResourceLoader.get(PackType.CLIENT_RESOURCES).registerReloader(FlwProgramsReloader.ID, FlwProgramsReloader.INSTANCE);
 	}
 
 	public static Version version() {

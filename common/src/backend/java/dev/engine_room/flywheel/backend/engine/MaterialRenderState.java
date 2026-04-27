@@ -44,11 +44,7 @@ public final class MaterialRenderState {
 
 		WriteMask mask = material.writeMask();
 		boolean writeColor = mask.color();
-
-		if (writeColor)
-			GlStateManager._colorMask(0b1111);
-		else
-			GlStateManager._colorMask(0b0000);
+		GlStateManager._colorMask(writeColor, writeColor, writeColor, writeColor);
 	}
 
 	private static void setupTexture(Material material) {
@@ -155,10 +151,7 @@ public final class MaterialRenderState {
 	private static void setupWriteMask(WriteMask mask) {
 		GlStateManager._depthMask(mask.depth());
 		boolean writeColor = mask.color();
-		if (writeColor)
-			GlStateManager._colorMask(0b1111);
-		else
-			GlStateManager._colorMask(0b0000);
+		GlStateManager._colorMask(writeColor, writeColor, writeColor, writeColor);
 	}
 
 	public static boolean materialEquals(Material lhs, Material rhs) {

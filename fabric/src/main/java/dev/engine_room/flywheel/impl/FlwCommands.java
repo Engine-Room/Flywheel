@@ -13,7 +13,7 @@ import dev.engine_room.flywheel.backend.compile.LightSmoothness;
 import dev.engine_room.flywheel.backend.compile.PipelineCompiler;
 import dev.engine_room.flywheel.backend.engine.uniform.DebugMode;
 import dev.engine_room.flywheel.backend.engine.uniform.FrameUniforms;
-import net.fabricmc.fabric.api.client.command.v2.ClientCommands;
+import net.fabricmc.fabric.api.client.command.v2.ClientCommandManager;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
@@ -31,9 +31,9 @@ public final class FlwCommands {
 	}
 
 	public static void registerClientCommands(CommandDispatcher<FabricClientCommandSource> dispatcher, CommandBuildContext buildContext) {
-		LiteralArgumentBuilder<FabricClientCommandSource> command = ClientCommands.literal("flywheel");
+		LiteralArgumentBuilder<FabricClientCommandSource> command = ClientCommandManager.literal("flywheel");
 
-		command.then(ClientCommands.literal("backend")
+		command.then(ClientCommandManager.literal("backend")
 				.executes(context -> {
 					Backend backend = BackendManager.currentBackend();
 					String idStr = Backend.REGISTRY.getIdOrThrow(backend)
@@ -41,7 +41,7 @@ public final class FlwCommands {
 					context.getSource().sendFeedback(Component.translatable("command.flywheel.backend.get", idStr));
 					return Command.SINGLE_SUCCESS;
 				})
-				.then(ClientCommands.literal("DEFAULT")
+				.then(ClientCommandManager.literal("DEFAULT")
 					.executes(context -> {
 						FabricFlwConfig.INSTANCE.backend = BackendManager.offBackend();
 						FabricFlwConfig.INSTANCE.useDefaultBackend = true;
@@ -56,7 +56,7 @@ public final class FlwCommands {
 						context.getSource().sendFeedback(Component.translatable("command.flywheel.backend.set", actualIdStr));
 						return Command.SINGLE_SUCCESS;
 					}))
-				.then(ClientCommands.argument("id", BackendArgument.INSTANCE)
+				.then(ClientCommandManager.argument("id", BackendArgument.INSTANCE)
 					.executes(context -> {
 						Backend requestedBackend = context.getArgument("id", Backend.class);
 						FabricFlwConfig.INSTANCE.backend = requestedBackend;
@@ -79,7 +79,7 @@ public final class FlwCommands {
 						return Command.SINGLE_SUCCESS;
 					})));
 
-		command.then(ClientCommands.literal("limitUpdates")
+		command.then(ClientCommandManager.literal("limitUpdates")
 				.executes(context -> {
 					if (FabricFlwConfig.INSTANCE.limitUpdates) {
 						context.getSource().sendFeedback(Component.translatable("command.flywheel.limit_updates.get.on"));
@@ -88,7 +88,7 @@ public final class FlwCommands {
 					}
 					return Command.SINGLE_SUCCESS;
 				})
-				.then(ClientCommands.literal("on")
+				.then(ClientCommandManager.literal("on")
 						.executes(context -> {
 							FabricFlwConfig.INSTANCE.limitUpdates = true;
 							FabricFlwConfig.INSTANCE.save();
@@ -96,7 +96,7 @@ public final class FlwCommands {
 							Minecraft.getInstance().levelRenderer.allChanged();
 							return Command.SINGLE_SUCCESS;
 						}))
-				.then(ClientCommands.literal("off")
+				.then(ClientCommandManager.literal("off")
 						.executes(context -> {
 							FabricFlwConfig.INSTANCE.limitUpdates = false;
 							FabricFlwConfig.INSTANCE.save();
@@ -105,8 +105,8 @@ public final class FlwCommands {
 							return Command.SINGLE_SUCCESS;
 						})));
 
-		command.then(ClientCommands.literal("lightSmoothness")
-				.then(ClientCommands.argument("mode", LightSmoothnessArgument.INSTANCE)
+		command.then(ClientCommandManager.literal("lightSmoothness")
+				.then(ClientCommandManager.argument("mode", LightSmoothnessArgument.INSTANCE)
 						.executes(context -> {
 							var oldValue = FabricFlwConfig.INSTANCE.backendConfig.lightSmoothness;
 							var newValue = context.getArgument("mode", LightSmoothness.class);
@@ -125,11 +125,11 @@ public final class FlwCommands {
 	}
 
 	private static LiteralArgumentBuilder<FabricClientCommandSource> createDebugCommand() {
-		var debug = ClientCommands.literal("debug");
+		var debug = ClientCommandManager.literal("debug");
 
-		debug.then(ClientCommands.literal("crumbling")
-				.then(ClientCommands.argument("pos", BlockPosArgument.blockPos())
-						.then(ClientCommands.argument("stage", IntegerArgumentType.integer(0, 9))
+		debug.then(ClientCommandManager.literal("crumbling")
+				.then(ClientCommandManager.argument("pos", BlockPosArgument.blockPos())
+						.then(ClientCommandManager.argument("stage", IntegerArgumentType.integer(0, 9))
 								.executes(context -> {
 									Entity executor = context.getSource()
 											.getEntity();
@@ -147,51 +147,51 @@ public final class FlwCommands {
 									return Command.SINGLE_SUCCESS;
 								}))));
 
-		debug.then(ClientCommands.literal("shader")
-				.then(ClientCommands.argument("mode", DebugModeArgument.INSTANCE)
+		debug.then(ClientCommandManager.literal("shader")
+				.then(ClientCommandManager.argument("mode", DebugModeArgument.INSTANCE)
 						.executes(context -> {
 							DebugMode mode = context.getArgument("mode", DebugMode.class);
 							FrameUniforms.debugMode(mode);
 							return Command.SINGLE_SUCCESS;
 						})));
 
-		debug.then(ClientCommands.literal("frustum")
-				.then(ClientCommands.literal("capture")
+		debug.then(ClientCommandManager.literal("frustum")
+				.then(ClientCommandManager.literal("capture")
 						.executes(context -> {
 							FrameUniforms.captureFrustum();
 							return Command.SINGLE_SUCCESS;
 						}))
-				.then(ClientCommands.literal("unpause")
+				.then(ClientCommandManager.literal("unpause")
 						.executes(context -> {
 							FrameUniforms.unpauseFrustum();
 							return Command.SINGLE_SUCCESS;
 						})));
 
-		debug.then(ClientCommands.literal("lightSections")
-				.then(ClientCommands.literal("on")
+		debug.then(ClientCommandManager.literal("lightSections")
+				.then(ClientCommandManager.literal("on")
 						.executes(context -> {
 							BackendDebugFlags.LIGHT_STORAGE_VIEW = true;
 							return Command.SINGLE_SUCCESS;
 						}))
-				.then(ClientCommands.literal("off")
+				.then(ClientCommandManager.literal("off")
 						.executes(context -> {
 							BackendDebugFlags.LIGHT_STORAGE_VIEW = false;
 							return Command.SINGLE_SUCCESS;
 						})));
 
-		debug.then(ClientCommands.literal("pauseUpdates")
-				.then(ClientCommands.literal("on")
+		debug.then(ClientCommandManager.literal("pauseUpdates")
+				.then(ClientCommandManager.literal("on")
 						.executes(context -> {
 							ImplDebugFlags.PAUSE_UPDATES = true;
 							return Command.SINGLE_SUCCESS;
 						}))
-				.then(ClientCommands.literal("off")
+				.then(ClientCommandManager.literal("off")
 						.executes(context -> {
 							ImplDebugFlags.PAUSE_UPDATES = false;
 							return Command.SINGLE_SUCCESS;
 						})));
 
-		debug.then(ClientCommands.literal("info")
+		debug.then(ClientCommandManager.literal("info")
 				.executes(context -> {
 					context.getSource()
 							.sendFeedback(FlwDebugInfo.getDebugCommandInfo());

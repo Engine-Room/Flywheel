@@ -15,7 +15,6 @@ import dev.engine_room.flywheel.backend.Samplers;
 import dev.engine_room.flywheel.backend.compile.OitPrograms;
 import dev.engine_room.flywheel.backend.gl.GlCompat;
 import dev.engine_room.flywheel.backend.gl.GlTextureUnit;
-import dev.engine_room.flywheel.backend.mixin.GpuDeviceAccessor;
 import net.minecraft.client.Minecraft;
 
 public class OitFramebuffer {
@@ -85,12 +84,12 @@ public class OitFramebuffer {
 	public void depthRange() {
 		// No depth writes, but we'll still use the depth test.
 		GlStateManager._depthMask(false);
-		GlStateManager._colorMask(0b1111);
+		GlStateManager._colorMask(true, true, true, true);
 		GlStateManager._enableBlend();
 		GlStateManager._blendFuncSeparate(GlConst.GL_ONE, GlConst.GL_ONE, GlConst.GL_ONE, GlConst.GL_ONE);
 		GL32.glBlendEquation(GlConst.GL_MAX);
 
-		var far = Minecraft.getInstance().gameRenderer.getGameRenderState().levelRenderState.cameraRenderState.depthFar;
+		var far = Minecraft.getInstance().gameRenderer.getDepthFar();
 
 		if (GlCompat.SUPPORTS_DSA) {
 			GL46.glNamedFramebufferDrawBuffers(fbo, DEPTH_RANGE_DRAW_BUFFERS);
@@ -108,7 +107,7 @@ public class OitFramebuffer {
 	public void renderTransmittance() {
 		// No depth writes, but we'll still use the depth test
 		GlStateManager._depthMask(false);
-		GlStateManager._colorMask(0b1111);
+		GlStateManager._colorMask(true, true, true, true);
 		GlStateManager._enableBlend();
 		GlStateManager._blendFuncSeparate(GlConst.GL_ONE, GlConst.GL_ONE, GlConst.GL_ONE, GlConst.GL_ONE);
 		GL32.glBlendEquation(GlConst.GL_FUNC_ADD);
@@ -134,7 +133,7 @@ public class OitFramebuffer {
 	public void renderDepthFromTransmittance() {
 		// Only write to depth, not color.
 		GlStateManager._depthMask(true);
-		GlStateManager._colorMask(0b0000);
+		GlStateManager._colorMask(false, false, false, false);
 		GlStateManager._disableBlend();
 		GlStateManager._depthFunc(GlConst.GL_ALWAYS);
 
@@ -156,7 +155,7 @@ public class OitFramebuffer {
 	public void accumulate() {
 		// No depth writes, but we'll still use the depth test
 		GlStateManager._depthMask(false);
-		GlStateManager._colorMask(0b1111);
+		GlStateManager._colorMask(true, true, true, true);
 		GlStateManager._enableBlend();
 		GlStateManager._blendFuncSeparate(GlConst.GL_ONE, GlConst.GL_ONE, GlConst.GL_ONE, GlConst.GL_ONE);
 		GL32.glBlendEquation(GlConst.GL_FUNC_ADD);
@@ -187,7 +186,7 @@ public class OitFramebuffer {
 		// depthMask = false: other transparent stuff renders on top of OIT stuff.
 		// If Neo gets wavelet OIT we can use their hooks to be correct with everything.
 		GlStateManager._depthMask(true);
-		GlStateManager._colorMask(0b1111);
+		GlStateManager._colorMask(true, true, true, true);
 		GlStateManager._enableBlend();
 
 		// We rely on the blend func to achieve:
@@ -214,7 +213,7 @@ public class OitFramebuffer {
 	private static void bindRenderTarget(RenderTarget target) {
 		GlTexture colorTexture = (GlTexture) target.getColorTexture();
 		int i = colorTexture.getFbo(
-				((GlDevice) ((GpuDeviceAccessor) RenderSystem.getDevice()).getBackend()).directStateAccess(),
+				((GlDevice) RenderSystem.getDevice()).directStateAccess(),
 				target.getDepthTexture()
 		);
 		GlStateManager._glBindFramebuffer(GlConst.GL_FRAMEBUFFER, i);

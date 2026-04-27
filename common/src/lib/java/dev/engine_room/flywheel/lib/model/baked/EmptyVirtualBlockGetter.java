@@ -5,7 +5,6 @@ import java.util.function.ToIntFunction;
 import org.jspecify.annotations.Nullable;
 
 import net.minecraft.core.BlockPos;
-import net.minecraft.world.level.CardinalLighting;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
@@ -44,10 +43,5 @@ public class EmptyVirtualBlockGetter extends VirtualBlockGetter {
 	@Override
 	public final int getMinY() {
 		return 0;
-	}
-
-	@Override
-	public CardinalLighting cardinalLighting() {
-		return CardinalLighting.DEFAULT;
 	}
 }
