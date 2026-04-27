@@ -98,19 +98,19 @@
 //				.translate((float) (pos.x - renderOrigin.getX()), (float) (pos.y - renderOrigin.getY()), (float) (pos.z - renderOrigin.getZ()));
 //
 //		float partialTick = ctx.partialTick();
-//		Camera camera = ctx.camera();
+//		Camera cameraRenderState = ctx.cameraRenderState();
 //		switch (renderState.billboardConstraints()) {
 //		case FIXED:
 //			instance.pose.rotateYXZ(-0.017453292F * entityYRot(entity, partialTick), ((float) Math.PI / 180F) * entityXRot(entity, partialTick), 0.0F);
 //			break;
 //		case HORIZONTAL:
-//			instance.pose.rotateYXZ(-0.017453292F * entityYRot(entity, partialTick), ((float) Math.PI / 180F) * cameraXRot(camera), 0.0F);
+//			instance.pose.rotateYXZ(-0.017453292F * entityYRot(entity, partialTick), ((float) Math.PI / 180F) * cameraXRot(cameraRenderState), 0.0F);
 //			break;
 //		case VERTICAL:
-//			instance.pose.rotateYXZ(-0.017453292F * cameraYrot(camera), ((float) Math.PI / 180F) * entityXRot(entity, partialTick), 0.0F);
+//			instance.pose.rotateYXZ(-0.017453292F * cameraYrot(cameraRenderState), ((float) Math.PI / 180F) * entityXRot(entity, partialTick), 0.0F);
 //			break;
 //		case CENTER:
-//			instance.pose.rotateYXZ(-0.017453292F * cameraYrot(camera), ((float) Math.PI / 180F) * cameraXRot(camera), 0.0F);
+//			instance.pose.rotateYXZ(-0.017453292F * cameraYrot(cameraRenderState), ((float) Math.PI / 180F) * cameraXRot(cameraRenderState), 0.0F);
 //			break;
 //		}
 //
@@ -121,12 +121,12 @@
 //				.setChanged();
 //	}
 //
-//	private static float cameraYrot(Camera camera) {
-//		return camera.yRot() - 180.0F;
+//	private static float cameraYrot(Camera cameraRenderState) {
+//		return cameraRenderState.yRot() - 180.0F;
 //	}
 //
-//	private static float cameraXRot(Camera camera) {
-//		return -camera.xRot();
+//	private static float cameraXRot(Camera cameraRenderState) {
+//		return -cameraRenderState.xRot();
 //	}
 //
 //	private static float entityYRot(Entity entity, float partialTick) {

@@ -12,7 +12,6 @@
 //import dev.engine_room.flywheel.lib.visual.SimpleDynamicVisual;
 //import dev.engine_room.flywheel.lib.visual.util.InstanceRecycler;
 //import dev.engine_room.vanillin.item.ItemModels;
-//import net.minecraft.client.renderer.LightTexture;
 //import net.minecraft.client.resources.model.BakedModel;
 //import net.minecraft.util.Mth;
 //import net.minecraft.util.RandomSource;

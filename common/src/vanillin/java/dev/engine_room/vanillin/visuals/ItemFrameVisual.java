@@ -14,7 +14,6 @@
 //import dev.engine_room.flywheel.lib.visual.SimpleDynamicVisual;
 //import dev.engine_room.vanillin.item.ItemModels;
 //import net.minecraft.client.Minecraft;
-//import net.minecraft.client.renderer.LightTexture;
 //import net.minecraft.client.renderer.block.BlockModelShaper;
 //import net.minecraft.client.resources.model.BlockStateDefinitions;
 //import net.minecraft.core.BlockPos;

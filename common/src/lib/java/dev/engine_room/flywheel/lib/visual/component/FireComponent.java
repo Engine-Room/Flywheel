@@ -20,9 +20,10 @@ import dev.engine_room.flywheel.lib.model.SingleMeshModel;
 import dev.engine_room.flywheel.lib.util.RendererReloadCache;
 import dev.engine_room.flywheel.lib.visual.util.SmartRecycler;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.resources.model.ModelBakery;
+import net.minecraft.client.resources.model.sprite.SpriteId;
+import net.minecraft.util.LightCoordsUtil;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 
@@ -34,10 +35,7 @@ public final class FireComponent implements EntityComponent {
 			.backfaceCulling(false) // Disable backface because we want to be able to flip the model.
 			.build();
 
-	// Parameterize by the material instead of the sprite
-	// because Material#sprite is a surprisingly heavy operation
-	// and because sprites are invalidated after a resource reload.
-	private static final RendererReloadCache<net.minecraft.client.resources.model.Material, Model> FIRE_MODELS = new RendererReloadCache<>(texture -> {
+	private static final RendererReloadCache<SpriteId, Model> FIRE_MODELS = new RendererReloadCache<>(texture -> {
 		TextureAtlasSprite sprite = Minecraft.getInstance().getAtlasManager().get(texture);
 		return new SingleMeshModel(new FireMesh(sprite), FIRE_MATERIAL);
 	});
@@ -59,7 +57,7 @@ public final class FireComponent implements EntityComponent {
 		TransformedInstance instance = context.instancerProvider()
 				.instancer(InstanceTypes.TRANSFORMED, model)
 				.createInstance();
-		instance.light(LightTexture.FULL_BLOCK);
+		instance.light(LightCoordsUtil.pack(15, 0));
 		instance.setChanged();
 		return instance;
 	}
@@ -96,8 +94,7 @@ public final class FireComponent implements EntityComponent {
 		stack.setIdentity();
 		stack.translate(entityX - renderOrigin.getX(), entityY - renderOrigin.getY(), entityZ - renderOrigin.getZ());
 		stack.scale(scale, scale, scale);
-		stack.mulPose(Axis.YP.rotationDegrees(-context.camera()
-				.yRot()));
+		stack.mulPose(Axis.YP.rotationDegrees(-context.cameraRenderState().yRot));
 		stack.translate(0.0F, 0.0F, -0.3F + (float) ((int) maxHeight) * 0.02F);
 
 		for (int i = 0; y < maxHeight; ++i) {
@@ -157,7 +154,7 @@ public final class FireComponent implements EntityComponent {
 			vertexList.b(i, 1);
 			vertexList.u(i, u);
 			vertexList.v(i, v);
-			vertexList.light(i, LightTexture.FULL_BLOCK);
+			vertexList.light(i, LightCoordsUtil.pack(15, 0));
 			vertexList.normalX(i, 0);
 			vertexList.normalY(i, 1);
 			vertexList.normalZ(i, 0);

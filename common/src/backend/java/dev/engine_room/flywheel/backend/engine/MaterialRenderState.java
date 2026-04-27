@@ -9,6 +9,7 @@ import com.mojang.blaze3d.opengl.GlConst;
 import com.mojang.blaze3d.opengl.GlSampler;
 import com.mojang.blaze3d.opengl.GlStateManager;
 import com.mojang.blaze3d.opengl.GlTextureView;
+import com.mojang.blaze3d.pipeline.ColorTargetState;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.textures.FilterMode;
 import com.mojang.blaze3d.textures.GpuSampler;
@@ -44,7 +45,8 @@ public final class MaterialRenderState {
 
 		WriteMask mask = material.writeMask();
 		boolean writeColor = mask.color();
-		GlStateManager._colorMask(writeColor, writeColor, writeColor, writeColor);
+		// TODO - IThundxr - Checkover
+		GlStateManager._colorMask(writeColor ? ColorTargetState.WRITE_ALL : ColorTargetState.WRITE_NONE);
 	}
 
 	private static void setupTexture(Material material) {
@@ -151,7 +153,8 @@ public final class MaterialRenderState {
 	private static void setupWriteMask(WriteMask mask) {
 		GlStateManager._depthMask(mask.depth());
 		boolean writeColor = mask.color();
-		GlStateManager._colorMask(writeColor, writeColor, writeColor, writeColor);
+		// TODO - IThundxr - Checkover
+		GlStateManager._colorMask(writeColor ? ColorTargetState.WRITE_ALL : ColorTargetState.WRITE_NONE);
 	}
 
 	public static boolean materialEquals(Material lhs, Material rhs) {

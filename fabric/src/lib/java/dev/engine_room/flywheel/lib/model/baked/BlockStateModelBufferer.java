@@ -9,14 +9,16 @@ import com.mojang.blaze3d.vertex.PoseStack;
 
 import dev.engine_room.flywheel.lib.model.SimpleModel;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.ItemBlockRenderTypes;
-import net.minecraft.client.renderer.block.BlockRenderDispatcher;
+import net.minecraft.client.color.block.BlockColors;
+import net.minecraft.client.renderer.block.BlockAndTintGetter;
+import net.minecraft.client.renderer.block.BlockModelLighter;
+import net.minecraft.client.renderer.block.FluidRenderer;
 import net.minecraft.client.renderer.block.ModelBlockRenderer;
-import net.minecraft.client.renderer.block.model.BlockStateModel;
+import net.minecraft.client.renderer.block.dispatch.BlockStateModel;
 import net.minecraft.client.renderer.chunk.ChunkSectionLayer;
-import net.minecraft.client.renderer.texture.OverlayTexture;
+import net.minecraft.client.renderer.state.GameRenderState;
+import net.minecraft.client.resources.model.ModelManager;
 import net.minecraft.core.BlockPos;
-import net.minecraft.world.level.BlockAndTintGetter;
 import net.minecraft.world.level.block.RenderShape;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.FluidState;
@@ -38,16 +40,24 @@ final class BlockStateModelBufferer {
 
 		long seed = state.getSeed(pos);
 
+		Minecraft minecraft = Minecraft.getInstance();
+		GameRenderState gameRenderState = minecraft.gameRenderer.getGameRenderState();
+		BlockColors blockColors = minecraft.getBlockColors();
+
 		// See ModelBlockRenderer#tesselateBlock
-		boolean useAo = Minecraft.useAmbientOcclusion();
+		boolean useAo = gameRenderState.optionsRenderState.ambientOcclusion;
 		boolean defaultAo = useAo && state.getLightEmission() == 0;
 		model = emitters.prepareForModel(model, useAo, defaultAo);
 
-		poseStack.pushPose();
-		Minecraft.getInstance()
-				.getBlockRenderer()
-				.getModelRenderer()
-				.render(level, model, state, pos, poseStack, emitters, false, seed, OverlayTexture.NO_OVERLAY);
+		ModelBlockRenderer blockRenderer = new ModelBlockRenderer(useAo, true, blockColors);
+
+		PoseStack finalPoseStack = poseStack;
+		blockRenderer.tesselateBlock((x, y, z, quad, instance) -> {
+			finalPoseStack.pushPose();
+			ChunkSectionLayer layer = quad.materialInfo().layer();
+			emitters.getEmitter(layer).putBakedQuad(finalPoseStack.last(), quad, instance);
+			finalPoseStack.popPose();
+		}, 0, 0, 0, level, pos, state, model, seed);
 		poseStack.popPose();
 
 		return emitters.end();
@@ -63,12 +73,16 @@ final class BlockStateModelBufferer {
 
 		emitters.prepare(blockMaterialFunction);
 
-		BlockRenderDispatcher renderDispatcher = Minecraft.getInstance()
-				.getBlockRenderer();
-		ModelBlockRenderer blockRenderer = renderDispatcher.getModelRenderer();
-		ModelBlockRenderer.enableCaching();
+		BlockModelLighter.enableCaching();
 
-		boolean useAo = Minecraft.useAmbientOcclusion();
+		Minecraft minecraft = Minecraft.getInstance();
+		ModelManager modelManager = minecraft.getModelManager();
+		GameRenderState gameRenderState = minecraft.gameRenderer.getGameRenderState();
+		boolean useAo = gameRenderState.optionsRenderState.ambientOcclusion;
+		BlockColors blockColors = minecraft.getBlockColors();
+
+		ModelBlockRenderer blockRenderer = new ModelBlockRenderer(useAo, true, blockColors);
+		FluidRenderer fluidRenderer = new FluidRenderer(modelManager.getFluidStateModelSet());
 
 		while (posIterator.hasNext()) {
 			BlockPos pos = posIterator.next();
@@ -80,37 +94,43 @@ final class BlockStateModelBufferer {
 				FluidState fluidState = state.getFluidState();
 
 				if (!fluidState.isEmpty()) {
-					ChunkSectionLayer layer = ItemBlockRenderTypes.getRenderLayer(fluidState);
+					poseStack.pushPose();
+					poseStack.translate(pos.getX() - (pos.getX() & 0xF), pos.getY() - (pos.getY() & 0xF), pos.getZ() - (pos.getZ() & 0xF));
+					PoseStack finalPoseStack = poseStack;
+					fluidRenderer.tesselate(level, pos, layer -> {
+						BufferBuilder bufferBuilder = emitters.getEmitter(layer).getBuffer(true, false);
 
-					BufferBuilder bufferBuilder = emitters.getEmitter(layer).getBuffer(true, false);
+						if (bufferBuilder != null) {
+							transformingWrapper.prepare(bufferBuilder, finalPoseStack);
+							return transformingWrapper;
+						}
 
-					if (bufferBuilder != null) {
-						transformingWrapper.prepare(bufferBuilder, poseStack);
-
-						poseStack.pushPose();
-						poseStack.translate(pos.getX() - (pos.getX() & 0xF), pos.getY() - (pos.getY() & 0xF), pos.getZ() - (pos.getZ() & 0xF));
-						renderDispatcher.renderLiquid(pos, level, transformingWrapper, state, fluidState);
-						poseStack.popPose();
-					}
+						return EmptyVertexConsumer.INSTANCE;
+					}, state, fluidState);
+					poseStack.popPose();
 				}
 			}
 
 			if (state.getRenderShape() == RenderShape.MODEL) {
 				long seed = state.getSeed(pos);
-				BlockStateModel model = renderDispatcher.getBlockModel(state);
+				BlockStateModel model = modelManager.getBlockStateModelSet().get(state);
 
 				// See ModelBlockRenderer#tesselateBlock
 				boolean defaultAo = useAo && state.getLightEmission() == 0;
 				model = emitters.prepareForModel(model, useAo, defaultAo);
 
-				poseStack.pushPose();
-				poseStack.translate(pos.getX(), pos.getY(), pos.getZ());
-				blockRenderer.render(level, model, state, pos, poseStack, emitters, true, seed, OverlayTexture.NO_OVERLAY);
-				poseStack.popPose();
+				PoseStack finalPoseStack = poseStack;
+				blockRenderer.tesselateBlock((x, y, z, quad, instance) -> {
+					finalPoseStack.pushPose();
+					finalPoseStack.translate(x, y, z);
+					ChunkSectionLayer layer = quad.materialInfo().layer();
+					emitters.getEmitter(layer).putBakedQuad(finalPoseStack.last(), quad, instance);
+					finalPoseStack.popPose();
+				}, pos.getX(), pos.getY(), pos.getZ(), level, pos, state, model, seed);
 			}
 		}
 
-		ModelBlockRenderer.clearCache();
+		BlockModelLighter.clearCache();
 		transformingWrapper.clear();
 		return emitters.end();
 	}

@@ -6,7 +6,7 @@ import java.util.Objects;
 import org.jspecify.annotations.Nullable;
 import org.lwjgl.system.MemoryUtil;
 
-import dev.engine_room.flywheel.backend.SkyLightSectionStorageExtension;
+import dev.engine_room.flywheel.backend.extension.SkyLightSectionStorageExtension;
 import dev.engine_room.flywheel.backend.mixin.light.LayerLightSectionStorageAccessor;
 import dev.engine_room.flywheel.backend.mixin.light.LightEngineAccessor;
 import it.unimi.dsi.fastutil.longs.Long2ObjectFunction;

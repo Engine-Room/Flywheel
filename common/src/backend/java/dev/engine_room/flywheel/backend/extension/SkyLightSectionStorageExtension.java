@@ -1,4 +1,4 @@
-package dev.engine_room.flywheel.backend;
+package dev.engine_room.flywheel.backend.extension;
 
 import org.jspecify.annotations.Nullable;
 

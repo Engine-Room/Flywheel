@@ -82,10 +82,6 @@ public final class ModelUtil {
 			return Materials.CUTOUT_BLOCK;
 		}
 
-		if (renderType == Sheets.solidBlockSheet()) {
-			return Materials.SOLID_BLOCK;
-		}
-
 		if (renderType == Sheets.translucentBlockItemSheet()) {
 			return Materials.TRANSLUCENT_ITEM_ENTITY_BLOCK;
 		}
