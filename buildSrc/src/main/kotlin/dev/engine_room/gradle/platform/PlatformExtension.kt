@@ -1,6 +1,8 @@
 package dev.engine_room.gradle.platform
 
 import net.fabricmc.loom.api.LoomGradleExtensionAPI
+import net.fabricmc.loom.task.RenderDocRunTask
+import net.fabricmc.loom.task.RenderDocRunUITask
 import org.gradle.api.Project
 import org.gradle.api.Task
 import org.gradle.api.tasks.SourceSet
@@ -9,6 +11,8 @@ import org.gradle.kotlin.dsl.assign
 import org.gradle.kotlin.dsl.named
 import org.gradle.kotlin.dsl.register
 import org.gradle.kotlin.dsl.the
+import org.gradle.kotlin.dsl.withType
+import java.io.File
 
 open class PlatformExtension(val project: Project) {
     fun setupLoomMod(vararg sourceSets: SourceSet) {
@@ -38,6 +42,17 @@ open class PlatformExtension(val project: Project) {
             named("server") {
                 isIdeConfigGenerated = true
                 programArgs("--nogui")
+            }
+        }
+
+
+        if (System.getProperty("os.name") == "Linux") {
+            project.tasks.withType<RenderDocRunTask> {
+                renderDocExecutable.set(File("/usr/bin/renderdoccmd"))
+            }
+
+            project.tasks.withType<RenderDocRunUITask> {
+                renderDocExecutable.set(File("/usr/bin/qrenderdoc"))
             }
         }
     }
