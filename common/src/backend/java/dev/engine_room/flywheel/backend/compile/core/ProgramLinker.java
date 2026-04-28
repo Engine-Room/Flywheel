@@ -31,8 +31,7 @@ public class ProgramLinker {
 		preLink.accept(out);
 
 		GlStateManager.glLinkProgram(handle);
-		int logLength = GlStateManager.glGetProgrami(handle, ShaderManager.MAX_LOG_LENGTH);
-		String log = GlStateManager.glGetProgramInfoLog(handle, logLength);
+		String log = GlStateManager.glGetProgramInfoLog(handle, ShaderManager.MAX_LOG_LENGTH);
 
 		if (linkSuccessful(handle)) {
 			return LinkResult.success(out, log);

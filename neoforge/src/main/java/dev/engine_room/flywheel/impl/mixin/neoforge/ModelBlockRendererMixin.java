@@ -4,21 +4,19 @@ import org.objectweb.asm.Opcodes;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.Slice;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import com.llamalad7.mixinextras.sugar.Local;
-import com.mojang.blaze3d.vertex.VertexConsumer;
 
-import dev.engine_room.flywheel.lib.model.baked.NeoForgeMeshEmitter;
 import net.minecraft.client.renderer.block.ModelBlockRenderer;
 
 @Mixin(ModelBlockRenderer.class)
 abstract class ModelBlockRendererMixin {
-	@Inject(method = "tesselateAmbientOcclusion", at = @At(value = "FIELD", target = "net/minecraft/client/renderer/block/ModelBlockRenderer.DIRECTIONS : [Lnet/minecraft/core/Direction;", opcode = Opcodes.GETSTATIC), slice = @Slice(from = @At(value = "INVOKE", target = "Lnet/neoforged/neoforge/client/extensions/BlockModelPartExtension;getRenderType(Lnet/minecraft/world/level/block/state/BlockState;)Lnet/minecraft/client/renderer/chunk/ChunkSectionLayer;")))
-	private void onTesselateWithAO(CallbackInfo ci, @Local VertexConsumer vertexConsumer, @Local(ordinal = 0, argsOnly = true) boolean ao) {
-		if (vertexConsumer instanceof NeoForgeMeshEmitter meshEmitter) {
-			meshEmitter.prepareForPart(ao);
-		}
+	@Inject(method = "tesselateAmbientOcclusion", at = @At(value = "FIELD", target = "net/minecraft/client/renderer/block/ModelBlockRenderer.DIRECTIONS : [Lnet/minecraft/core/Direction;", opcode = Opcodes.GETSTATIC))
+	private void onTesselateWithAO(CallbackInfo ci, @Local(name = "ao") boolean ao) {
+		// TODO - IThundxr - This needs some thinking, reimplementing this isn't exactly easy at the moment
+//		if (vertexConsumer instanceof NeoForgeMeshEmitter meshEmitter) {
+//			meshEmitter.prepareForPart(ao);
+//		}
 	}
 }

@@ -43,8 +43,7 @@ public class Compilation {
 		var shaderName = name + "." + shaderType.extension;
 		dumpSource(source, shaderName);
 
-		var logLength = GlStateManager.glGetShaderi(handle, ShaderManager.MAX_LOG_LENGTH);
-		var infoLog = GlStateManager.glGetShaderInfoLog(handle, logLength);
+		var infoLog = GlStateManager.glGetShaderInfoLog(handle, ShaderManager.MAX_LOG_LENGTH);
 
 		if (compiledSuccessfully(handle)) {
 			return ShaderResult.success(new GlShader(handle, shaderType, shaderName), infoLog);
