@@ -14,6 +14,10 @@ subproject.init("vanillin-neoforge", "vanillin_group", "vanillin_version")
 
 val main = sourceSets.getByName("main")
 
+platform {
+    setupMdgRuns()
+}
+
 transitiveSourceSets {
     sourceSet(main) {
         compileClasspath(project(platform), "api", "lib", "main")

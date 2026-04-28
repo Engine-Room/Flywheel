@@ -3,6 +3,8 @@ package dev.engine_room.gradle.platform
 import net.fabricmc.loom.api.LoomGradleExtensionAPI
 import net.fabricmc.loom.task.RenderDocRunTask
 import net.fabricmc.loom.task.RenderDocRunUITask
+import net.neoforged.moddevgradle.dsl.ModDevExtension
+import net.neoforged.moddevgradle.dsl.RunModel
 import org.gradle.api.Project
 import org.gradle.api.Task
 import org.gradle.api.tasks.SourceSet
@@ -17,6 +19,12 @@ import java.io.File
 open class PlatformExtension(val project: Project) {
     fun setupLoomMod(vararg sourceSets: SourceSet) {
         project.the<LoomGradleExtensionAPI>().mods.maybeCreate("main").apply {
+            sourceSets.forEach(::sourceSet)
+        }
+    }
+
+    fun setupMdgMod(vararg sourceSets: SourceSet) {
+        project.the<ModDevExtension>().mods.maybeCreate("main").apply {
             sourceSets.forEach(::sourceSet)
         }
     }
@@ -53,6 +61,29 @@ open class PlatformExtension(val project: Project) {
 
             project.tasks.withType<RenderDocRunUITask> {
                 renderDocExecutable.set(File("/usr/bin/qrenderdoc"))
+            }
+        }
+    }
+
+    fun setupMdgRuns() {
+        project.the<ModDevExtension>().runs.apply {
+            create("client") {
+                client()
+
+                systemProperty("flw.dumpShaderSource", "true")
+                systemProperty("flw.debugMemorySafety", "true")
+
+                systemProperty("mixin.debug.export", "true")
+                systemProperty("mixin.debug.verbose", "true")
+
+                programArguments.addAll("--width", "1280", "--height", "720")
+            }
+
+            // We're a client mod, but we need to make sure we correctly render when playing on a server.
+            create("server") {
+                server()
+
+                programArgument("--nogui")
             }
         }
     }

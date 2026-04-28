@@ -17,8 +17,7 @@ import net.minecraft.core.Direction;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.block.state.BlockState;
 
-// TODO - IThundxr - Checkover
-class FabricMeshEmitterManager extends MeshEmitterManager<FabricMeshEmitter> /*implements BlockVertexConsumerProvider*/ {
+class FabricMeshEmitterManager extends MeshEmitterManager<FabricMeshEmitter> {
 	private final WrapperModel wrapperModel = new WrapperModel();
 
 	private boolean useAo;
@@ -50,12 +49,6 @@ class FabricMeshEmitterManager extends MeshEmitterManager<FabricMeshEmitter> /*i
 			emitter.prepareForGeometry(shade, ao);
 		}
 	}
-
-	// TODO - IThundxr - Checkover
-//	@Override
-//	public FabricMeshEmitter getBuffer(ChunkSectionLayer layer) {
-//		return getEmitter(layer);
-//	}
 
 	private class WrapperModel extends WrapperBlockStateModel {
 		private final QuadTransform quadTransform = quad -> {

@@ -15,7 +15,7 @@ import net.minecraft.client.renderer.block.ModelBlockRenderer;
 
 @Mixin(ModelBlockRenderer.class)
 abstract class ModelBlockRendererMixin {
-	@Inject(method = "tesselateWithAO(Lnet/minecraft/world/level/BlockAndTintGetter;Ljava/util/List;Lnet/minecraft/world/level/block/state/BlockState;Lnet/minecraft/core/BlockPos;Lcom/mojang/blaze3d/vertex/PoseStack;Ljava/util/function/Function;ZI)V", at = @At(value = "FIELD", target = "net/minecraft/client/renderer/block/ModelBlockRenderer.DIRECTIONS : [Lnet/minecraft/core/Direction;", opcode = Opcodes.GETSTATIC), slice = @Slice(from = @At(value = "INVOKE", target = "Lnet/neoforged/neoforge/client/extensions/BlockModelPartExtension;getRenderType(Lnet/minecraft/world/level/block/state/BlockState;)Lnet/minecraft/client/renderer/chunk/ChunkSectionLayer;")))
+	@Inject(method = "tesselateAmbientOcclusion", at = @At(value = "FIELD", target = "net/minecraft/client/renderer/block/ModelBlockRenderer.DIRECTIONS : [Lnet/minecraft/core/Direction;", opcode = Opcodes.GETSTATIC), slice = @Slice(from = @At(value = "INVOKE", target = "Lnet/neoforged/neoforge/client/extensions/BlockModelPartExtension;getRenderType(Lnet/minecraft/world/level/block/state/BlockState;)Lnet/minecraft/client/renderer/chunk/ChunkSectionLayer;")))
 	private void onTesselateWithAO(CallbackInfo ci, @Local VertexConsumer vertexConsumer, @Local(ordinal = 0, argsOnly = true) boolean ao) {
 		if (vertexConsumer instanceof NeoForgeMeshEmitter meshEmitter) {
 			meshEmitter.prepareForPart(ao);

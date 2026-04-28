@@ -7,13 +7,14 @@ import org.jetbrains.annotations.NotNull;
 
 import com.google.common.collect.MapMaker;
 
-import net.minecraft.client.renderer.block.model.BlockStateModel;
-import net.minecraft.client.renderer.block.model.SimpleModelWrapper;
-import net.minecraft.client.renderer.block.model.SingleVariant;
-import net.minecraft.client.resources.model.BlockModelRotation;
+import net.minecraft.client.renderer.block.dispatch.BlockModelRotation;
+import net.minecraft.client.renderer.block.dispatch.BlockStateModel;
+import net.minecraft.client.renderer.block.dispatch.SingleVariant;
 import net.minecraft.client.resources.model.ModelBaker;
+import net.minecraft.client.resources.model.ModelDebugName;
 import net.minecraft.client.resources.model.ModelManager;
 import net.minecraft.client.resources.model.ResolvableModel;
+import net.minecraft.client.resources.model.SimpleModelWrapper;
 import net.minecraft.resources.Identifier;
 import net.neoforged.neoforge.client.event.ModelEvent;
 import net.neoforged.neoforge.client.model.standalone.StandaloneModelKey;
@@ -50,7 +51,7 @@ public class NeoForgePartialModel extends PartialModel {
 
 	private class Unbaked implements UnbakedStandaloneModel<@NotNull BlockStateModel> {
 		@Override
-		public BlockStateModel bake(ModelBaker baker) {
+		public @NotNull BlockStateModel bake(ModelBaker baker, ModelDebugName name) {
 			return new SingleVariant(SimpleModelWrapper.bake(baker, modelId, BlockModelRotation.IDENTITY));
 		}
 

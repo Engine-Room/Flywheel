@@ -45,7 +45,6 @@ public final class MaterialRenderState {
 
 		WriteMask mask = material.writeMask();
 		boolean writeColor = mask.color();
-		// TODO - IThundxr - Checkover
 		GlStateManager._colorMask(writeColor ? ColorTargetState.WRITE_ALL : ColorTargetState.WRITE_NONE);
 	}
 
@@ -153,7 +152,6 @@ public final class MaterialRenderState {
 	private static void setupWriteMask(WriteMask mask) {
 		GlStateManager._depthMask(mask.depth());
 		boolean writeColor = mask.color();
-		// TODO - IThundxr - Checkover
 		GlStateManager._colorMask(writeColor ? ColorTargetState.WRITE_ALL : ColorTargetState.WRITE_NONE);
 	}
 

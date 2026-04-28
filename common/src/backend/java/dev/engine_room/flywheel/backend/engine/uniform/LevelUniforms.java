@@ -35,7 +35,7 @@ public final class LevelUniforms extends UniformWriter {
 		ptr = writeVec3(ptr, LIGHT0_DIRECTION);
 		ptr = writeVec3(ptr, LIGHT1_DIRECTION);
 
-		long dayTime = level.getOverworldClockTime(); // TODO - IThundxr - Checkover
+		long dayTime = level.getOverworldClockTime();
 		long levelDay = dayTime / 24000L;
 		float timeOfDay = (float) (dayTime - levelDay * 24000L) / 24000f;
 		ptr = writeInt(ptr, (int) (levelDay % 0x7FFFFFFFL));

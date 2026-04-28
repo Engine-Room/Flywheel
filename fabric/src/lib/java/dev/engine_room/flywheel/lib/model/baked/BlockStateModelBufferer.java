@@ -52,13 +52,12 @@ final class BlockStateModelBufferer {
 		ModelBlockRenderer blockRenderer = new ModelBlockRenderer(useAo, true, blockColors);
 
 		PoseStack finalPoseStack = poseStack;
-		blockRenderer.tesselateBlock((x, y, z, quad, instance) -> {
+		blockRenderer.tesselateBlock((_, _, _, quad, instance) -> {
 			finalPoseStack.pushPose();
 			ChunkSectionLayer layer = quad.materialInfo().layer();
 			emitters.getEmitter(layer).putBakedQuad(finalPoseStack.last(), quad, instance);
 			finalPoseStack.popPose();
 		}, 0, 0, 0, level, pos, state, model, seed);
-		poseStack.popPose();
 
 		return emitters.end();
 	}

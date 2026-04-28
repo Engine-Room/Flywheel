@@ -61,6 +61,8 @@ transitiveSourceSets {
 }
 
 platform {
+    setupMdgMod(api, lib, backend, main)
+    setupMdgRuns()
     setupTestMod(testMod)
 }
 

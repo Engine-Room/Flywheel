@@ -11,16 +11,18 @@ import com.mojang.blaze3d.vertex.PoseStack;
 
 import dev.engine_room.flywheel.lib.model.SimpleModel;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.ItemBlockRenderTypes;
-import net.minecraft.client.renderer.block.BlockRenderDispatcher;
+import net.minecraft.client.color.block.BlockColors;
+import net.minecraft.client.renderer.block.BlockAndTintGetter;
+import net.minecraft.client.renderer.block.BlockModelLighter;
+import net.minecraft.client.renderer.block.FluidRenderer;
 import net.minecraft.client.renderer.block.ModelBlockRenderer;
-import net.minecraft.client.renderer.block.model.BlockModelPart;
-import net.minecraft.client.renderer.block.model.BlockStateModel;
+import net.minecraft.client.renderer.block.dispatch.BlockStateModel;
+import net.minecraft.client.renderer.block.dispatch.BlockStateModelPart;
 import net.minecraft.client.renderer.chunk.ChunkSectionLayer;
-import net.minecraft.client.renderer.texture.OverlayTexture;
+import net.minecraft.client.renderer.state.GameRenderState;
+import net.minecraft.client.resources.model.ModelManager;
 import net.minecraft.core.BlockPos;
 import net.minecraft.util.RandomSource;
-import net.minecraft.world.level.BlockAndTintGetter;
 import net.minecraft.world.level.block.RenderShape;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.FluidState;
@@ -37,7 +39,7 @@ final class BlockStateModelBufferer {
 		if (poseStack == null) {
 			poseStack = objects.identityPoseStack;
 		}
-		List<BlockModelPart> parts = objects.parts;
+		List<BlockStateModelPart> parts = objects.parts;
 		RandomSource random = objects.random;
 		NeoForgeMeshEmitterManager emitters = objects.emitters;
 
@@ -47,8 +49,12 @@ final class BlockStateModelBufferer {
 		random.setSeed(seed);
 		model.collectParts(level, pos, state, random, parts);
 
+		Minecraft minecraft = Minecraft.getInstance();
+		GameRenderState gameRenderState = minecraft.gameRenderer.getGameRenderState();
+		BlockColors blockColors = minecraft.getBlockColors();
+
 		// See ModelBlockRenderer#tesselateBlock
-		boolean useAo = Minecraft.useAmbientOcclusion();
+		boolean useAo = gameRenderState.optionsRenderState.ambientOcclusion;
 		boolean perPartAo = NeoForgeClientConfig.INSTANCE.handleAmbientOcclusionPerPart.getAsBoolean();
 		boolean ao = useAo && (perPartAo || parts.isEmpty() || switch(parts.getFirst().ambientOcclusion()) {
 			case TRUE -> true;
@@ -57,12 +63,15 @@ final class BlockStateModelBufferer {
 		});
 		emitters.prepareForModel(ao);
 
-		poseStack.pushPose();
-		Minecraft.getInstance()
-				.getBlockRenderer()
-				.getModelRenderer()
-				.tesselateBlock(level, parts, state, pos, poseStack, emitters, false, OverlayTexture.NO_OVERLAY);
-		poseStack.popPose();
+		ModelBlockRenderer blockRenderer = new ModelBlockRenderer(useAo, true, blockColors);
+
+		PoseStack finalPoseStack = poseStack;
+		blockRenderer.tesselateBlock((_, _, _, quad, instance) -> {
+			finalPoseStack.pushPose();
+			ChunkSectionLayer layer = quad.materialInfo().layer();
+			emitters.getEmitter(layer).putBakedQuad(finalPoseStack.last(), quad, instance);
+			finalPoseStack.popPose();
+		}, 0, 0, 0, level, pos, state, model, seed);
 
 		return emitters.end();
 	}
@@ -72,19 +81,24 @@ final class BlockStateModelBufferer {
 		if (poseStack == null) {
 			poseStack = objects.identityPoseStack;
 		}
-		List<BlockModelPart> parts = objects.parts;
+		List<BlockStateModelPart> parts = objects.parts;
 		RandomSource random = objects.random;
 		NeoForgeMeshEmitterManager emitters = objects.emitters;
 		TransformingVertexConsumer transformingWrapper = objects.transformingWrapper;
 
 		emitters.prepare(blockMaterialFunction);
 
-		BlockRenderDispatcher renderDispatcher = Minecraft.getInstance()
-				.getBlockRenderer();
-		ModelBlockRenderer blockRenderer = renderDispatcher.getModelRenderer();
-		ModelBlockRenderer.enableCaching();
+		BlockModelLighter.enableCaching();
 
-		boolean useAo = Minecraft.useAmbientOcclusion();
+		Minecraft minecraft = Minecraft.getInstance();
+		ModelManager modelManager = minecraft.getModelManager();
+		GameRenderState gameRenderState = minecraft.gameRenderer.getGameRenderState();
+		boolean useAo = gameRenderState.optionsRenderState.ambientOcclusion;
+		BlockColors blockColors = minecraft.getBlockColors();
+
+		ModelBlockRenderer blockRenderer = new ModelBlockRenderer(useAo, true, blockColors);
+		FluidRenderer fluidRenderer = new FluidRenderer(modelManager.getFluidStateModelSet());
+
 		boolean perPartAo = NeoForgeClientConfig.INSTANCE.handleAmbientOcclusionPerPart.getAsBoolean();
 
 		while (posIterator.hasNext()) {
@@ -97,18 +111,20 @@ final class BlockStateModelBufferer {
 				FluidState fluidState = state.getFluidState();
 
 				if (!fluidState.isEmpty()) {
-					ChunkSectionLayer layer = ItemBlockRenderTypes.getRenderLayer(fluidState);
+					poseStack.pushPose();
+					poseStack.translate(pos.getX() - (pos.getX() & 0xF), pos.getY() - (pos.getY() & 0xF), pos.getZ() - (pos.getZ() & 0xF));
+					PoseStack finalPoseStack = poseStack;
+					fluidRenderer.tesselate(level, pos, layer -> {
+						BufferBuilder bufferBuilder = emitters.getEmitter(layer).getBuffer(true, false);
 
-					BufferBuilder bufferBuilder = emitters.getEmitter(layer).getBuffer(true, false);
+						if (bufferBuilder != null) {
+							transformingWrapper.prepare(bufferBuilder, finalPoseStack);
+							return transformingWrapper;
+						}
 
-					if (bufferBuilder != null) {
-						transformingWrapper.prepare(bufferBuilder, poseStack);
-
-						poseStack.pushPose();
-						poseStack.translate(pos.getX() - (pos.getX() & 0xF), pos.getY() - (pos.getY() & 0xF), pos.getZ() - (pos.getZ() & 0xF));
-						renderDispatcher.renderLiquid(pos, level, transformingWrapper, state, fluidState);
-						poseStack.popPose();
-					}
+						return EmptyVertexConsumer.INSTANCE;
+					}, state, fluidState);
+					poseStack.popPose();
 				}
 			}
 
@@ -116,7 +132,7 @@ final class BlockStateModelBufferer {
 				long seed = state.getSeed(pos);
 				random.setSeed(seed);
 
-				BlockStateModel model = renderDispatcher.getBlockModel(state);
+				BlockStateModel model = modelManager.getBlockStateModelSet().get(state);
 				model.collectParts(level, pos, state, random, parts);
 
 				// See ModelBlockRenderer#tesselateBlock
@@ -127,22 +143,26 @@ final class BlockStateModelBufferer {
 				});
 				emitters.prepareForModel(ao);
 
-				poseStack.pushPose();
-				poseStack.translate(pos.getX(), pos.getY(), pos.getZ());
-				blockRenderer.tesselateBlock(level, parts, state, pos, poseStack, emitters, true, OverlayTexture.NO_OVERLAY);
-				poseStack.popPose();
+				PoseStack finalPoseStack = poseStack;
+				blockRenderer.tesselateBlock((x, y, z, quad, instance) -> {
+					finalPoseStack.pushPose();
+					finalPoseStack.translate(x, y, z);
+					ChunkSectionLayer layer = quad.materialInfo().layer();
+					emitters.getEmitter(layer).putBakedQuad(finalPoseStack.last(), quad, instance);
+					finalPoseStack.popPose();
+				}, pos.getX(), pos.getY(), pos.getZ(), level, pos, state, model, seed);
 			}
 		}
 
-		ModelBlockRenderer.clearCache();
+		BlockModelLighter.clearCache();
 		transformingWrapper.clear();
 		return emitters.end();
 	}
 
 	private static class ThreadLocalObjects {
 		public final PoseStack identityPoseStack = new PoseStack();
-		public final List<BlockModelPart> parts = new ArrayList<>();
-		public final RandomSource random = RandomSource.createNewThreadLocalInstance();
+		public final List<BlockStateModelPart> parts = new ArrayList<>();
+		public final RandomSource random = RandomSource.createThreadLocalInstance();
 
 		public final NeoForgeMeshEmitterManager emitters = new NeoForgeMeshEmitterManager();
 		public final TransformingVertexConsumer transformingWrapper = new TransformingVertexConsumer();
