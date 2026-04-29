@@ -18,7 +18,10 @@ import dev.engine_room.flywheel.lib.model.part.ModelTrees;
 import dev.engine_room.flywheel.lib.visual.AbstractEntityVisual;
 import dev.engine_room.flywheel.lib.visual.SimpleDynamicVisual;
 import dev.engine_room.flywheel.lib.visual.SimpleTickableVisual;
+import dev.engine_room.vanillin.mixin.BlockModelSetAccessor;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.geom.ModelLayerLocation;
+import net.minecraft.client.renderer.block.BlockModelSet;
 import net.minecraft.resources.Identifier;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.vehicle.minecart.AbstractMinecart;
@@ -30,7 +33,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
 
 public class MinecartVisual<T extends AbstractMinecart> extends AbstractEntityVisual<T> implements SimpleTickableVisual, SimpleDynamicVisual {
-	private static final Identifier TEXTURE = Identifier.withDefaultNamespace("textures/entity/minecart.png");
+	private static final Identifier TEXTURE = Identifier.withDefaultNamespace("textures/entity/minecart/minecart.png");
 	private static final Material MATERIAL = SimpleMaterial.builder()
 			.texture(TEXTURE)
 			.mipmap(false)
@@ -60,6 +63,10 @@ public class MinecartVisual<T extends AbstractMinecart> extends AbstractEntityVi
 		RenderShape shape = blockState.getRenderShape();
 
 		if (shape == RenderShape.INVISIBLE) {
+			return null;
+		}
+
+		if (hasSpecialRenderer(blockState)) {
 			instances.visible(false);
 			return null;
 		}
@@ -197,6 +204,16 @@ public class MinecartVisual<T extends AbstractMinecart> extends AbstractEntityVi
 	}
 
 	public static boolean shouldSkipRender(AbstractMinecart minecart) {
-		return minecart.getDisplayBlockState().getRenderShape() != RenderShape.MODEL;
+		BlockState state = minecart.getDisplayBlockState();
+		if (state.getRenderShape() == RenderShape.INVISIBLE) {
+			return true;
+		} else {
+			return !hasSpecialRenderer(state);
+		}
+	}
+
+	private static boolean hasSpecialRenderer(BlockState state) {
+		BlockModelSet blockModelSet = Minecraft.getInstance().getModelManager().getBlockModelSet();
+		return ((BlockModelSetAccessor) blockModelSet).flywheel$getBlockModelByStateCache().containsKey(state);
 	}
 }
