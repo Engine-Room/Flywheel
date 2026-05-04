@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import org.jetbrains.annotations.ApiStatus.Internal;
 import org.jspecify.annotations.Nullable;
 
 import com.mojang.blaze3d.vertex.BufferBuilder;
@@ -28,8 +29,11 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.FluidState;
 import net.neoforged.neoforge.client.config.NeoForgeClientConfig;
 
-final class BlockStateModelBufferer {
+@Internal
+public final class BlockStateModelBufferer {
 	private static final ThreadLocal<ThreadLocalObjects> THREAD_LOCAL_OBJECTS = ThreadLocal.withInitial(ThreadLocalObjects::new);
+
+	public static final ScopedValue<NeoForgeMeshEmitterManager> EMITTER_MANAGER = ScopedValue.newInstance();
 
 	private BlockStateModelBufferer() {
 	}
@@ -66,12 +70,14 @@ final class BlockStateModelBufferer {
 		ModelBlockRenderer blockRenderer = new ModelBlockRenderer(useAo, true, blockColors);
 
 		PoseStack finalPoseStack = poseStack;
-		blockRenderer.tesselateBlock((_, _, _, quad, instance) -> {
-			finalPoseStack.pushPose();
-			ChunkSectionLayer layer = quad.materialInfo().layer();
-			emitters.getEmitter(layer).putBakedQuad(finalPoseStack.last(), quad, instance);
-			finalPoseStack.popPose();
-		}, 0, 0, 0, level, pos, state, model, seed);
+		ScopedValue.where(EMITTER_MANAGER, emitters).run(() ->
+			blockRenderer.tesselateBlock((_, _, _, quad, instance) -> {
+				finalPoseStack.pushPose();
+				ChunkSectionLayer layer = quad.materialInfo().layer();
+				emitters.getEmitter(layer).putBakedQuad(finalPoseStack.last(), quad, instance);
+				finalPoseStack.popPose();
+			}, 0, 0, 0, level, pos, state, model, seed)
+		);
 
 		return emitters.end();
 	}
@@ -144,13 +150,15 @@ final class BlockStateModelBufferer {
 				emitters.prepareForModel(ao);
 
 				PoseStack finalPoseStack = poseStack;
-				blockRenderer.tesselateBlock((x, y, z, quad, instance) -> {
-					finalPoseStack.pushPose();
-					finalPoseStack.translate(x, y, z);
-					ChunkSectionLayer layer = quad.materialInfo().layer();
-					emitters.getEmitter(layer).putBakedQuad(finalPoseStack.last(), quad, instance);
-					finalPoseStack.popPose();
-				}, pos.getX(), pos.getY(), pos.getZ(), level, pos, state, model, seed);
+				ScopedValue.where(EMITTER_MANAGER, emitters).run(() ->
+					blockRenderer.tesselateBlock((x, y, z, quad, instance) -> {
+						finalPoseStack.pushPose();
+						finalPoseStack.translate(x, y, z);
+						ChunkSectionLayer layer = quad.materialInfo().layer();
+						emitters.getEmitter(layer).putBakedQuad(finalPoseStack.last(), quad, instance);
+						finalPoseStack.popPose();
+					}, pos.getX(), pos.getY(), pos.getZ(), level, pos, state, model, seed)
+				);
 			}
 		}
 

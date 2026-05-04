@@ -10,7 +10,7 @@ import com.mojang.blaze3d.opengl.GlStateManager;
 import dev.engine_room.flywheel.backend.gl.GlStateTracker;
 import dev.engine_room.flywheel.backend.gl.buffer.GlBufferType;
 
-@Mixin(value = GlStateManager.class, remap = false)
+@Mixin(GlStateManager.class)
 abstract class GlStateManagerMixin {
 	@Inject(method = "_glBindBuffer(II)V", at = @At("RETURN"))
 	private static void flywheel$onBindBuffer(int target, int buffer, CallbackInfo ci) {
