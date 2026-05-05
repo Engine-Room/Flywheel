@@ -167,12 +167,14 @@ public class MinecartVisual<T extends AbstractMinecart> extends AbstractEntityVi
 			Vec3 frontPos = behavior.getPosOffs(posX, posY, posZ, 0.3F);
 			Vec3 backPos = behavior.getPosOffs(posX, posY, posZ, -0.3F);
 
-			stack.translate((float) (pos.x - posX), (float) ((frontPos.y + backPos.y) / 2.0D - posY), (float) (pos.z - posZ));
-			Vec3 vec = backPos.add(-frontPos.x, -frontPos.y, -frontPos.z);
-			if (vec.length() != 0.0D) {
-				vec = vec.normalize();
-				yaw = (float) (Math.atan2(vec.z, vec.x) * 180.0D / Math.PI);
-				pitch = (float) (Math.atan(vec.y) * 73.0D);
+			if (frontPos != null && backPos != null) {
+				stack.translate((float) (pos.x - posX), (float) ((frontPos.y + backPos.y) / 2.0D - posY), (float) (pos.z - posZ));
+				Vec3 vec = backPos.add(-frontPos.x, -frontPos.y, -frontPos.z);
+				if (vec.length() != 0.0D) {
+					vec = vec.normalize();
+					yaw = (float) (Math.atan2(vec.z, vec.x) * 180.0D / Math.PI);
+					pitch = (float) (Math.atan(vec.y) * 73.0D);
+				}
 			}
 		}
 
