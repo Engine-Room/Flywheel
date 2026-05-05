@@ -8,15 +8,18 @@ import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.PoseStack;
 
 import dev.engine_room.flywheel.lib.model.SimpleModel;
+import net.fabricmc.fabric.api.client.renderer.v1.Renderer;
+import net.fabricmc.fabric.api.client.renderer.v1.mesh.QuadEmitter;
+import net.fabricmc.fabric.api.client.renderer.v1.render.AltModelBlockRenderer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.color.block.BlockColors;
 import net.minecraft.client.renderer.block.BlockAndTintGetter;
 import net.minecraft.client.renderer.block.BlockModelLighter;
 import net.minecraft.client.renderer.block.FluidRenderer;
-import net.minecraft.client.renderer.block.ModelBlockRenderer;
 import net.minecraft.client.renderer.block.dispatch.BlockStateModel;
 import net.minecraft.client.renderer.chunk.ChunkSectionLayer;
 import net.minecraft.client.renderer.state.GameRenderState;
+import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.client.resources.model.ModelManager;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.block.RenderShape;
@@ -47,17 +50,21 @@ final class BlockStateModelBufferer {
 		// See ModelBlockRenderer#tesselateBlock
 		boolean useAo = gameRenderState.optionsRenderState.ambientOcclusion;
 		boolean defaultAo = useAo && state.getLightEmission() == 0;
-		model = emitters.prepareForModel(model, useAo, defaultAo);
+		emitters.prepareForModel(useAo, defaultAo);
 
-		ModelBlockRenderer blockRenderer = new ModelBlockRenderer(useAo, true, blockColors);
+		AltModelBlockRenderer altModelBlockRenderer = Renderer.get().altModelBlockRenderer(useAo, true, blockColors);
 
 		PoseStack finalPoseStack = poseStack;
-		blockRenderer.tesselateBlock((_, _, _, quad, instance) -> {
+		QuadEmitter quadEmitter = Renderer.get().quadEmitter((quad) -> {
 			finalPoseStack.pushPose();
-			ChunkSectionLayer layer = quad.materialInfo().layer();
-			emitters.getEmitter(layer).putBakedQuad(finalPoseStack.last(), quad, instance);
+			ChunkSectionLayer layer = quad.chunkLayer();
+			FabricMeshEmitter emitter = emitters.getEmitter(layer);
+			emitters.prepareForGeometry(quad);
+			quad.buffer(OverlayTexture.NO_OVERLAY, finalPoseStack.last(), emitter);
 			finalPoseStack.popPose();
-		}, 0, 0, 0, level, pos, state, model, seed);
+		});
+
+		altModelBlockRenderer.tesselateBlock(quadEmitter, 0, 0, 0, level, pos, state, model, seed);
 
 		return emitters.end();
 	}
@@ -80,7 +87,7 @@ final class BlockStateModelBufferer {
 		boolean useAo = gameRenderState.optionsRenderState.ambientOcclusion;
 		BlockColors blockColors = minecraft.getBlockColors();
 
-		ModelBlockRenderer blockRenderer = new ModelBlockRenderer(useAo, true, blockColors);
+		AltModelBlockRenderer altModelBlockRenderer = Renderer.get().altModelBlockRenderer(useAo, true, blockColors);
 		FluidRenderer fluidRenderer = new FluidRenderer(modelManager.getFluidStateModelSet());
 
 		while (posIterator.hasNext()) {
@@ -116,16 +123,18 @@ final class BlockStateModelBufferer {
 
 				// See ModelBlockRenderer#tesselateBlock
 				boolean defaultAo = useAo && state.getLightEmission() == 0;
-				model = emitters.prepareForModel(model, useAo, defaultAo);
+				emitters.prepareForModel(useAo, defaultAo);
 
 				PoseStack finalPoseStack = poseStack;
-				blockRenderer.tesselateBlock((x, y, z, quad, instance) -> {
+				QuadEmitter quadEmitter = Renderer.get().quadEmitter((quad) -> {
 					finalPoseStack.pushPose();
-					finalPoseStack.translate(x, y, z);
-					ChunkSectionLayer layer = quad.materialInfo().layer();
-					emitters.getEmitter(layer).putBakedQuad(finalPoseStack.last(), quad, instance);
+					ChunkSectionLayer layer = quad.chunkLayer();
+					FabricMeshEmitter emitter = emitters.getEmitter(layer);
+					emitters.prepareForGeometry(quad);
+					quad.buffer(OverlayTexture.NO_OVERLAY, finalPoseStack.last(), emitter);
 					finalPoseStack.popPose();
-				}, pos.getX(), pos.getY(), pos.getZ(), level, pos, state, model, seed);
+				});
+				altModelBlockRenderer.tesselateBlock(quadEmitter, pos.getX(), pos.getY(), pos.getZ(), level, pos, state, model, seed);
 			}
 		}
 

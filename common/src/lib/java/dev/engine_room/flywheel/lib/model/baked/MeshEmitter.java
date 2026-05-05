@@ -6,14 +6,15 @@ import org.jetbrains.annotations.UnknownNullability;
 import org.jspecify.annotations.Nullable;
 
 import com.google.common.collect.ImmutableList;
-import com.mojang.blaze3d.pipeline.RenderPipeline;
 import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.ByteBufferBuilder;
 import com.mojang.blaze3d.vertex.VertexConsumer;
+import com.mojang.blaze3d.vertex.VertexFormat.Mode;
 
 import dev.engine_room.flywheel.api.material.Material;
 import dev.engine_room.flywheel.api.model.Mesh;
 import dev.engine_room.flywheel.api.model.Model;
+import dev.engine_room.flywheel.lib.vertex.FlywheelVertexFormats;
 import net.minecraft.client.renderer.chunk.ChunkSectionLayer;
 
 abstract class MeshEmitter implements VertexConsumer {
@@ -91,10 +92,7 @@ abstract class MeshEmitter implements VertexConsumer {
 		}
 
 		ByteBufferBuilder byteBufferBuilder = byteBufferBuilderStack.nextOrCreate();
-
-		// Trust that the RenderType mode/format don't change out from underneath us.
-		RenderPipeline pipeline = chunkSectionLayer.pipeline();
-		BufferBuilder bufferBuilder = new BufferBuilder(byteBufferBuilder, pipeline.getVertexFormatMode(), pipeline.getVertexFormat());
+		BufferBuilder bufferBuilder = new BufferBuilder(byteBufferBuilder, Mode.QUADS, FlywheelVertexFormats.BLOCK_VERTEX_FORMAT);
 
 		// currentIndex == numBufferBuildersPopulated here.
 		materials[currentIndex] = material;
