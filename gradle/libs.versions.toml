@@ -1,21 +1,21 @@
 [versions]
-minecraft = "26.1.1"
+minecraft = "26.1.2"
 
 # https://neoforged.net/
-neoforge = "26.1.1.1-beta"
+neoforge = "26.1.2.41-beta"
 mdg = "2.0.+"
 
 # https://fabricmc.net/develop/
-loom = "1.15.+"
-fabric-loader = "0.18.5"
-fabric-api = "0.145.3+26.1.1"
+loom = "1.16.+"
+fabric-loader = "0.19.2"
+fabric-api = "0.148.0+26.1.2"
 
 # we need to manually depend on mixin (+extras) in common
 mixin = "0.16.5+mixin.0.8.7"
 mixin-extras = "0.5.3"
 
 # https://maven.caffeinemc.net/#/releases/net/caffeinemc/sodium-fabric
-sodium = "0.8.9+mc26.1.1"
+sodium = "0.8.10+mc26.1.2"
 # https://modrinth.com/mod/iris/versions
 iris = "1.10.9+26.1"
 

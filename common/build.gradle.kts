@@ -92,7 +92,9 @@ dependencies {
 
     compileOnly(annotationProcessor("io.github.llamalad7:mixinextras-common:0.4.1")!!)
 
-    testImplementation("org.junit.jupiter:junit-jupiter:5.8.1")
+    testImplementation(platform("org.junit:junit-bom:6.0.3"))
+    testImplementation("org.junit.jupiter:junit-jupiter")
+    testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
 
 tasks.test {
