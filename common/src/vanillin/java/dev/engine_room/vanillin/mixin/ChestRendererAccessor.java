@@ -10,5 +10,7 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 @Mixin(ChestRenderer.class)
 public interface ChestRendererAccessor {
 	@Invoker("getChestMaterial")
-	ChestRenderState.ChestMaterialType flywheel$getChestMaterial(BlockEntity blockEntity, boolean xmasTextures);
+	static ChestRenderState.ChestMaterialType flywheel$getChestMaterial(BlockEntity blockEntity, boolean xmasTextures) {
+		throw new AssertionError();
+	}
 }

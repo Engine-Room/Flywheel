@@ -20,7 +20,6 @@ import dev.engine_room.flywheel.lib.visual.SimpleDynamicVisual;
 import dev.engine_room.vanillin.mixin.ChestRendererAccessor;
 import it.unimi.dsi.fastutil.floats.Float2FloatFunction;
 import it.unimi.dsi.fastutil.longs.LongSet;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.geom.ModelLayerLocation;
 import net.minecraft.client.model.geom.ModelLayers;
 import net.minecraft.client.renderer.LevelRenderer;
@@ -76,10 +75,8 @@ public class ChestVisual<T extends BlockEntity & LidBlockEntity> extends Abstrac
 		Block block = blockState.getBlock();
 		if (block instanceof AbstractChestBlock<?> chestBlock) {
 			ChestType chestType = blockState.hasProperty(ChestBlock.TYPE) ? blockState.getValue(ChestBlock.TYPE) : ChestType.SINGLE;
-			// TODO 1.21.11: should we be using unchecked casts here?
-			ChestRenderer<?> renderer = (ChestRenderer) Minecraft.getInstance().getBlockEntityRenderDispatcher().getRenderer(blockEntity);
 			SpriteId texture = Sheets.chooseSprite(
-					((ChestRendererAccessor) renderer).flywheel$getChestMaterial(blockEntity, ChestRenderer.xmasTextures()),
+					ChestRendererAccessor.flywheel$getChestMaterial(blockEntity, ChestRenderer.xmasTextures()),
 					chestType
 			);
 			instances = InstanceTree.create(instancerProvider(), ModelTrees.of(LAYER_LOCATIONS.get(chestType), texture, MATERIAL));
