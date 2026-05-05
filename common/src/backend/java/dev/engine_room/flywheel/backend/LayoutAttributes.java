@@ -80,7 +80,6 @@ public class LayoutAttributes {
 		}
 	}
 
-	// TODO 1.21.11: Is there a better way to do this perhaps?
 	private static VertexFormatElement.Type toGlType(IntegerRepr repr) {
 		return switch (repr) {
 			case BYTE -> VertexFormatElement.Type.BYTE;
@@ -89,7 +88,6 @@ public class LayoutAttributes {
 		};
 	}
 
-	// TODO 1.21.11: Is there a better way to do this perhaps?
 	private static VertexFormatElement.Type toGlType(UnsignedIntegerRepr repr) {
 		return switch (repr) {
 			case UNSIGNED_BYTE -> VertexFormatElement.Type.UBYTE;
@@ -98,7 +96,6 @@ public class LayoutAttributes {
 		};
 	}
 
-	// TODO 1.21.11: Is there a better way to do this perhaps?
 	private static VertexFormatElement.Type toGlType(FloatRepr repr) {
 		return switch (repr) {
 			case BYTE, NORMALIZED_BYTE -> VertexFormatElement.Type.BYTE;

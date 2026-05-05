@@ -74,7 +74,7 @@ jobs:
 
       # Lock to a specific commit, it would be bad if the tag is re-pushed with unwanted changes
       - name: Run the MC client
-        uses: 3arthqu4ke/mc-runtime-test@e72f8fe1134aabf6fc749a2a8c09bb56dd7d283e
+        uses: headlesshq/mc-runtime-test@9d9ea4af8ef6d82648051f750c49905f75d0c3bb
         with:
           mc: ${{ env.MINECRAFT_VERSION }}
           modloader: ${{ matrix.loader }}
