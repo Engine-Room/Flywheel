@@ -31,7 +31,7 @@ jobs:
       - name: Build
         # Doesn't actually publish, as no secrets are passed in, just makes sure that publishing works
         # Also generate the mod jars for the test job
-        run: ./gradlew remapTestModJar publish --no-daemon
+        run: ./gradlew testModJar publish --no-daemon
 
       - name: Capture Build Artifacts
         uses: actions/upload-artifact@v4
