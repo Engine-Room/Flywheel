@@ -4,6 +4,10 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
+import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.textures.FilterMode;
+import com.mojang.blaze3d.textures.GpuSampler;
+
 import dev.engine_room.flywheel.api.backend.Engine;
 import dev.engine_room.flywheel.api.instance.Instance;
 import dev.engine_room.flywheel.api.material.Material;
@@ -31,6 +35,7 @@ import dev.engine_room.flywheel.backend.gl.shader.GlProgram;
 import dev.engine_room.flywheel.lib.material.SimpleMaterial;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.model.ModelBakery;
+import net.minecraft.resources.Identifier;
 
 public class InstancedDrawManager extends DrawManager<InstancedInstancer<?>> {
 	private static final Comparator<InstancedDraw> DRAW_COMPARATOR = Comparator.comparingInt(InstancedDraw::bias)
@@ -272,8 +277,9 @@ public class InstancedDrawManager extends DrawManager<InstancedInstancer<?>> {
 			GroupKey<?> shader = groupEntry.getKey();
 
 			for (var progressEntry : byProgress.int2ObjectEntrySet()) {
-				Samplers.CRUMBLING.makeActive();
-				TextureBinder.bind(ModelBakery.BREAKING_LOCATIONS.get(progressEntry.getIntKey()));
+				Identifier crumblingTextureId = ModelBakery.BREAKING_LOCATIONS.get(progressEntry.getIntKey());
+				GpuSampler crumblingTextureSampler = RenderSystem.getSamplerCache().getRepeat(FilterMode.NEAREST);
+				TextureBinder.bind(Samplers.CRUMBLING.number, crumblingTextureId, crumblingTextureSampler);
 
 				for (var instanceHandlePair : progressEntry.getValue()) {
 					InstancedInstancer<?> instancer = instanceHandlePair.getFirst();
