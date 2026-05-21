@@ -42,6 +42,8 @@ open class PlatformExtension(val project: Project) {
                 property("mixin.debug.export", "true")
                 property("mixin.debug.verbose", "true")
 
+                programArgs("--renderDebugLabels")
+
                 // 720p baby!
                 programArgs("--width", "1280", "--height", "720")
             }
@@ -75,6 +77,8 @@ open class PlatformExtension(val project: Project) {
 
                 systemProperty("mixin.debug.export", "true")
                 systemProperty("mixin.debug.verbose", "true")
+
+                programArguments.add("--renderDebugLabels")
 
                 programArguments.addAll("--width", "1280", "--height", "720")
             }

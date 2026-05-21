@@ -56,11 +56,11 @@ public final class MaterialRenderState {
 		// TODO 1.21.11: give the Material more control, such as using default filter mode, address modes, AF, max LOD?
 		FilterMode filterMode = material.blur() ? FilterMode.LINEAR : FilterMode.NEAREST;
 		GpuSampler defaultSampler = texture.getSampler();
-		GlSampler sampler = (GlSampler) RenderSystem.getSamplerCache()
+		GpuSampler sampler = RenderSystem.getSamplerCache()
 				.getSampler(defaultSampler.getAddressModeU(), defaultSampler.getAddressModeV(), filterMode, filterMode, material.mipmap());
 
 		/// TODO 1.21.11: should cubemap textures be allowed?
-		TextureBinder.bind(Samplers.DIFFUSE.number, (GlTextureView) texture.getTextureView(), sampler);
+		TextureBinder.bind(Samplers.DIFFUSE.number, texture.getTextureView(), sampler);
 	}
 
 	private static void setupBackfaceCulling(boolean backfaceCulling) {
