@@ -34,6 +34,10 @@ open class PlatformExtension(val project: Project) {
             named("client") {
                 isIdeConfigGenerated = true
 
+                // Better hotswap, only available with the JetBrains Runtime so we have to ignore invalid options aswell
+                jvmArguments.add("-XX:+IgnoreUnrecognizedVMOptions")
+                jvmArguments.add("-XX:+AllowEnhancedClassRedefinition")
+
                 // Turn on our own debug flags
                 property("flw.dumpShaderSource", "true")
                 property("flw.debugMemorySafety", "true")
@@ -72,15 +76,23 @@ open class PlatformExtension(val project: Project) {
             create("client") {
                 client()
 
+                // Better hotswap, only available with the JetBrains Runtime so we have to ignore invalid options aswell
+                jvmArgument("-XX:+IgnoreUnrecognizedVMOptions")
+                jvmArgument("-XX:+AllowEnhancedClassRedefinition")
+
+                // Turn on our own debug flags
                 systemProperty("flw.dumpShaderSource", "true")
                 systemProperty("flw.debugMemorySafety", "true")
 
+                // Turn on mixin debug flags
                 systemProperty("mixin.debug.export", "true")
                 systemProperty("mixin.debug.verbose", "true")
 
-                programArguments.add("--renderDebugLabels")
-
+                // 720p baby!
                 programArguments.addAll("--width", "1280", "--height", "720")
+
+                // Helpful when debugging issues
+                programArguments.addAll("--renderDebugLabels", "--vulkanValidation")
             }
 
             // We're a client mod, but we need to make sure we correctly render when playing on a server.
