@@ -1,6 +1,7 @@
 package dev.engine_room.flywheel.impl;
 
 import java.net.URI;
+import java.util.Locale;
 
 import org.jspecify.annotations.Nullable;
 
@@ -10,6 +11,7 @@ import dev.engine_room.flywheel.backend.engine.DrawManager;
 import dev.engine_room.flywheel.backend.gl.GlCompat;
 import dev.engine_room.flywheel.impl.visualization.VisualizationManagerImpl;
 import dev.engine_room.flywheel.lib.memory.FlwMemoryTracker;
+import dev.engine_room.flywheel.lib.util.IdentifierUtil;
 import dev.engine_room.flywheel.lib.util.StringUtil;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 import it.unimi.dsi.fastutil.ints.IntComparators;
@@ -24,6 +26,7 @@ import net.minecraft.network.chat.ClickEvent.OpenUrl;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.HoverEvent.ShowText;
 import net.minecraft.network.chat.Style;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.chunk.LevelChunk;
 
@@ -253,23 +256,46 @@ public final class FlwDebugInfo {
 	}
 
 	public static class FlwDebugEntry implements DebugScreenEntry {
-		// TODO 1.21.11: Check if this should use a group instead, and if this information should be split across multiple entries
-		@Override
-		public void display(DebugScreenDisplayer displayer, @Nullable Level level, @Nullable LevelChunk clientChunk, @Nullable LevelChunk serverChunk) {
-			displayer.addLine("Flywheel: " + FlwImplXplat.INSTANCE.getVersionStr());
-			displayer.addLine("Backend: " + BackendManagerImpl.getBackendString());
-			displayer.addLine("Update limiting: " + (FlwConfig.INSTANCE.limitUpdates() ? "on" : "off"));
+		public static final Identifier ID = IdentifierUtil.id("flw_debug_info");
+		private static final Identifier GROUP = IdentifierUtil.id("flywheel");
 
-			VisualizationManager manager = VisualizationManager.get(level);
+		@Override
+		public void display(DebugScreenDisplayer displayer, @Nullable Level serverOrClientLevel, @Nullable LevelChunk clientChunk, @Nullable LevelChunk serverChunk) {
+			add(displayer, "Flywheel: %s", FlwImplXplat.INSTANCE.getVersionStr());
+			add(displayer, "Backend: %s", BackendManagerImpl.getBackendString());
+			add(displayer, "Update limiting: %s", FlwConfig.INSTANCE.limitUpdates() ? "on" : "off");
+
+			Level clientLevel = clientChunk != null ? clientChunk.getLevel() : null;
+			VisualizationManager manager = VisualizationManager.get(clientLevel);
 			if (manager != null) {
-				displayer.addLine("B: " + manager.blockEntities().visualCount()
-						+ ", E: " + manager.entities().visualCount()
-						+ ", F: " + manager.effects().visualCount());
+				add(displayer, "B: %s, E: %s, F: %s",
+					manager.blockEntities().visualCount(),
+					manager.entities().visualCount(),
+					manager.effects().visualCount()
+				);
+
 				Vec3i renderOrigin = manager.renderOrigin();
-				displayer.addLine("Origin: " + renderOrigin.getX() + ", " + renderOrigin.getY() + ", " + renderOrigin.getZ());
+				add(displayer, "Origin: %s, %s, %s",
+					renderOrigin.getX(),
+					renderOrigin.getY(),
+					renderOrigin.getZ()
+				);
 			}
 
-			displayer.addLine("Memory Usage: CPU: " + StringUtil.formatBytes(FlwMemoryTracker.getCpuMemory()) + ", GPU: " + StringUtil.formatBytes(FlwMemoryTracker.getGpuMemory()));
+			// TODO b3d-ification: This is not really correct anymore, it no longer tracks the buffers flw creates, it should probably be removed
+			add(displayer, "Memory Usage: CPU: %s, GPU: %s",
+				StringUtil.formatBytes(FlwMemoryTracker.getCpuMemory()),
+				StringUtil.formatBytes(FlwMemoryTracker.getGpuMemory())
+			);
+		}
+
+		@Override
+		public boolean isAllowed(boolean reducedDebugInfo) {
+			return true;
+		}
+
+		private static void add(DebugScreenDisplayer displayer, String input, Object... args) {
+			displayer.addToGroup(GROUP, String.format(Locale.ROOT, input, args));
 		}
 	}
 }

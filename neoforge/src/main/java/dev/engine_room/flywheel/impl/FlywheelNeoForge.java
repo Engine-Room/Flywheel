@@ -70,7 +70,7 @@ public final class FlywheelNeoForge {
 
 		gameEventBus.addListener(FlwCommands::registerClientCommands);
 
-		modEventBus.addListener((RegisterDebugEntriesEvent e) -> e.register(IdentifierUtil.id("flw_debug_info"), new FlwDebugInfo.FlwDebugEntry()));
+		modEventBus.addListener((RegisterDebugEntriesEvent e) -> e.register(FlwDebugInfo.FlwDebugEntry.ID, new FlwDebugInfo.FlwDebugEntry()));
 
 		modEventBus.addListener((EndClientResourceReloadEvent e) -> BackendManagerImpl.onEndClientResourceReload(e.error().isPresent()));
 

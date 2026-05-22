@@ -64,7 +64,7 @@ public final class FlywheelFabric implements ClientModInitializer {
 
 		ClientCommandRegistrationCallback.EVENT.register(FlwCommands::registerClientCommands);
 
-		DebugScreenEntries.register(IdentifierUtil.id("flw_debug_info"), new FlwDebugInfo.FlwDebugEntry());
+		DebugScreenEntries.register(FlwDebugInfo.FlwDebugEntry.ID, new FlwDebugInfo.FlwDebugEntry());
 
 		EndClientResourceReloadCallback.EVENT.register((minecraft, resourceManager, initialReload, error) ->
 				BackendManagerImpl.onEndClientResourceReload(error.isPresent()));
