@@ -84,8 +84,7 @@ public class ParallelTaskExecutor implements TaskExecutorImpl {
 		for (Thread thread : threads) {
 			try {
 				thread.join();
-			} catch (InterruptedException e) {
-				//
+			} catch (InterruptedException _) {
 			}
 		}
 
@@ -186,6 +185,11 @@ public class ParallelTaskExecutor implements TaskExecutorImpl {
 		} finally {
 			waitGroup.done();
 		}
+	}
+
+	@Override
+	public void shutdown() {
+		stopWorkers();
 	}
 
 	private class WorkerThread extends Thread {

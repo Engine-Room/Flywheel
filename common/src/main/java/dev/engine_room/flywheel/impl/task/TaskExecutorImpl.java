@@ -38,4 +38,12 @@ public interface TaskExecutorImpl extends TaskExecutor {
 	 * try to use {@link #syncUntil(BooleanSupplier) syncUntil}.
 	 */
 	void syncPoint();
+
+	/**
+	 * Start shutting down this task executor.
+	 * <br>
+	 * Any attempts to use the current executor after calling this will result in
+	 * an exception being thrown unless the executor has been started again.
+	 */
+	void shutdown();
 }

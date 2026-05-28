@@ -31,4 +31,8 @@ public class SerialTaskExecutor implements TaskExecutorImpl {
 	@Override
 	public void syncPoint() {
 	}
+
+	@Override
+	public void shutdown() {
+	}
 }
