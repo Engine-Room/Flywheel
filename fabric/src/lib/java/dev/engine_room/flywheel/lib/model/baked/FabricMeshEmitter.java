@@ -8,7 +8,10 @@ import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.minecraft.client.renderer.chunk.ChunkSectionLayer;
 import net.minecraft.client.resources.model.geometry.BakedQuad;
 
-class FabricMeshEmitter extends MeshEmitter {
+import org.jetbrains.annotations.ApiStatus;
+
+@ApiStatus.Internal
+public class FabricMeshEmitter extends MeshEmitter {
 	private boolean shade;
 	private boolean ao;
 

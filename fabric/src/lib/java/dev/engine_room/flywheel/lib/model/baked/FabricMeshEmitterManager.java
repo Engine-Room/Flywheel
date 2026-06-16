@@ -3,7 +3,10 @@ package dev.engine_room.flywheel.lib.model.baked;
 import net.fabricmc.fabric.api.client.renderer.v1.mesh.QuadView;
 import net.fabricmc.fabric.api.util.TriState;
 
-class FabricMeshEmitterManager extends MeshEmitterManager<FabricMeshEmitter> {
+import org.jetbrains.annotations.ApiStatus;
+
+@ApiStatus.Internal
+public class FabricMeshEmitterManager extends MeshEmitterManager<FabricMeshEmitter> {
 	private boolean useAo;
 	private boolean defaultAo;
 

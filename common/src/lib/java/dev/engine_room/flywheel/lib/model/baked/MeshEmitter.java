@@ -2,6 +2,7 @@ package dev.engine_room.flywheel.lib.model.baked;
 
 import java.util.Arrays;
 
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.UnknownNullability;
 import org.jspecify.annotations.Nullable;
 
@@ -17,7 +18,8 @@ import dev.engine_room.flywheel.api.model.Model;
 import dev.engine_room.flywheel.lib.vertex.FlywheelVertexFormats;
 import net.minecraft.client.renderer.chunk.ChunkSectionLayer;
 
-abstract class MeshEmitter implements VertexConsumer {
+@ApiStatus.Internal
+public abstract class MeshEmitter implements VertexConsumer {
 	private static final int INITIAL_CAPACITY = 1;
 
 	private final ByteBufferBuilderStack byteBufferBuilderStack;

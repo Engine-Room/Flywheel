@@ -2,6 +2,7 @@ package dev.engine_room.flywheel.lib.model.baked;
 
 import java.util.Iterator;
 
+import org.jetbrains.annotations.ApiStatus;
 import org.jspecify.annotations.Nullable;
 
 import com.mojang.blaze3d.vertex.BufferBuilder;
@@ -26,7 +27,8 @@ import net.minecraft.world.level.block.RenderShape;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.FluidState;
 
-final class BlockStateModelBufferer {
+@ApiStatus.Internal
+public final class BlockStateModelBufferer {
 	private static final ThreadLocal<ThreadLocalObjects> THREAD_LOCAL_OBJECTS = ThreadLocal.withInitial(ThreadLocalObjects::new);
 
 	private BlockStateModelBufferer() {

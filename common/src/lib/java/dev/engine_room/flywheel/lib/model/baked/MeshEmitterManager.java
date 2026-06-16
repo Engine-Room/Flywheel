@@ -10,7 +10,10 @@ import it.unimi.dsi.fastutil.objects.Reference2ReferenceArrayMap;
 import it.unimi.dsi.fastutil.objects.Reference2ReferenceMap;
 import net.minecraft.client.renderer.chunk.ChunkSectionLayer;
 
-class MeshEmitterManager<T extends MeshEmitter> {
+import org.jetbrains.annotations.ApiStatus;
+
+@ApiStatus.Internal
+public class MeshEmitterManager<T extends MeshEmitter> {
 	private static final ChunkSectionLayer[] CHUNK_LAYERS = ChunkSectionLayer.values();
 
 	final Reference2ReferenceMap<ChunkSectionLayer, T> emitterMap = new Reference2ReferenceArrayMap<>();
