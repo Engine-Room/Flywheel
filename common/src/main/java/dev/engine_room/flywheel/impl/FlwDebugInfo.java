@@ -61,7 +61,7 @@ public final class FlwDebugInfo {
 		addVisualizationManagerDebugInfo(manager, out);
 
 		// Write out to a string both to emit to chat and include in the click event.
-		var debugInfoString = out.toString();
+		String debugInfoString = out.toString();
 
 		return Component.literal(debugInfoString)
 				.append(Component.literal("\n\nClick to copy debug info to clipboard")
@@ -71,8 +71,8 @@ public final class FlwDebugInfo {
 				.append(Component.literal("\n\nClick to open an issue on GitHub")
 						.withStyle(Style.EMPTY.withUnderlined(true)
 								.withColor(ChatFormatting.BLUE)
-								.withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, "https://github.com/Engine-Room/Flywheel/issues"))
-								.withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.literal("Opens URL:\nhttps://github.com/Engine-Room/Flywheel/issues")))));
+								.withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, "https://github.com/Engine-Room/Flywheel/issues/new"))
+								.withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.literal("Opens URL:\nhttps://github.com/Engine-Room/Flywheel/issues/new")))));
 
 	}
 
