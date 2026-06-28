@@ -10,6 +10,7 @@ import static org.lwjgl.opengl.GL20.glUniform3f;
 import static org.lwjgl.opengl.GL20.glUniform4f;
 import static org.lwjgl.opengl.GL20.glUniformMatrix3fv;
 import static org.lwjgl.opengl.GL20.glUniformMatrix4fv;
+import static org.lwjgl.opengl.GL30.glBindFragDataLocation;
 import static org.lwjgl.opengl.GL30.glUniform1ui;
 import static org.lwjgl.opengl.GL30.glUniform2ui;
 import static org.lwjgl.opengl.GL31.GL_INVALID_INDEX;
@@ -187,6 +188,22 @@ public class GlProgram extends GlObject {
 
 	public void bindAttribLocation(String attribute, int binding) {
 		glBindAttribLocation(handle(), binding, attribute);
+	}
+
+	/**
+	 * Binds a fragment shader output variable to a specific color attachment (draw buffer) slot.
+	 *
+	 * <p>This must happen before the program is linked. Binding a name that isn't an active output
+	 * in the linked program is a no-op, so it's safe to bind every possible output unconditionally.
+	 *
+	 * <p>Without this, the GL implementation is free to assign output locations in any order it
+	 * likes when a fragment shader declares multiple outputs without explicit {@code layout(location)}
+	 * qualifiers. Most desktop drivers happen to assign them in declaration order, but Apple's legacy
+	 * OpenGL driver does not, which scrambles the OIT coefficient targets and makes the transparent
+	 * geometry vanish. Binding the locations explicitly is correct everywhere.
+	 */
+	public void bindFragDataLocation(String name, int binding) {
+		glBindFragDataLocation(handle(), binding, name);
 	}
 
 	@Override
