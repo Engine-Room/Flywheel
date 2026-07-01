@@ -12,6 +12,7 @@
 //import dev.engine_room.flywheel.lib.visual.SimpleDynamicVisual;
 //import dev.engine_room.flywheel.lib.visual.util.InstanceRecycler;
 //import dev.engine_room.vanillin.item.ItemModels;
+//import net.minecraft.client.renderer.LightTexture;
 //import net.minecraft.client.resources.model.BakedModel;
 //import net.minecraft.util.Mth;
 //import net.minecraft.util.RandomSource;
@@ -26,18 +27,17 @@
 //	private static final ThreadLocal<RandomSource> RANDOM = ThreadLocal.withInitial(RandomSource::createNewThreadLocalInstance);
 //
 //	private final PoseStack pPoseStack = new PoseStack();
-//	private final BakedModel bakedModel;
+//	private BakedModel bakedModel;
+//	private ItemStack currentStack;
 //
-//	private final InstanceRecycler<TransformedInstance> instances;
+//	private InstanceRecycler<TransformedInstance> instances;
 //
 //	public ItemVisual(VisualizationContext ctx, ItemEntity entity, float partialTick) {
 //		super(ctx, entity, partialTick);
 //
-//		var item = entity.getItem();
-//		bakedModel = ItemModels.getModel(item);
-//
-//		var model = ItemModels.get(level, item, ItemDisplayContext.GROUND);
-//
+//		currentStack = entity.getItem();
+//		bakedModel = ItemModels.getModel(currentStack);
+//		var model =  ItemModels.get(level, currentStack, ItemDisplayContext.GROUND);
 //		instances = new InstanceRecycler<>(() -> ctx.instancerProvider()
 //				.instancer(InstanceTypes.TRANSFORMED, model)
 //				.createInstance());
@@ -63,8 +63,18 @@
 //		TransformStack.of(pPoseStack)
 //				.translate(getVisualPosition(partialTick));
 //
-//		instances.resetCount();
 //		ItemStack itemstack = entity.getItem();
+//		if (!ItemStack.matches(itemstack, currentStack)) {
+//			instances.delete();
+//			currentStack = itemstack.copy();
+//			bakedModel = ItemModels.getModel(currentStack);
+//			var model =  ItemModels.get(level, currentStack, ItemDisplayContext.GROUND);
+//			instances = new InstanceRecycler<>(() -> visualizationContext.instancerProvider()
+//					.instancer(InstanceTypes.TRANSFORMED, model)
+//					.createInstance());
+//		}
+//		instances.resetCount();
+//
 //		int i = itemstack.isEmpty() ? 187 : Item.getId(itemstack.getItem()) + itemstack.getDamageValue();
 //		var random = RANDOM.get();
 //		random.setSeed(i);
