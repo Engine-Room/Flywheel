@@ -7,16 +7,16 @@ import dev.engine_room.flywheel.lib.model.SimpleModel;
 import dev.engine_room.flywheel.lib.model.baked.BakedModelBuilder;
 import dev.engine_room.flywheel.lib.model.baked.BlockModelBuilder;
 import dev.engine_room.flywheel.lib.model.baked.ModelBuilderImpl;
-import net.minecraft.client.resources.model.BakedModel;
+import dev.engine_room.flywheel.lib.model.baked.PartialModelEventHandler;
+import net.minecraft.client.renderer.block.dispatch.BlockStateModel;
 import net.minecraft.client.resources.model.ModelManager;
-import net.minecraft.client.resources.model.ModelResourceLocation;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 public class FlwLibXplatImpl implements FlwLibXplat {
 	@Override
 	@UnknownNullability
-	public BakedModel getBakedModel(ModelManager modelManager, ResourceLocation location) {
-		return modelManager.getModel(ModelResourceLocation.standalone(location));
+	public BlockStateModel getBakedModel(ModelManager modelManager, Identifier location) {
+		return modelManager.getStandaloneModel(PartialModelEventHandler.getKey(location));
 	}
 
 	@Override

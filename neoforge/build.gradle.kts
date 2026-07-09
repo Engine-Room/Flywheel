@@ -2,7 +2,7 @@ plugins {
     idea
     java
     `maven-publish`
-    id("dev.architectury.loom")
+    id("dev.architectury.loom-no-remap")
     id("flywheel.subproject")
     id("flywheel.platform")
 }
@@ -18,6 +18,14 @@ val backend = sourceSets.create("backend")
 val stubs = sourceSets.create("stubs")
 val main = sourceSets.getByName("main")
 val testMod = sourceSets.create("testMod")
+
+lib.java.exclude(
+	"dev/engine_room/flywheel/lib/model/baked/NeoForgeSinglePosVirtualBlockGetter.java",
+)
+
+main.java.exclude(
+    "dev/engine_room/flywheel/impl/mixin/neoforge/ModelBlockRendererMixin.java",
+)
 
 transitiveSourceSets {
     compileClasspath = main.compileClasspath
@@ -112,12 +120,6 @@ defaultPackageInfos {
 }
 
 loom {
-    mixin {
-        useLegacyMixinAp = true
-        add(main, "flywheel.refmap.json")
-        add(backend, "backend-flywheel.refmap.json")
-    }
-
     runs {
         configureEach {
             property("forge.logging.markers", "")
@@ -133,10 +135,14 @@ repositories {
 dependencies {
     neoForge("net.neoforged:neoforge:${property("neoforge_version")}")
 
-    modCompileOnly("maven.modrinth:sodium:${property("sodium_version")}-neoforge")
-    modCompileOnly("maven.modrinth:iris:${property("iris_version")}-neoforge")
+    compileOnly("maven.modrinth:sodium:${property("sodium_version")}-neoforge")
+    if (property("iris_version") != "none") {
+        compileOnly("maven.modrinth:iris:${property("iris_version")}-neoforge")
+    }
 
-    modCompileOnly("maven.modrinth:embeddium:${property("embeddium_version")}")
+    if (property("embeddium_version") != "none") {
+        compileOnly("maven.modrinth:embeddium:${property("embeddium_version")}")
+    }
 
     "forApi"(project(path = common, configuration = "apiClasses"))
     "forLib"(project(path = common, configuration = "libClasses"))
@@ -147,4 +153,10 @@ dependencies {
     "forLib"(project(path = common, configuration = "libResources"))
     "forBackend"(project(path = common, configuration = "backendResources"))
     "forMain"(project(path = common, configuration = "mainResources"))
+}
+
+sourceSets.main {
+    if (property("embeddium_version") == "none") {
+        java.exclude("dev/engine_room/flywheel/impl/compat/EmbeddiumCompat.java")
+    }
 }

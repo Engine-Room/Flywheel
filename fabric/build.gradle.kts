@@ -132,7 +132,9 @@ dependencies {
     modApi("net.fabricmc.fabric-api:fabric-api:${property("fabric_api_version")}")
 
     modCompileOnly("maven.modrinth:sodium:${property("sodium_version")}-fabric")
-    modCompileOnly("maven.modrinth:iris:${property("iris_version")}-fabric")
+    if (property("iris_version") != "none") {
+        modCompileOnly("maven.modrinth:iris:${property("iris_version")}-fabric")
+    }
 
     "forApi"(project(path = common, configuration = "apiClasses"))
     "forLib"(project(path = common, configuration = "libClasses"))

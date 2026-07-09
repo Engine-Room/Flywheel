@@ -19,7 +19,7 @@ import dev.engine_room.flywheel.backend.glsl.error.lines.SpanHighlightLine;
 import dev.engine_room.flywheel.backend.glsl.error.lines.TextLine;
 import dev.engine_room.flywheel.backend.glsl.span.Span;
 import dev.engine_room.flywheel.lib.util.StringUtil;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 public class ErrorBuilder {
 	// set to false for testing
@@ -69,7 +69,7 @@ public class ErrorBuilder {
 		return pointAtFile(source.name);
 	}
 
-	public ErrorBuilder pointAtFile(ResourceLocation file) {
+	public ErrorBuilder pointAtFile(Identifier file) {
 		return pointAtFile(file.toString());
 	}
 

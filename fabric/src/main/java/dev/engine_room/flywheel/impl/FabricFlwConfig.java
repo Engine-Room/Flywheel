@@ -18,8 +18,8 @@ import dev.engine_room.flywheel.backend.BackendConfig;
 import dev.engine_room.flywheel.backend.FlwBackend;
 import dev.engine_room.flywheel.backend.compile.LightSmoothness;
 import net.fabricmc.loader.api.FabricLoader;
-import net.minecraft.ResourceLocationException;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.IdentifierException;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.Mth;
 
 public class FabricFlwConfig implements FlwConfig {
@@ -122,10 +122,10 @@ public class FabricFlwConfig implements FlwConfig {
 			}
 
 			try {
-				this.backend = Backend.REGISTRY.getOrThrow(ResourceLocation.parse(value));
+				this.backend = Backend.REGISTRY.getOrThrow(Identifier.parse(value));
 				useDefaultBackend = false;
 				return;
-			} catch (ResourceLocationException e) {
+			} catch (IdentifierException e) {
 				msg = "'backend' value '" + value + "' is not a valid resource location";
 			} catch (IllegalArgumentException e) {
 				msg = "Backend with ID '" + value + "' is not registered";

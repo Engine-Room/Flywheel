@@ -1,37 +1,29 @@
 package dev.engine_room.flywheel.backend.engine;
 
-import com.mojang.blaze3d.systems.RenderSystem;
+import org.lwjgl.opengl.GL11;
 
 import dev.engine_room.flywheel.backend.Samplers;
+import dev.engine_room.flywheel.backend.gl.GlTextureUtil;
 import net.minecraft.client.Minecraft;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 public class TextureBinder {
-	public static void bind(ResourceLocation resourceLocation) {
-		RenderSystem.bindTexture(byName(resourceLocation));
+	public static void bind(Identifier Identifier) {
+		GL11.glBindTexture(GL11.GL_TEXTURE_2D, byName(Identifier));
 	}
 
 	public static void bindLightAndOverlay() {
 		var gameRenderer = Minecraft.getInstance().gameRenderer;
 
 		Samplers.OVERLAY.makeActive();
-		gameRenderer.overlayTexture()
-				.setupOverlayColor();
-		RenderSystem.bindTexture(RenderSystem.getShaderTexture(1));
+		GL11.glBindTexture(GL11.GL_TEXTURE_2D, GlTextureUtil.glId(gameRenderer.overlayTexture()
+				.getTextureView()));
 
 		Samplers.LIGHT.makeActive();
-		gameRenderer.lightTexture()
-				.turnOnLightLayer();
-		RenderSystem.bindTexture(RenderSystem.getShaderTexture(2));
+		GL11.glBindTexture(GL11.GL_TEXTURE_2D, GlTextureUtil.glId(gameRenderer.lightmap()));
 	}
 
 	public static void resetLightAndOverlay() {
-		var gameRenderer = Minecraft.getInstance().gameRenderer;
-
-		gameRenderer.overlayTexture()
-				.teardownOverlayColor();
-		gameRenderer.lightTexture()
-				.turnOffLightLayer();
 	}
 
 	/**
@@ -40,10 +32,11 @@ public class TextureBinder {
 	 * @param texture The texture's resource location.
 	 * @return The texture.
 	 */
-	public static int byName(ResourceLocation texture) {
-		return Minecraft.getInstance()
+	public static int byName(Identifier texture) {
+		var abstractTexture = Minecraft.getInstance()
 				.getTextureManager()
-				.getTexture(texture)
-				.getId();
+				.getTexture(texture);
+		var textureView = abstractTexture.getTextureView();
+		return textureView == null ? 0 : GlTextureUtil.glId(textureView);
 	}
 }

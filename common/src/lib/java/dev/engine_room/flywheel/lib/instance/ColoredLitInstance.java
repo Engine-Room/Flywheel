@@ -2,7 +2,7 @@ package dev.engine_room.flywheel.lib.instance;
 
 import dev.engine_room.flywheel.api.instance.InstanceHandle;
 import dev.engine_room.flywheel.api.instance.InstanceType;
-import net.minecraft.util.FastColor;
+import net.minecraft.util.ARGB;
 
 public abstract class ColoredLitInstance extends AbstractInstance implements FlatLit {
 	public byte red = (byte) 0xFF;
@@ -17,11 +17,11 @@ public abstract class ColoredLitInstance extends AbstractInstance implements Fla
 	}
 
 	public ColoredLitInstance colorArgb(int argb) {
-		return color(FastColor.ARGB32.red(argb), FastColor.ARGB32.green(argb), FastColor.ARGB32.blue(argb), FastColor.ARGB32.alpha(argb));
+		return color(ARGB.red(argb), ARGB.green(argb), ARGB.blue(argb), ARGB.alpha(argb));
 	}
 
 	public ColoredLitInstance colorRgb(int rgb) {
-		return color(FastColor.ARGB32.red(rgb), FastColor.ARGB32.green(rgb), FastColor.ARGB32.blue(rgb));
+		return color(ARGB.red(rgb), ARGB.green(rgb), ARGB.blue(rgb));
 	}
 
 	public ColoredLitInstance color(int red, int green, int blue, int alpha) {

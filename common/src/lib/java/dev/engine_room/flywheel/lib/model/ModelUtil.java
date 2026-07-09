@@ -15,21 +15,21 @@ import dev.engine_room.flywheel.lib.material.Materials;
 import dev.engine_room.flywheel.lib.material.SimpleMaterial;
 import dev.engine_room.flywheel.lib.memory.MemoryBlock;
 import dev.engine_room.flywheel.lib.vertex.PosVertexView;
-import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.Sheets;
+import net.minecraft.client.renderer.chunk.ChunkSectionLayer;
+import net.minecraft.client.renderer.rendertype.RenderType;
+import net.minecraft.client.renderer.rendertype.RenderTypes;
 
 public final class ModelUtil {
 	private static final float BOUNDING_SPHERE_EPSILON = 1e-4f;
 
-	private static final RenderType[] CHUNK_LAYERS = new RenderType[]{RenderType.solid(), RenderType.cutoutMipped(), RenderType.cutout(), RenderType.translucent(), RenderType.tripwire()};
-
 	// Array of chunk materials to make lookups easier.
 	// Index by (renderTypeIdx * 4 + shaded * 2 + ambientOcclusion).
-	private static final Material[] CHUNK_MATERIALS = new Material[20];
+	private static final Material[] CHUNK_MATERIALS = new Material[12];
 
 	static {
-		Material[] baseChunkMaterials = new Material[]{Materials.SOLID_BLOCK, Materials.CUTOUT_MIPPED_BLOCK, Materials.CUTOUT_BLOCK, Materials.TRANSLUCENT_BLOCK, Materials.TRIPWIRE_BLOCK,};
-		for (int chunkLayerIdx = 0; chunkLayerIdx < CHUNK_LAYERS.length; chunkLayerIdx++) {
+		Material[] baseChunkMaterials = new Material[]{Materials.SOLID_BLOCK, Materials.CUTOUT_BLOCK, Materials.TRANSLUCENT_BLOCK};
+		for (int chunkLayerIdx = 0; chunkLayerIdx < baseChunkMaterials.length; chunkLayerIdx++) {
 			int baseMaterialIdx = chunkLayerIdx * 4;
 			Material baseChunkMaterial = baseChunkMaterials[chunkLayerIdx];
 
@@ -61,17 +61,27 @@ public final class ModelUtil {
 
 	@Nullable
 	public static Material getMaterial(RenderType chunkRenderType, boolean shaded, boolean ambientOcclusion) {
-		for (int chunkLayerIdx = 0; chunkLayerIdx < CHUNK_LAYERS.length; ++chunkLayerIdx) {
-			if (chunkRenderType == CHUNK_LAYERS[chunkLayerIdx]) {
-				int shadedIdx = shaded ? 1 : 0;
-				int ambientOcclusionIdx = ambientOcclusion ? 1 : 0;
+		if (chunkRenderType == Sheets.cutoutBlockItemSheet() || chunkRenderType == Sheets.cutoutItemSheet()) {
+			return getMaterial(ChunkSectionLayer.CUTOUT, shaded, ambientOcclusion);
+		}
 
-				int materialIdx = chunkLayerIdx * 4 + shadedIdx * 2 + ambientOcclusionIdx;
-
-				return CHUNK_MATERIALS[materialIdx];
-			}
+		if (chunkRenderType == Sheets.translucentBlockItemSheet() || chunkRenderType == Sheets.translucentItemSheet()) {
+			return getMaterial(ChunkSectionLayer.TRANSLUCENT, shaded, ambientOcclusion);
 		}
 		return null;
+	}
+
+	@Nullable
+	public static Material getMaterial(ChunkSectionLayer chunkLayer, boolean shaded, boolean ambientOcclusion) {
+		int chunkLayerIdx = switch (chunkLayer) {
+			case SOLID -> 0;
+			case CUTOUT -> 1;
+			case TRANSLUCENT -> 2;
+		};
+		int shadedIdx = shaded ? 1 : 0;
+		int ambientOcclusionIdx = ambientOcclusion ? 1 : 0;
+		int materialIdx = chunkLayerIdx * 4 + shadedIdx * 2 + ambientOcclusionIdx;
+		return CHUNK_MATERIALS[materialIdx];
 	}
 
 	@Nullable
@@ -82,22 +92,18 @@ public final class ModelUtil {
 			return chunkMaterial;
 		}
 
-		if (renderType == Sheets.cutoutBlockSheet()) {
+		if (renderType == Sheets.cutoutBlockItemSheet() || renderType == Sheets.cutoutItemSheet()) {
 			return Materials.CUTOUT_BLOCK;
 		}
 
-		if (renderType == Sheets.solidBlockSheet()) {
-			return Materials.SOLID_BLOCK;
-		}
-
-		if (renderType == Sheets.translucentCullBlockSheet() || renderType == Sheets.translucentItemSheet()) {
+		if (renderType == Sheets.translucentBlockItemSheet() || renderType == Sheets.translucentItemSheet()) {
 			return Materials.TRANSLUCENT_ENTITY;
 		}
 
-		if (renderType == RenderType.glint() || renderType == RenderType.glintTranslucent()) {
+		if (renderType == RenderTypes.glint() || renderType == RenderTypes.glintTranslucent()) {
 			return Materials.GLINT;
 		}
-		if (renderType == RenderType.entityGlint() || renderType == RenderType.entityGlintDirect()) {
+		if (renderType == RenderTypes.entityGlint() || renderType == RenderTypes.armorEntityGlint()) {
 			return Materials.GLINT_ENTITY;
 		}
 		return null;

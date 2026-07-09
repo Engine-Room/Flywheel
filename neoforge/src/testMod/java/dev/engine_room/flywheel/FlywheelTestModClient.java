@@ -6,7 +6,7 @@ import org.spongepowered.asm.mixin.MixinEnvironment;
 
 import net.minecraft.client.Minecraft;
 import net.neoforged.fml.common.Mod;
-import net.neoforged.fml.loading.FMLLoader;
+import net.neoforged.fml.loading.FMLEnvironment;
 import net.neoforged.neoforge.client.event.ClientTickEvent;
 import net.neoforged.neoforge.common.NeoForge;
 
@@ -16,7 +16,7 @@ public class FlywheelTestModClient {
 	private static final Logger LOGGER = LoggerFactory.getLogger(NAME);
 
 	public FlywheelTestModClient() {
-		LOGGER.info("Starting {} on Dist: {}", NAME, FMLLoader.getDist());
+		LOGGER.info("Starting {} on Dist: {}", NAME, FMLEnvironment.getDist());
 
 		NeoForge.EVENT_BUS.addListener((ClientTickEvent.Post e) -> {
 			LOGGER.info("Running mixin audit");

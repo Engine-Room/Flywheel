@@ -5,19 +5,20 @@ import java.util.Arrays;
 import org.jetbrains.annotations.UnknownNullability;
 
 import com.google.common.collect.ImmutableList;
+import com.mojang.blaze3d.PrimitiveTopology;
 import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.ByteBufferBuilder;
 
 import dev.engine_room.flywheel.api.material.Material;
 import dev.engine_room.flywheel.api.model.Mesh;
 import dev.engine_room.flywheel.api.model.Model;
-import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.chunk.ChunkSectionLayer;
 
 class MeshEmitter {
 	private static final int INITIAL_CAPACITY = 1;
 
 	private final ByteBufferBuilderStack byteBufferBuilderStack;
-	private final RenderType renderType;
+	private final ChunkSectionLayer chunkLayer;
 
 	private Material @UnknownNullability [] materials = new Material[INITIAL_CAPACITY];
 	private BufferBuilder @UnknownNullability [] bufferBuilders = new BufferBuilder[INITIAL_CAPACITY];
@@ -30,9 +31,9 @@ class MeshEmitter {
 
 	private int currentIndex = 0;
 
-	MeshEmitter(ByteBufferBuilderStack byteBufferBuilderStack, RenderType renderType) {
+	MeshEmitter(ByteBufferBuilderStack byteBufferBuilderStack, ChunkSectionLayer chunkLayer) {
 		this.byteBufferBuilderStack = byteBufferBuilderStack;
-		this.renderType = renderType;
+		this.chunkLayer = chunkLayer;
 	}
 
 	public void prepare(BlockMaterialFunction blockMaterialFunction) {
@@ -89,8 +90,8 @@ class MeshEmitter {
 
 		ByteBufferBuilder byteBufferBuilder = byteBufferBuilderStack.nextOrCreate();
 
-		// Trust that the RenderType mode/format don't change out from underneath us.
-		BufferBuilder bufferBuilder = new BufferBuilder(byteBufferBuilder, renderType.mode(), renderType.format());
+		// Trust that the chunk layer format doesn't change out from underneath us.
+		BufferBuilder bufferBuilder = new BufferBuilder(byteBufferBuilder, PrimitiveTopology.QUADS, chunkLayer.vertexFormat());
 
 		// currentIndex == numBufferBuildersPopulated here.
 		materials[currentIndex] = material;

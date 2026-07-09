@@ -4,16 +4,17 @@ import org.jetbrains.annotations.Nullable;
 
 import dev.engine_room.flywheel.api.backend.RenderContext;
 import dev.engine_room.flywheel.backend.FlwBackendXplat;
-import dev.engine_room.flywheel.backend.mixin.AbstractClientPlayerAccessor;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.multiplayer.PlayerInfo;
-import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.core.BlockPos;
-import net.minecraft.util.FastColor;
+import net.minecraft.util.ARGB;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LightLayer;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.phys.Vec3;
@@ -27,15 +28,16 @@ public final class PlayerUniforms extends UniformWriter {
 	}
 
 	public static void update(RenderContext context) {
-		LocalPlayer player = Minecraft.getInstance().player;
-		if (player == null) {
+		Minecraft minecraft = Minecraft.getInstance();
+		Entity cameraEntity = minecraft.getCameraEntity();
+		if (!(cameraEntity instanceof Player player)) {
 			BUFFER.clear();
 			return;
 		}
 
 		long ptr = BUFFER.ptr();
 
-		PlayerInfo info = ((AbstractClientPlayerAccessor) player).flywheel$getPlayerInfo();
+		PlayerInfo info = minecraft.getConnection() == null ? null : minecraft.getConnection().getPlayerInfo(player.getUUID());
 
 		Vec3 eyePos = player.getEyePosition(context.partialTick());
 		ptr = writeVec3(ptr, (float) eyePos.x, (float) eyePos.y, (float) eyePos.z);
@@ -62,12 +64,14 @@ public final class PlayerUniforms extends UniformWriter {
 
 	private static long writeTeamColor(long ptr, @Nullable PlayerTeam team) {
 		if (team != null) {
-			Integer color = team.getColor().getColor();
+			Integer color = team.getColor()
+					.map(net.minecraft.world.scores.TeamColor::rgb)
+					.orElse(null);
 
 			if (color != null) {
-				int red = FastColor.ARGB32.red(color);
-				int green = FastColor.ARGB32.green(color);
-				int blue = FastColor.ARGB32.blue(color);
+				int red = ARGB.red(color);
+				int green = ARGB.green(color);
+				int blue = ARGB.blue(color);
 				return writeVec4(ptr, red / 255f, green / 255f, blue / 255f, 1f);
 			} else {
 				return writeVec4(ptr, 1f, 1f, 1f, 1f);
@@ -77,25 +81,26 @@ public final class PlayerUniforms extends UniformWriter {
 		}
 	}
 
-	private static long writeEyeBrightness(long ptr, LocalPlayer player) {
-		ClientLevel level = player.clientLevel;
+	private static long writeEyeBrightness(long ptr, Player player) {
+		ClientLevel level = (ClientLevel) player.level();
 		int blockBrightness = level.getBrightness(LightLayer.BLOCK, player.blockPosition());
 		int skyBrightness = level.getBrightness(LightLayer.SKY, player.blockPosition());
-		int maxBrightness = level.getMaxLightLevel();
+		int maxBrightness = Level.MAX_BRIGHTNESS;
 
 		return writeVec2(ptr, (float) blockBrightness / (float) maxBrightness,
 				(float) skyBrightness / (float) maxBrightness);
 	}
 
-	private static long writeHeldLight(long ptr, LocalPlayer player) {
+	private static long writeHeldLight(long ptr, Player player) {
 		int heldLight = 0;
 
 		for (InteractionHand hand : InteractionHand.values()) {
 			Item handItem = player.getItemInHand(hand).getItem();
 			if (handItem instanceof BlockItem blockItem) {
 				Block block = blockItem.getBlock();
+				ClientLevel level = (ClientLevel) player.level();
 				int blockLight = FlwBackendXplat.INSTANCE
-						.getLightEmission(block.defaultBlockState(), player.clientLevel, player.blockPosition());
+						.getLightEmission(block.defaultBlockState(), level, player.blockPosition());
 				if (heldLight < blockLight) {
 					heldLight = blockLight;
 				}
@@ -105,8 +110,8 @@ public final class PlayerUniforms extends UniformWriter {
 		return writeFloat(ptr, (float) heldLight / 15);
 	}
 
-	private static long writeEyeIn(long ptr, LocalPlayer player) {
-		ClientLevel level = player.clientLevel;
+	private static long writeEyeIn(long ptr, Player player) {
+		ClientLevel level = (ClientLevel) player.level();
 		Vec3 eyePos = player.getEyePosition();
 		BlockPos blockPos = BlockPos.containing(eyePos);
 		return writeInFluidAndBlock(ptr, level, blockPos, eyePos);

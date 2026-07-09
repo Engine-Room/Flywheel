@@ -49,6 +49,12 @@ class VertexWriter implements VertexConsumer {
 	}
 
 	@Override
+	public VertexConsumer setColor(int color) {
+		// ignore color
+		return this;
+	}
+
+	@Override
 	public VertexConsumer setUv(float u, float v) {
 		if (!filledTexture) {
 			long ptr = vertexPtr();
@@ -80,6 +86,11 @@ class VertexWriter implements VertexConsumer {
 			MemoryUtil.memPutByte(ptr + 22, DataPacker.packNormI8(z));
 			filledNormal = true;
 		}
+		return this;
+	}
+
+	@Override
+	public VertexConsumer setLineWidth(float width) {
 		return this;
 	}
 

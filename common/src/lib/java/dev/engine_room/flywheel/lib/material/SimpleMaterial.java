@@ -9,8 +9,8 @@ import dev.engine_room.flywheel.api.material.Material;
 import dev.engine_room.flywheel.api.material.MaterialShaders;
 import dev.engine_room.flywheel.api.material.Transparency;
 import dev.engine_room.flywheel.api.material.WriteMask;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.inventory.InventoryMenu;
+import net.minecraft.client.renderer.texture.TextureAtlas;
+import net.minecraft.resources.Identifier;
 
 public class SimpleMaterial implements Material {
 	protected final MaterialShaders shaders;
@@ -18,7 +18,7 @@ public class SimpleMaterial implements Material {
 	protected final CutoutShader cutout;
 	protected final LightShader light;
 
-	protected final ResourceLocation texture;
+	protected final Identifier texture;
 	protected final boolean blur;
 	protected final boolean mipmap;
 
@@ -82,7 +82,7 @@ public class SimpleMaterial implements Material {
 	}
 
 	@Override
-	public ResourceLocation texture() {
+	public Identifier texture() {
 		return texture;
 	}
 
@@ -147,7 +147,7 @@ public class SimpleMaterial implements Material {
 		protected CutoutShader cutout;
 		protected LightShader light;
 
-		protected ResourceLocation texture;
+		protected Identifier texture;
 		protected boolean blur;
 		protected boolean mipmap;
 
@@ -168,7 +168,7 @@ public class SimpleMaterial implements Material {
 			fog = FogShaders.LINEAR;
 			cutout = CutoutShaders.OFF;
 			light = LightShaders.SMOOTH_WHEN_EMBEDDED;
-			texture = InventoryMenu.BLOCK_ATLAS;
+			texture = TextureAtlas.LOCATION_BLOCKS;
 			blur = false;
 			mipmap = true;
 			backfaceCulling = true;
@@ -226,7 +226,7 @@ public class SimpleMaterial implements Material {
 			return this;
 		}
 
-		public Builder texture(ResourceLocation value) {
+		public Builder texture(Identifier value) {
 			this.texture = value;
 			return this;
 		}
@@ -315,7 +315,7 @@ public class SimpleMaterial implements Material {
 		}
 
 		@Override
-		public ResourceLocation texture() {
+		public Identifier texture() {
 			return texture;
 		}
 

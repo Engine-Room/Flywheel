@@ -7,8 +7,8 @@ import dev.engine_room.flywheel.api.backend.Backend;
 import dev.engine_room.flywheel.api.backend.BackendManager;
 import dev.engine_room.flywheel.backend.BackendConfig;
 import dev.engine_room.flywheel.backend.compile.LightSmoothness;
-import net.minecraft.ResourceLocationException;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.IdentifierException;
+import net.minecraft.resources.Identifier;
 import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.config.ModConfig;
 import net.neoforged.neoforge.common.ModConfigSpec;
@@ -42,10 +42,10 @@ public class NeoForgeFlwConfig implements FlwConfig {
 			return BackendManager.defaultBackend();
 		}
 
-		ResourceLocation backendId;
+		Identifier backendId;
 		try {
-			backendId = ResourceLocation.parse(value);
-		} catch (ResourceLocationException e) {
+			backendId = Identifier.parse(value);
+		} catch (IdentifierException e) {
 			FlwImpl.CONFIG_LOGGER.warn("'backend' value '{}' is not a valid resource location", value);
 			return null;
 		}

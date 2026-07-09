@@ -12,7 +12,7 @@ import dev.engine_room.flywheel.api.visual.TickableVisual;
 import dev.engine_room.flywheel.api.visualization.VisualizationContext;
 import dev.engine_room.flywheel.api.visualization.VisualizationManager;
 import dev.engine_room.flywheel.lib.instance.FlatLit;
-import net.minecraft.client.renderer.LightTexture;
+import dev.engine_room.flywheel.lib.util.LightUtil;
 import net.minecraft.core.BlockPos;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
@@ -89,14 +89,14 @@ public abstract class AbstractEntityVisual<T extends Entity> extends AbstractVis
 	}
 
 	public boolean isVisible(FrustumIntersection frustum) {
-		return entity.noCulling || visibilityTester.check(frustum);
+		return visibilityTester.check(frustum);
 	}
 
 	protected int computePackedLight(float partialTick) {
 		BlockPos pos = BlockPos.containing(entity.getLightProbePosition(partialTick));
 		int blockLight = entity.isOnFire() ? 15 : level.getBrightness(LightLayer.BLOCK, pos);
 		int skyLight = level.getBrightness(LightLayer.SKY, pos);
-		return LightTexture.pack(blockLight, skyLight);
+		return LightUtil.pack(blockLight, skyLight);
 	}
 
 	protected void relight(float partialTick, @Nullable FlatLit... instances) {

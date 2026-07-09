@@ -1,45 +1,16 @@
 package dev.engine_room.flywheel.impl.compat;
 
-import dev.engine_room.flywheel.impl.FlwImpl;
-import net.irisshaders.iris.api.v0.IrisApi;
-
 public final class IrisCompat {
-	public static final boolean ACTIVE = CompatMod.IRIS.isLoaded;
-
-	static {
-		if (ACTIVE) {
-			FlwImpl.LOGGER.debug("Detected Iris");
-		}
-	}
+	public static final boolean ACTIVE = false;
 
 	private IrisCompat() {
 	}
 
 	public static boolean isShaderPackInUse() {
-		if (!ACTIVE) {
-			return false;
-		}
-
-		return Internals.isShaderPackInUse();
+		return false;
 	}
 
 	public static boolean isRenderingShadowPass() {
-		if (!ACTIVE) {
-			return false;
-		}
-
-		return Internals.isRenderingShadowPass();
-	}
-
-	private static final class Internals {
-		static boolean isShaderPackInUse() {
-			return IrisApi.getInstance()
-					.isShaderPackInUse();
-		}
-
-		static boolean isRenderingShadowPass() {
-			return IrisApi.getInstance()
-					.isRenderingShadowPass();
-		}
+		return false;
 	}
 }

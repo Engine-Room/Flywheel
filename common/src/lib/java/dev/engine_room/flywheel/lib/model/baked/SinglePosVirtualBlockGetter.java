@@ -61,13 +61,16 @@ public class SinglePosVirtualBlockGetter extends VirtualBlockGetter {
 		return Blocks.AIR.defaultBlockState();
 	}
 
-	@Override
 	public int getHeight() {
 		return 1;
 	}
 
-	@Override
 	public int getMinBuildHeight() {
+		return pos.getY();
+	}
+
+	@Override
+	public int getMinY() {
 		return pos.getY();
 	}
 }

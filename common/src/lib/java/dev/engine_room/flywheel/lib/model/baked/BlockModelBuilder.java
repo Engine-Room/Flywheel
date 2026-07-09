@@ -10,9 +10,10 @@ import dev.engine_room.flywheel.api.material.Material;
 import dev.engine_room.flywheel.lib.internal.FlwLibXplat;
 import dev.engine_room.flywheel.lib.model.ModelUtil;
 import dev.engine_room.flywheel.lib.model.SimpleModel;
-import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.Sheets;
+import net.minecraft.client.renderer.rendertype.RenderType;
 import net.minecraft.core.BlockPos;
-import net.minecraft.world.level.BlockAndTintGetter;
+import net.minecraft.client.renderer.block.BlockAndTintGetter;
 
 public final class BlockModelBuilder {
 	final BlockAndTintGetter level;
@@ -41,7 +42,10 @@ public final class BlockModelBuilder {
 	@Deprecated(forRemoval = true)
 	public BlockModelBuilder materialFunc(@Nullable BiFunction<RenderType, Boolean, @Nullable Material> materialFunc) {
 		if (materialFunc != null) {
-			this.materialFunc = (chunkRenderType, shaded, ambientOcclusion) -> materialFunc.apply(chunkRenderType, shaded);
+			this.materialFunc = (chunkLayer, shaded, ambientOcclusion) -> materialFunc.apply(switch (chunkLayer) {
+				case SOLID, CUTOUT -> Sheets.cutoutBlockItemSheet();
+				case TRANSLUCENT -> Sheets.translucentBlockItemSheet();
+			}, shaded);
 		} else {
 			this.materialFunc = null;
 		}

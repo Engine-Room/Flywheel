@@ -16,21 +16,18 @@ import dev.engine_room.vanillin.config.Configurator;
 import dev.engine_room.vanillin.config.EntityVisualizerBuilder;
 import dev.engine_room.vanillin.elements.ShadowElement;
 import dev.engine_room.vanillin.visuals.BellVisual;
-import dev.engine_room.vanillin.visuals.BlockDisplayVisual;
 import dev.engine_room.vanillin.visuals.ChestVisual;
-import dev.engine_room.vanillin.visuals.ItemDisplayVisual;
-import dev.engine_room.vanillin.visuals.ItemFrameVisual;
-import dev.engine_room.vanillin.visuals.ItemVisual;
 import dev.engine_room.vanillin.visuals.MinecartVisual;
 import dev.engine_room.vanillin.visuals.ShulkerBoxVisual;
 import net.minecraft.client.model.geom.ModelLayerLocation;
 import net.minecraft.client.model.geom.ModelLayers;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.decoration.ItemFrame;
-import net.minecraft.world.entity.vehicle.AbstractMinecart;
+import net.minecraft.world.entity.EntityTypes;
+import net.minecraft.world.entity.vehicle.minecart.AbstractMinecart;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
+import net.minecraft.world.level.block.entity.BlockEntityTypes;
 
 public class VanillaVisuals {
 	public static final Configurator CONFIGURATOR = new Configurator();
@@ -41,47 +38,38 @@ public class VanillaVisuals {
 	public static final boolean EXPERIMENTAL = VanillinXplat.INSTANCE.isDevelopmentEnvironment();
 
 	public static void init() {
-		builder(BlockEntityType.CHEST)
+		builder(BlockEntityTypes.CHEST)
 				.factory(ChestVisual::new)
 				.apply(STABLE);
-		builder(BlockEntityType.ENDER_CHEST)
+		builder(BlockEntityTypes.ENDER_CHEST)
 				.factory(ChestVisual::new)
 				.apply(STABLE);
-		builder(BlockEntityType.TRAPPED_CHEST)
+		builder(BlockEntityTypes.TRAPPED_CHEST)
 				.factory(ChestVisual::new)
 				.apply(STABLE);
 
-		builder(BlockEntityType.BELL)
+		builder(BlockEntityTypes.BELL)
 				.factory(BellVisual::new)
 				.apply(STABLE);
 
-		builder(BlockEntityType.SHULKER_BOX)
+		builder(BlockEntityTypes.SHULKER_BOX)
 				.factory(ShulkerBoxVisual::new)
 				.apply(STABLE);
 
-		builder(EntityType.BLOCK_DISPLAY).factory(BlockDisplayVisual::new)
+		minecart(EntityTypes.CHEST_MINECART, ModelLayers.CHEST_MINECART)
+				.apply(STABLE);
+		minecart(EntityTypes.COMMAND_BLOCK_MINECART, ModelLayers.COMMAND_BLOCK_MINECART)
+				.apply(STABLE);
+		minecart(EntityTypes.FURNACE_MINECART, ModelLayers.FURNACE_MINECART)
+				.apply(STABLE);
+		minecart(EntityTypes.HOPPER_MINECART, ModelLayers.HOPPER_MINECART)
+				.apply(STABLE);
+		minecart(EntityTypes.MINECART, ModelLayers.MINECART)
+				.apply(STABLE);
+		minecart(EntityTypes.SPAWNER_MINECART, ModelLayers.SPAWNER_MINECART)
 				.apply(STABLE);
 
-		composable(EntityType.ITEM_DISPLAY).with(element(VisualElements.ITEM_DISPLAY).build())
-				.shouldVisualize((ctx, e) -> ItemDisplayVisual.shouldVisualize(e))
-				.build()
-				.skipVanillaRender(ItemDisplayVisual::shouldVisualize)
-				.apply(EXPERIMENTAL);
-
-		minecart(EntityType.CHEST_MINECART, ModelLayers.CHEST_MINECART)
-				.apply(STABLE);
-		minecart(EntityType.COMMAND_BLOCK_MINECART, ModelLayers.COMMAND_BLOCK_MINECART)
-				.apply(STABLE);
-		minecart(EntityType.FURNACE_MINECART, ModelLayers.FURNACE_MINECART)
-				.apply(STABLE);
-		minecart(EntityType.HOPPER_MINECART, ModelLayers.HOPPER_MINECART)
-				.apply(STABLE);
-		minecart(EntityType.MINECART, ModelLayers.MINECART)
-				.apply(STABLE);
-		minecart(EntityType.SPAWNER_MINECART, ModelLayers.SPAWNER_MINECART)
-				.apply(STABLE);
-
-		composable(EntityType.TNT_MINECART).apply(VanillaVisuals::commonElements)
+		composable(EntityTypes.TNT_MINECART).apply(VanillaVisuals::commonElements)
 				.with(element(VisualElements.SHADOW).configure(new ShadowElement.Config(0.7f, ShadowElement.Config.DEFAULT_STRENGTH))
 						.build())
 				.with(element(VisualElements.FIRE).build())
@@ -90,32 +78,11 @@ public class VanillaVisuals {
 				.skipVanillaRender(MinecartVisual::shouldSkipRender)
 				.apply(STABLE);
 
-		itemFrame(EntityType.ITEM_FRAME).apply(EXPERIMENTAL);
-		itemFrame(EntityType.GLOW_ITEM_FRAME).apply(EXPERIMENTAL);
-
-		composable(EntityType.ITEM).apply(VanillaVisuals::commonElements)
-				.with(element(VisualElements.FIRE).build())
-				.with(element(VisualElements.SHADOW).configure(new ShadowElement.Config(0.15f, 0.75f))
-						.build())
-				.with(element(VisualElements.ITEM_ENTITY).build())
-				.shouldVisualize(((ctx, entity) -> ItemVisual.isSupported(entity)))
-				.build()
-				.skipVanillaRender(ItemVisual::isSupported)
-				.apply(EXPERIMENTAL);
-
 	}
 
 	public static <T extends Entity> void commonElements(EntityBuilder<T> builder) {
 		builder.with(element(VisualElements.HITBOX).configure(false)
 				.build());
-	}
-
-	public static <T extends ItemFrame> EntityVisualizerBuilder<T> itemFrame(EntityType<T> type) {
-		return composable(type).apply(VanillaVisuals::commonElements)
-				.with(element(VisualElements.ITEM_FRAME).build())
-				.shouldVisualize((ctx, entity) -> ItemFrameVisual.shouldVisualize(entity))
-				.build()
-				.skipVanillaRender(ItemFrameVisual::shouldVisualize);
 	}
 
 	public static <T extends AbstractMinecart> EntityVisualizerBuilder<T> minecart(EntityType<T> type, ModelLayerLocation variant) {

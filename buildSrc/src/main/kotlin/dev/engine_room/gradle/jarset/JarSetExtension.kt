@@ -15,10 +15,11 @@ open class JarSetExtension(private val project: Project) {
 
     val mainSet: JarTaskSet by lazy {
         val jarTask = project.tasks.named<Jar>("jar")
-        val remapJarTask = project.tasks.named<RemapJarTask>("remapJar")
         val sourcesJarTask = project.tasks.named<Jar>("sourcesJar")
-        val remapSourcesJarTask = project.tasks.named<RemapSourcesJarTask>("remapSourcesJar")
         val javadocJarTask = project.tasks.named<Jar>("javadocJar")
+        val noRemap = project.plugins.hasPlugin("dev.architectury.loom-no-remap")
+        val remapJarTask = if (noRemap) jarTask else project.tasks.named<RemapJarTask>("remapJar")
+        val remapSourcesJarTask = if (noRemap) sourcesJarTask else project.tasks.named<RemapSourcesJarTask>("remapSourcesJar")
 
         JarTaskSet(project, "main", jarTask, sourcesJarTask, javadocJarTask, remapJarTask, remapSourcesJarTask)
     }

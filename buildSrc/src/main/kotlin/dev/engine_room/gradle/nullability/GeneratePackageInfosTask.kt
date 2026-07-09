@@ -42,14 +42,10 @@ open class GeneratePackageInfosTask: DefaultTask() {
                 NioExtensions.withWriter(target.resolve("package-info.java"), closureOf<BufferedWriter> {
                     val packageName = relativePath.toString().replace(File.separator, ".")
                     write(StringGroovyMethods.stripMargin("""@ParametersAreNonnullByDefault
-					|@FieldsAreNonnullByDefault
-					|@MethodsReturnNonnullByDefault
 					|package $packageName;
 					|
 					|import javax.annotation.ParametersAreNonnullByDefault;
 					|
-					|import net.minecraft.FieldsAreNonnullByDefault;
-					|import net.minecraft.MethodsReturnNonnullByDefault;
 					|"""))
                 })
             }

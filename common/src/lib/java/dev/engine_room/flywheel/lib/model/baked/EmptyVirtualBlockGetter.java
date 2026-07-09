@@ -35,13 +35,16 @@ public class EmptyVirtualBlockGetter extends VirtualBlockGetter {
 		return Fluids.EMPTY.defaultFluidState();
 	}
 
-	@Override
 	public final int getHeight() {
 		return 1;
 	}
 
-	@Override
 	public final int getMinBuildHeight() {
+		return 0;
+	}
+
+	@Override
+	public final int getMinY() {
 		return 0;
 	}
 }

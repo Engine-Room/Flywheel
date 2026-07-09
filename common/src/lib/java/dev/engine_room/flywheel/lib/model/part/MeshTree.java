@@ -11,6 +11,7 @@ import dev.engine_room.flywheel.api.model.Mesh;
 import dev.engine_room.flywheel.lib.internal.FlwLibLink;
 import dev.engine_room.flywheel.lib.memory.MemoryBlock;
 import dev.engine_room.flywheel.lib.model.SimpleQuadMesh;
+import dev.engine_room.flywheel.lib.util.LightUtil;
 import dev.engine_room.flywheel.lib.util.RendererReloadCache;
 import dev.engine_room.flywheel.lib.vertex.PosTexNormalVertexView;
 import dev.engine_room.flywheel.lib.vertex.VertexView;
@@ -19,7 +20,6 @@ import net.minecraft.client.model.geom.EntityModelSet;
 import net.minecraft.client.model.geom.ModelLayerLocation;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.model.geom.PartPose;
-import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 
 public final class MeshTree {
@@ -74,7 +74,7 @@ public final class MeshTree {
 		}
 
 		VertexWriter vertexWriter = objects.vertexWriter;
-		FlwLibLink.INSTANCE.compileModelPart(modelPart, IDENTITY_POSE, vertexWriter, LightTexture.FULL_BRIGHT, OverlayTexture.NO_OVERLAY, 0xFFFFFFFF);
+		FlwLibLink.INSTANCE.compileModelPart(modelPart, IDENTITY_POSE, vertexWriter, LightUtil.FULL_BRIGHT, OverlayTexture.NO_OVERLAY, 0xFFFFFFFF);
 		MemoryBlock data = vertexWriter.copyDataAndReset();
 
 		VertexView vertexView = new PosTexNormalVertexView();

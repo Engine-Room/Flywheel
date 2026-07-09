@@ -7,23 +7,23 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 public class MockShaderSources {
-	private final Map<ResourceLocation, String> sources = new HashMap<>();
-	private final Map<ResourceLocation, LoadResult> cache = new HashMap<>();
-	private final Deque<ResourceLocation> findStack = new ArrayDeque<>();
+	private final Map<Identifier, String> sources = new HashMap<>();
+	private final Map<Identifier, LoadResult> cache = new HashMap<>();
+	private final Deque<Identifier> findStack = new ArrayDeque<>();
 
 
 	public MockShaderSources() {
 
 	}
 
-	public void add(ResourceLocation loc, String source) {
+	public void add(Identifier loc, String source) {
 		sources.put(loc, source);
 	}
 
-	public LoadResult find(ResourceLocation location) {
+	public LoadResult find(Identifier location) {
 		if (findStack.contains(location)) {
 			// Make a copy of the find stack with the offending location added on top to show the full path.
 			findStack.addLast(location);
@@ -39,7 +39,7 @@ public class MockShaderSources {
 		return out;
 	}
 
-	private LoadResult load(ResourceLocation loc) {
+	private LoadResult load(Identifier loc) {
 		var out = cache.get(loc);
 		if (out != null) {
 			return out;
@@ -52,7 +52,7 @@ public class MockShaderSources {
 		return loadResult;
 	}
 
-	private LoadResult _load(ResourceLocation loc) {
+	private LoadResult _load(Identifier loc) {
 		var maybeFound = sources.get(loc);
 		if (maybeFound == null) {
 			return new LoadResult.Failure(new LoadError.IOError(loc, new FileNotFoundException(loc.toString())));

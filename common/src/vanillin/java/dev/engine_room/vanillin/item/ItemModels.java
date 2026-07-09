@@ -47,7 +47,7 @@ import net.minecraft.client.resources.model.WeightedBakedModel;
 import net.minecraft.core.Direction;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.data.models.ItemModelGenerators;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.tags.TagKey;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.item.BlockItem;
@@ -71,25 +71,25 @@ public class ItemModels {
 
 	private static final @Nullable Direction[] DIRECTIONS = new Direction[]{Direction.DOWN, Direction.UP, Direction.NORTH, Direction.SOUTH, Direction.WEST, Direction.EAST, null};
 
-	private static final Set<ResourceLocation> ALLOWED_OVERRIDES = new HashSet<>();
+	private static final Set<Identifier> ALLOWED_OVERRIDES = new HashSet<>();
 
 	static {
-		ALLOWED_OVERRIDES.add(ResourceLocation.withDefaultNamespace("lefthanded"));
-		ALLOWED_OVERRIDES.add(ResourceLocation.withDefaultNamespace("cooldown"));
+		ALLOWED_OVERRIDES.add(Identifier.withDefaultNamespace("lefthanded"));
+		ALLOWED_OVERRIDES.add(Identifier.withDefaultNamespace("cooldown"));
 		ALLOWED_OVERRIDES.add(ItemModelGenerators.TRIM_TYPE_PREDICATE_ID);
-		ALLOWED_OVERRIDES.add(ResourceLocation.withDefaultNamespace("custom_model_data"));
-		ALLOWED_OVERRIDES.add(ResourceLocation.withDefaultNamespace("pull"));
-		ALLOWED_OVERRIDES.add(ResourceLocation.withDefaultNamespace("brushing"));
-		ALLOWED_OVERRIDES.add(ResourceLocation.withDefaultNamespace("pulling"));
-		ALLOWED_OVERRIDES.add(ResourceLocation.withDefaultNamespace("filled"));
-		ALLOWED_OVERRIDES.add(ResourceLocation.withDefaultNamespace("charged"));
-		ALLOWED_OVERRIDES.add(ResourceLocation.withDefaultNamespace("firework"));
-		ALLOWED_OVERRIDES.add(ResourceLocation.withDefaultNamespace("broken"));
-		ALLOWED_OVERRIDES.add(ResourceLocation.withDefaultNamespace("cast"));
-		ALLOWED_OVERRIDES.add(ResourceLocation.withDefaultNamespace("blocking"));
-		ALLOWED_OVERRIDES.add(ResourceLocation.withDefaultNamespace("throwing"));
-		ALLOWED_OVERRIDES.add(ResourceLocation.withDefaultNamespace("level"));
-		ALLOWED_OVERRIDES.add(ResourceLocation.withDefaultNamespace("tooting"));
+		ALLOWED_OVERRIDES.add(Identifier.withDefaultNamespace("custom_model_data"));
+		ALLOWED_OVERRIDES.add(Identifier.withDefaultNamespace("pull"));
+		ALLOWED_OVERRIDES.add(Identifier.withDefaultNamespace("brushing"));
+		ALLOWED_OVERRIDES.add(Identifier.withDefaultNamespace("pulling"));
+		ALLOWED_OVERRIDES.add(Identifier.withDefaultNamespace("filled"));
+		ALLOWED_OVERRIDES.add(Identifier.withDefaultNamespace("charged"));
+		ALLOWED_OVERRIDES.add(Identifier.withDefaultNamespace("firework"));
+		ALLOWED_OVERRIDES.add(Identifier.withDefaultNamespace("broken"));
+		ALLOWED_OVERRIDES.add(Identifier.withDefaultNamespace("cast"));
+		ALLOWED_OVERRIDES.add(Identifier.withDefaultNamespace("blocking"));
+		ALLOWED_OVERRIDES.add(Identifier.withDefaultNamespace("throwing"));
+		ALLOWED_OVERRIDES.add(Identifier.withDefaultNamespace("level"));
+		ALLOWED_OVERRIDES.add(Identifier.withDefaultNamespace("tooting"));
 	}
 
 	public static boolean isSupported(ItemStack stack) {

@@ -301,7 +301,7 @@ public class InstancedDrawManager extends DrawManager<InstancedInstancer<?>> {
 	@Override
 	public void triggerFallback() {
 		InstancingPrograms.kill();
-		Minecraft.getInstance().levelRenderer.allChanged();
+		Minecraft.getInstance().levelRenderer.resetLevelRenderData();
 	}
 
 	@Override

@@ -18,7 +18,7 @@ import dev.engine_room.flywheel.lib.util.ResourceUtil;
 import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.commands.synchronization.SingletonArgumentInfo;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 public class BackendArgument implements ArgumentType<Backend> {
 	private static final List<String> EXAMPLES = List.of("off", "flywheel:off", "instancing");
@@ -32,7 +32,7 @@ public class BackendArgument implements ArgumentType<Backend> {
 
 	@Override
 	public Backend parse(StringReader reader) throws CommandSyntaxException {
-		ResourceLocation id = ResourceUtil.readFlywheelDefault(reader);
+		Identifier id = ResourceUtil.readFlywheelDefault(reader);
 		Backend backend = Backend.REGISTRY.get(id);
 
 		if (backend == null) {
@@ -45,7 +45,7 @@ public class BackendArgument implements ArgumentType<Backend> {
 	@Override
 	public <S> CompletableFuture<Suggestions> listSuggestions(CommandContext<S> context, SuggestionsBuilder builder) {
 		String input = builder.getRemaining().toLowerCase(Locale.ROOT);
-		for (ResourceLocation id : Backend.REGISTRY.getAllIds()) {
+		for (Identifier id : Backend.REGISTRY.getAllIds()) {
 			String idStr = id.toString();
 			if (SharedSuggestionProvider.matchesSubStr(input, idStr) || SharedSuggestionProvider.matchesSubStr(input, id.getPath())) {
 				builder.suggest(idStr);

@@ -34,13 +34,7 @@ versionRange = "${neoforge_version_range}"
 side = "CLIENT"
 
 [[dependencies.${ flywheel_id }]]
-modId = "embeddium"
-type = "optional"
-versionRange = "[0.3.25,)"
-side = "CLIENT"
-
-[[dependencies.${ flywheel_id }]]
 modId = "sodium"
 type = "optional"
-versionRange = "[0.6.0-beta.2,)"
+versionRange = "[0.9.0,)"
 side = "CLIENT"

@@ -3,6 +3,7 @@ package dev.engine_room.flywheel.backend.gl.shader;
 import static org.lwjgl.opengl.GL20.glBindAttribLocation;
 import static org.lwjgl.opengl.GL20.glDeleteProgram;
 import static org.lwjgl.opengl.GL20.glGetUniformLocation;
+import static org.lwjgl.opengl.GL20.glUseProgram;
 import static org.lwjgl.opengl.GL20.glUniform1f;
 import static org.lwjgl.opengl.GL20.glUniform1i;
 import static org.lwjgl.opengl.GL20.glUniform2f;
@@ -20,7 +21,6 @@ import org.joml.Matrix3fc;
 import org.joml.Matrix4fc;
 import org.slf4j.Logger;
 
-import com.mojang.blaze3d.shaders.ProgramManager;
 import com.mojang.logging.LogUtils;
 
 import dev.engine_room.flywheel.backend.gl.GlObject;
@@ -38,11 +38,11 @@ public class GlProgram extends GlObject {
 	}
 
 	public void bind() {
-		ProgramManager.glUseProgram(handle());
+		glUseProgram(handle());
 	}
 
 	public static void unbind() {
-		ProgramManager.glUseProgram(0);
+		glUseProgram(0);
 	}
 
 	public void setFloat(String glslName, float value) {

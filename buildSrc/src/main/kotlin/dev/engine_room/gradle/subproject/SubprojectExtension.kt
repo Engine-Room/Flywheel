@@ -101,14 +101,32 @@ open class SubprojectExtension(val project: Project) {
             val minecraft_version: String by project
             val parchment_minecraft_version: String by project
             val parchment_version: String by project
+            val minecraft_mapping_mode = project.findProperty("minecraft_mapping_mode") as String? ?: "official"
+            val noRemap = project.plugins.hasPlugin("dev.architectury.loom-no-remap")
             val loom = project.the<LoomGradleExtensionAPI>()
 
             add("minecraft", "com.mojang:minecraft:${minecraft_version}")
 
-            add("mappings", loom.layered {
-                officialMojangMappings()
-                parchment("org.parchmentmc.data:parchment-${parchment_minecraft_version}:${parchment_version}@zip")
-            })
+            if (!noRemap) {
+                add("mappings", loom.layered {
+                    if (minecraft_mapping_mode == "identity") {
+                        mappings(project.rootProject.file("gradle/minecraft-identity-mappings.tiny")) {
+                            fallbackNamespaces("official", "named")
+                            mergeNamespace("official")
+                        }
+                    } else if (minecraft_mapping_mode == "official") {
+                        officialMojangMappings()
+                        if (parchment_version != "none") {
+                            parchment("org.parchmentmc.data:parchment-${parchment_minecraft_version}:${parchment_version}@zip")
+                        }
+                    } else {
+                        error("Unknown minecraft_mapping_mode: $minecraft_mapping_mode")
+                    }
+                })
+            } else {
+                project.configurations.maybeCreate("mappingsFinal")
+                add("mappingsFinal", project.files(project.rootProject.file("gradle/minecraft-identity-mappings.tiny")))
+            }
 
             add("api", "com.google.code.findbugs:jsr305:3.0.2")
         }

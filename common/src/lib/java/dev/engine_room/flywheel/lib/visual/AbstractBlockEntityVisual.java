@@ -15,10 +15,11 @@ import dev.engine_room.flywheel.api.visualization.VisualManager;
 import dev.engine_room.flywheel.api.visualization.VisualizationContext;
 import dev.engine_room.flywheel.lib.instance.FlatLit;
 import dev.engine_room.flywheel.lib.math.MoreMath;
+import dev.engine_room.flywheel.lib.util.LightUtil;
 import it.unimi.dsi.fastutil.longs.LongSet;
-import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.SectionPos;
+import net.minecraft.world.level.LightLayer;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 
@@ -96,15 +97,15 @@ public abstract class AbstractBlockEntityVisual<T extends BlockEntity> extends A
 	 */
 	public boolean doDistanceLimitThisFrame(DynamicVisual.Context context) {
 		return !context.limiter()
-				.shouldUpdate(pos.distToCenterSqr(context.camera().getPosition()));
+				.shouldUpdate(pos.distToCenterSqr(context.camera().position()));
 	}
 
 	protected int computePackedLight() {
-		return LevelRenderer.getLightColor(level, pos);
+		return computePackedLight(pos);
 	}
 
 	protected void relight(BlockPos pos, @Nullable FlatLit... instances) {
-		FlatLit.relight(LevelRenderer.getLightColor(level, pos), instances);
+		FlatLit.relight(computePackedLight(pos), instances);
 	}
 
 	protected void relight(@Nullable FlatLit... instances) {
@@ -112,7 +113,7 @@ public abstract class AbstractBlockEntityVisual<T extends BlockEntity> extends A
 	}
 
 	protected void relight(BlockPos pos, Iterator<@Nullable FlatLit> instances) {
-		FlatLit.relight(LevelRenderer.getLightColor(level, pos), instances);
+		FlatLit.relight(computePackedLight(pos), instances);
 	}
 
 	protected void relight(Iterator<@Nullable FlatLit> instances) {
@@ -120,10 +121,14 @@ public abstract class AbstractBlockEntityVisual<T extends BlockEntity> extends A
 	}
 
 	protected void relight(BlockPos pos, Iterable<@Nullable FlatLit> instances) {
-		FlatLit.relight(LevelRenderer.getLightColor(level, pos), instances);
+		FlatLit.relight(computePackedLight(pos), instances);
 	}
 
 	protected void relight(Iterable<@Nullable FlatLit> instances) {
 		relight(pos, instances);
+	}
+
+	private int computePackedLight(BlockPos pos) {
+		return LightUtil.pack(level.getBrightness(LightLayer.BLOCK, pos), level.getBrightness(LightLayer.SKY, pos));
 	}
 }

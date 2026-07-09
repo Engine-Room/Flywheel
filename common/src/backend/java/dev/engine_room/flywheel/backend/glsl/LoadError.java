@@ -9,17 +9,17 @@ import com.mojang.datafixers.util.Pair;
 
 import dev.engine_room.flywheel.backend.glsl.error.ErrorBuilder;
 import dev.engine_room.flywheel.backend.glsl.span.Span;
-import net.minecraft.ResourceLocationException;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.IdentifierException;
+import net.minecraft.resources.Identifier;
 
 sealed public interface LoadError {
 	ErrorBuilder generateMessage();
 
-	record CircularDependency(ResourceLocation offender, List<ResourceLocation> stack) implements LoadError {
+	record CircularDependency(Identifier offender, List<Identifier> stack) implements LoadError {
 		public String format() {
 			return stack.stream()
 					.dropWhile(l -> !l.equals(offender))
-					.map(ResourceLocation::toString)
+					.map(Identifier::toString)
 					.collect(Collectors.joining(" -> "));
 		}
 
@@ -31,7 +31,7 @@ sealed public interface LoadError {
 		}
 	}
 
-	record IncludeError(ResourceLocation location, List<Pair<Span, LoadError>> innerErrors) implements LoadError {
+	record IncludeError(Identifier location, List<Pair<Span, LoadError>> innerErrors) implements LoadError {
 		@Override
 		public ErrorBuilder generateMessage() {
 			var out = ErrorBuilder.create()
@@ -49,7 +49,7 @@ sealed public interface LoadError {
 		}
 	}
 
-	record IOError(ResourceLocation location, IOException exception) implements LoadError {
+	record IOError(Identifier location, IOException exception) implements LoadError {
 		@Override
 		public ErrorBuilder generateMessage() {
 			if (exception instanceof FileNotFoundException) {
@@ -63,7 +63,7 @@ sealed public interface LoadError {
 		}
 	}
 
-	record ResourceError(ResourceLocation location) implements LoadError {
+	record ResourceError(Identifier location) implements LoadError {
 		@Override
 		public ErrorBuilder generateMessage() {
 			return ErrorBuilder.create()
@@ -71,7 +71,7 @@ sealed public interface LoadError {
 		}
 	}
 
-	record MalformedInclude(ResourceLocationException exception) implements LoadError {
+	record MalformedInclude(IdentifierException exception) implements LoadError {
 		@Override
 		public ErrorBuilder generateMessage() {
 			return ErrorBuilder.create()

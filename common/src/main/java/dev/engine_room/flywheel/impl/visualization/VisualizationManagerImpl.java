@@ -135,7 +135,7 @@ public class VisualizationManagerImpl implements VisualizationManager {
 		private DynamicVisual.Context createVisualFrameContext(RenderContext ctx) {
 			Vec3i renderOrigin = engine.renderOrigin();
 			var cameraPos = ctx.camera()
-					.getPosition();
+					.position();
 
 			Matrix4f viewProjection = new Matrix4f(ctx.viewProjection());
 			viewProjection.translate((float) (renderOrigin.getX() - cameraPos.x), (float) (renderOrigin.getY() - cameraPos.y), (float) (renderOrigin.getZ() - cameraPos.z));

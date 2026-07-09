@@ -7,19 +7,19 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import java.util.List;
 
 import dev.engine_room.flywheel.lib.util.ResourceUtil;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 public class TestBase {
-	public static final ResourceLocation FLW_A = ResourceUtil.rl("a.glsl");
-	public static final ResourceLocation FLW_B = ResourceUtil.rl("b.glsl");
-	public static final ResourceLocation FLW_C = ResourceUtil.rl("c.glsl");
+	public static final Identifier FLW_A = ResourceUtil.rl("a.glsl");
+	public static final Identifier FLW_B = ResourceUtil.rl("b.glsl");
+	public static final Identifier FLW_C = ResourceUtil.rl("c.glsl");
 
 	public static <T> T assertSingletonList(List<T> list) {
 		assertEquals(1, list.size());
 		return list.get(0);
 	}
 
-	public static <E extends LoadError> E findAndAssertError(Class<E> clazz, MockShaderSources sources, ResourceLocation loc) {
+	public static <E extends LoadError> E findAndAssertError(Class<E> clazz, MockShaderSources sources, Identifier loc) {
 		var result = sources.find(loc);
 		var failure = assertInstanceOf(LoadResult.Failure.class, result);
 		return assertInstanceOf(clazz, failure.error());
@@ -36,12 +36,12 @@ public class TestBase {
 		return assertInstanceOf(finalErrType, pair.getSecond());
 	}
 
-	public static SourceFile findAndAssertSuccess(MockShaderSources sources, ResourceLocation loc) {
+	public static SourceFile findAndAssertSuccess(MockShaderSources sources, Identifier loc) {
 		var result = sources.find(loc);
 		return assertSuccessAndUnwrap(loc, result);
 	}
 
-	public static SourceFile assertSuccessAndUnwrap(ResourceLocation expectedName, LoadResult result) {
+	public static SourceFile assertSuccessAndUnwrap(Identifier expectedName, LoadResult result) {
 		assertInstanceOf(LoadResult.Success.class, result);
 
 		var file = result.unwrap();

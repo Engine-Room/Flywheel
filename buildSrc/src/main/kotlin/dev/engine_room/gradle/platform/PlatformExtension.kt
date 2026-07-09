@@ -53,16 +53,20 @@ open class PlatformExtension(val project: Project) {
                 archiveClassifier = "testmod"
             }
 
-            val remapTestModJar = register<RemapJarTask>("remapTestModJar") {
-                dependsOn(testModJar)
-                inputFile.set(testModJar.get().archiveFile)
-                archiveClassifier = "testmod"
-                addNestedDependencies = false
-                classpath.from(sourceSet.compileClasspath)
+            val testModArtifact = if (project.plugins.hasPlugin("dev.architectury.loom-no-remap")) {
+                testModJar
+            } else {
+                register<RemapJarTask>("remapTestModJar") {
+                    dependsOn(testModJar)
+                    inputFile.set(testModJar.get().archiveFile)
+                    archiveClassifier = "testmod"
+                    addNestedDependencies = false
+                    classpath.from(sourceSet.compileClasspath)
+                }
             }
 
             named<Task>("build").configure {
-                dependsOn(remapTestModJar)
+                dependsOn(testModArtifact)
             }
         }
     }

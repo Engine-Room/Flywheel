@@ -1,17 +1,20 @@
 package dev.engine_room.flywheel.backend.engine.indirect;
 
 import org.lwjgl.opengl.GL32;
+import org.lwjgl.opengl.GL14;
 import org.lwjgl.opengl.GL46;
+import org.lwjgl.opengl.GL11;
 
 import com.mojang.blaze3d.pipeline.RenderTarget;
-import com.mojang.blaze3d.platform.GlStateManager;
-import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.opengl.GlStateManager;
 
 import dev.engine_room.flywheel.backend.NoiseTextures;
 import dev.engine_room.flywheel.backend.Samplers;
 import dev.engine_room.flywheel.backend.compile.OitPrograms;
 import dev.engine_room.flywheel.backend.gl.GlCompat;
 import dev.engine_room.flywheel.backend.gl.GlTextureUnit;
+import dev.engine_room.flywheel.backend.gl.GlTextureUtil;
+import dev.engine_room.flywheel.backend.mixin.LevelRendererAccessor;
 import net.minecraft.client.Minecraft;
 
 public class OitFramebuffer {
@@ -45,33 +48,37 @@ public class OitFramebuffer {
 	 * Set up the framebuffer.
 	 */
 	public void prepare() {
-		RenderTarget renderTarget;
+		RenderTarget mainTarget = Minecraft.getInstance()
+				.gameRenderer
+				.mainRenderTarget();
+		RenderTarget renderTarget = mainTarget;
 
-		if (Minecraft.useShaderTransparency()) {
-			renderTarget = Minecraft.getInstance().levelRenderer.getItemEntityTarget();
-
-			renderTarget.copyDepthFrom(Minecraft.getInstance()
-					.getMainRenderTarget());
-		} else {
-			renderTarget = Minecraft.getInstance()
-					.getMainRenderTarget();
+		RenderTarget itemEntityTarget = Minecraft.getInstance()
+				.levelRenderer
+				.itemEntityTarget();
+		if (itemEntityTarget != null) {
+			renderTarget = itemEntityTarget;
+			renderTarget.copyDepthFrom(mainTarget);
 		}
 
 		maybeResizeFBO(renderTarget.width, renderTarget.height);
 
 		Samplers.COEFFICIENTS.makeActive();
-		// Bind zero to render system to make sure we clear their internal state
-		RenderSystem.bindTexture(0);
+		GL11.glBindTexture(GL11.GL_TEXTURE_2D, 0);
 		GL32.glBindTexture(GL32.GL_TEXTURE_2D_ARRAY, coefficients);
 
 		Samplers.DEPTH_RANGE.makeActive();
-		RenderSystem.bindTexture(depthBounds);
+		GL11.glBindTexture(GL11.GL_TEXTURE_2D, depthBounds);
 
 		Samplers.NOISE.makeActive();
-		NoiseTextures.BLUE_NOISE.bind();
+		if (NoiseTextures.BLUE_NOISE == null || NoiseTextures.BLUE_NOISE.getTextureView() == null) {
+			GL11.glBindTexture(GL11.GL_TEXTURE_2D, 0);
+		} else {
+			GlTextureUtil.bindTexture2D(NoiseTextures.BLUE_NOISE.getTextureView());
+		}
 
 		GlStateManager._glBindFramebuffer(GL32.GL_FRAMEBUFFER, fbo);
-		GL32.glFramebufferTexture(GL32.GL_FRAMEBUFFER, GL32.GL_DEPTH_ATTACHMENT, renderTarget.getDepthTextureId(), 0);
+		GL32.glFramebufferTexture(GL32.GL_FRAMEBUFFER, GL32.GL_DEPTH_ATTACHMENT, GlTextureUtil.glId(renderTarget.getDepthTexture()), 0);
 	}
 
 	/**
@@ -79,21 +86,22 @@ public class OitFramebuffer {
 	 */
 	public void depthRange() {
 		// No depth writes, but we'll still use the depth test.
-		RenderSystem.depthMask(false);
-		RenderSystem.colorMask(true, true, true, true);
-		RenderSystem.enableBlend();
-		RenderSystem.blendFunc(GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ONE);
-		RenderSystem.blendEquation(GL32.GL_MAX);
+		GL11.glDepthMask(false);
+		GL11.glColorMask(true, true, true, true);
+		GL11.glEnable(GL11.GL_BLEND);
+		GL11.glBlendFunc(GL11.GL_ONE, GL11.GL_ONE);
+		GL14.glBlendEquation(GL32.GL_MAX);
 
-		var far = Minecraft.getInstance().gameRenderer.getDepthFar();
+		var far = ((LevelRendererAccessor) Minecraft.getInstance().levelRenderer).flywheel$getLevelRenderState()
+				.cameraRenderState.depthFar;
 
 		if (GlCompat.SUPPORTS_DSA) {
 			GL46.glNamedFramebufferDrawBuffers(fbo, DEPTH_RANGE_DRAW_BUFFERS);
 			GL46.glClearNamedFramebufferfv(fbo, GL46.GL_COLOR, 0, new float[]{-far, -far, 0, 0});
 		} else {
 			GL32.glDrawBuffers(DEPTH_RANGE_DRAW_BUFFERS);
-			RenderSystem.clearColor(-far, -far, 0, 0);
-			RenderSystem.clear(GL32.GL_COLOR_BUFFER_BIT, false);
+			GL11.glClearColor(-far, -far, 0, 0);
+			GL11.glClear(GL32.GL_COLOR_BUFFER_BIT);
 		}
 	}
 
@@ -102,11 +110,11 @@ public class OitFramebuffer {
 	 */
 	public void renderTransmittance() {
 		// No depth writes, but we'll still use the depth test
-		RenderSystem.depthMask(false);
-		RenderSystem.colorMask(true, true, true, true);
-		RenderSystem.enableBlend();
-		RenderSystem.blendFunc(GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ONE);
-		RenderSystem.blendEquation(GL32.GL_FUNC_ADD);
+		GL11.glDepthMask(false);
+		GL11.glColorMask(true, true, true, true);
+		GL11.glEnable(GL11.GL_BLEND);
+		GL11.glBlendFunc(GL11.GL_ONE, GL11.GL_ONE);
+		GL14.glBlendEquation(GL32.GL_FUNC_ADD);
 
 		if (GlCompat.SUPPORTS_DSA) {
 			GL46.glNamedFramebufferDrawBuffers(fbo, RENDER_TRANSMITTANCE_DRAW_BUFFERS);
@@ -117,8 +125,8 @@ public class OitFramebuffer {
 			GL46.glClearNamedFramebufferfv(fbo, GL46.GL_COLOR, 3, CLEAR_TO_ZERO);
 		} else {
 			GL32.glDrawBuffers(RENDER_TRANSMITTANCE_DRAW_BUFFERS);
-			RenderSystem.clearColor(0, 0, 0, 0);
-			RenderSystem.clear(GL32.GL_COLOR_BUFFER_BIT, false);
+			GL11.glClearColor(0, 0, 0, 0);
+			GL11.glClear(GL32.GL_COLOR_BUFFER_BIT);
 		}
 	}
 
@@ -128,10 +136,10 @@ public class OitFramebuffer {
 	 */
 	public void renderDepthFromTransmittance() {
 		// Only write to depth, not color.
-		RenderSystem.depthMask(true);
-		RenderSystem.colorMask(false, false, false, false);
-		RenderSystem.disableBlend();
-		RenderSystem.depthFunc(GL32.GL_ALWAYS);
+		GL11.glDepthMask(true);
+		GL11.glColorMask(false, false, false, false);
+		GL11.glDisable(GL11.GL_BLEND);
+		GL11.glDepthFunc(GL32.GL_ALWAYS);
 
 		if (GlCompat.SUPPORTS_DSA) {
 			GL46.glNamedFramebufferDrawBuffers(fbo, DEPTH_ONLY_DRAW_BUFFERS);
@@ -150,11 +158,11 @@ public class OitFramebuffer {
 	 */
 	public void accumulate() {
 		// No depth writes, but we'll still use the depth test
-		RenderSystem.depthMask(false);
-		RenderSystem.colorMask(true, true, true, true);
-		RenderSystem.enableBlend();
-		RenderSystem.blendFunc(GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ONE);
-		RenderSystem.blendEquation(GL32.GL_FUNC_ADD);
+		GL11.glDepthMask(false);
+		GL11.glColorMask(true, true, true, true);
+		GL11.glEnable(GL11.GL_BLEND);
+		GL11.glBlendFunc(GL11.GL_ONE, GL11.GL_ONE);
+		GL14.glBlendEquation(GL32.GL_FUNC_ADD);
 
 		if (GlCompat.SUPPORTS_DSA) {
 			GL46.glNamedFramebufferDrawBuffers(fbo, ACCUMULATE_DRAW_BUFFERS);
@@ -162,8 +170,8 @@ public class OitFramebuffer {
 			GL46.glClearNamedFramebufferfv(fbo, GL46.GL_COLOR, 0, CLEAR_TO_ZERO);
 		} else {
 			GL32.glDrawBuffers(ACCUMULATE_DRAW_BUFFERS);
-			RenderSystem.clearColor(0, 0, 0, 0);
-			RenderSystem.clear(GL32.GL_COLOR_BUFFER_BIT, false);
+			GL11.glClearColor(0, 0, 0, 0);
+			GL11.glClear(GL32.GL_COLOR_BUFFER_BIT);
 		}
 	}
 
@@ -171,22 +179,13 @@ public class OitFramebuffer {
 	 * Composite the accumulated luminance onto the main framebuffer.
 	 */
 	public void composite() {
-		if (Minecraft.useShaderTransparency()) {
-			Minecraft.getInstance().levelRenderer.getItemEntityTarget()
-					.bindWrite(false);
-		} else {
-			Minecraft.getInstance()
-					.getMainRenderTarget()
-					.bindWrite(false);
-		}
-
 		// The composite shader writes out the closest depth to gl_FragDepth.
 		// depthMask = true: OIT stuff renders on top of other transparent stuff.
 		// depthMask = false: other transparent stuff renders on top of OIT stuff.
 		// If Neo gets wavelet OIT we can use their hooks to be correct with everything.
-		RenderSystem.depthMask(true);
-		RenderSystem.colorMask(true, true, true, true);
-		RenderSystem.enableBlend();
+		GL11.glDepthMask(true);
+		GL11.glColorMask(true, true, true, true);
+		GL11.glEnable(GL11.GL_BLEND);
 
 		// We rely on the blend func to achieve:
 		// final color = (1 - transmittance_total) * sum(color_f * alpha_f * transmittance_f) / sum(alpha_f * transmittance_f)
@@ -194,21 +193,17 @@ public class OitFramebuffer {
 		//
 		// Though note that the alpha value we emit in the fragment shader is actually (1. - transmittance_total).
 		// The extra inversion step is so we can have a sane alpha value written out for the fabulous blit shader to consume.
-		RenderSystem.blendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
-		RenderSystem.blendEquation(GL32.GL_FUNC_ADD);
-		RenderSystem.depthFunc(GL32.GL_ALWAYS);
+		GL14.glBlendFuncSeparate(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA, GL11.GL_ONE, GL11.GL_ONE_MINUS_SRC_ALPHA);
+		GL14.glBlendEquation(GL32.GL_FUNC_ADD);
+		GL11.glDepthFunc(GL32.GL_ALWAYS);
 
 		GlTextureUnit.T0.makeActive();
-		RenderSystem.bindTexture(accumulate);
+		GL11.glBindTexture(GL11.GL_TEXTURE_2D, accumulate);
 
 		programs.getOitCompositeProgram()
 				.bind();
 
 		drawFullscreenQuad();
-
-		Minecraft.getInstance()
-				.getMainRenderTarget()
-				.bindWrite(false);
 	}
 
 	public void delete() {
@@ -240,9 +235,9 @@ public class OitFramebuffer {
 		// We sometimes get the same texture ID back when creating new textures,
 		// so bind zero to clear the GlStateManager
 		Samplers.COEFFICIENTS.makeActive();
-		RenderSystem.bindTexture(0);
+		GL11.glBindTexture(GL11.GL_TEXTURE_2D, 0);
 		Samplers.DEPTH_RANGE.makeActive();
-		RenderSystem.bindTexture(0);
+		GL11.glBindTexture(GL11.GL_TEXTURE_2D, 0);
 	}
 
 	private void maybeResizeFBO(int width, int height) {
@@ -280,7 +275,7 @@ public class OitFramebuffer {
 			accumulate = GL32.glGenTextures();
 
 			GlTextureUnit.T0.makeActive();
-			RenderSystem.bindTexture(0);
+			GL11.glBindTexture(GL11.GL_TEXTURE_2D, 0);
 
 			GL32.glBindTexture(GL32.GL_TEXTURE_2D, depthBounds);
 			GL32.glTexImage2D(GL32.GL_TEXTURE_2D, 0, GL32.GL_RG32F, width, height, 0, GL46.GL_RGBA, GL46.GL_BYTE, 0);

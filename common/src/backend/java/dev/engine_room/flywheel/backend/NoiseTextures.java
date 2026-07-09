@@ -3,19 +3,20 @@ package dev.engine_room.flywheel.backend;
 import java.io.IOException;
 
 import org.jetbrains.annotations.UnknownNullability;
+import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL32;
 
 import com.mojang.blaze3d.platform.NativeImage;
-import com.mojang.blaze3d.systems.RenderSystem;
 
 import dev.engine_room.flywheel.backend.gl.GlTextureUnit;
+import dev.engine_room.flywheel.backend.gl.GlTextureUtil;
 import dev.engine_room.flywheel.lib.util.ResourceUtil;
 import net.minecraft.client.renderer.texture.DynamicTexture;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.packs.resources.ResourceManager;
 
 public class NoiseTextures {
-	public static final ResourceLocation NOISE_TEXTURE = ResourceUtil.rl("textures/flywheel/noise/blue.png");
+	public static final Identifier NOISE_TEXTURE = ResourceUtil.rl("textures/flywheel/noise/blue.png");
 
 	@UnknownNullability
 	public static DynamicTexture BLUE_NOISE;
@@ -33,18 +34,18 @@ public class NoiseTextures {
 
 		try (var is = optional.get()
 				.open()) {
-			var image = NativeImage.read(NativeImage.Format.LUMINANCE, is);
+			var image = NativeImage.read(NativeImage.Format.RGBA, is);
 
-			BLUE_NOISE = new DynamicTexture(image);
+			BLUE_NOISE = new DynamicTexture(() -> NOISE_TEXTURE.toString(), image);
 
 			GlTextureUnit.T0.makeActive();
-			BLUE_NOISE.bind();
+			GlTextureUtil.bindTexture2D(BLUE_NOISE.getTextureView());
 
-			NoiseTextures.BLUE_NOISE.setFilter(true, false);
-			RenderSystem.texParameter(GL32.GL_TEXTURE_2D, GL32.GL_TEXTURE_WRAP_S, GL32.GL_REPEAT);
-			RenderSystem.texParameter(GL32.GL_TEXTURE_2D, GL32.GL_TEXTURE_WRAP_T, GL32.GL_REPEAT);
+			GlTextureUtil.configureFiltering(true, false);
+			GL11.glTexParameteri(GL32.GL_TEXTURE_2D, GL32.GL_TEXTURE_WRAP_S, GL32.GL_REPEAT);
+			GL11.glTexParameteri(GL32.GL_TEXTURE_2D, GL32.GL_TEXTURE_WRAP_T, GL32.GL_REPEAT);
 
-			RenderSystem.bindTexture(0);
+			GL11.glBindTexture(GL32.GL_TEXTURE_2D, 0);
 		} catch (IOException e) {
 
 		}

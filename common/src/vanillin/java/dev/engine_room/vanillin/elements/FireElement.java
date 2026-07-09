@@ -21,9 +21,11 @@ import dev.engine_room.flywheel.lib.util.RendererReloadCache;
 import dev.engine_room.flywheel.lib.visual.AbstractVisual;
 import dev.engine_room.flywheel.lib.visual.SimpleDynamicVisual;
 import dev.engine_room.flywheel.lib.visual.util.SmartRecycler;
-import net.minecraft.client.renderer.LightTexture;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.resources.model.ModelBakery;
+import net.minecraft.client.resources.model.sprite.SpriteId;
+import net.minecraft.util.LightCoordsUtil;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 
@@ -38,8 +40,8 @@ public final class FireElement extends AbstractVisual implements SimpleDynamicVi
 	// Parameterize by the material instead of the sprite
 	// because Material#sprite is a surprisingly heavy operation
 	// and because sprites are invalidated after a resource reload.
-	private static final RendererReloadCache<net.minecraft.client.resources.model.Material, Model> FIRE_MODELS = new RendererReloadCache<>(texture -> {
-		return new SingleMeshModel(new FireMesh(texture.sprite()), FIRE_MATERIAL);
+	private static final RendererReloadCache<SpriteId, Model> FIRE_MODELS = new RendererReloadCache<>(texture -> {
+		return new SingleMeshModel(new FireMesh(Minecraft.getInstance().getAtlasManager().get(texture)), FIRE_MATERIAL);
 	});
 
 	private final Entity entity;
@@ -59,7 +61,7 @@ public final class FireElement extends AbstractVisual implements SimpleDynamicVi
 		TransformedInstance instance = visualizationContext.instancerProvider()
 				.instancer(InstanceTypes.TRANSFORMED, model)
 				.createInstance();
-		instance.light(LightTexture.FULL_BLOCK);
+		instance.light(LightCoordsUtil.pack(15, 0));
 		instance.setChanged();
 		return instance;
 	}
@@ -97,7 +99,7 @@ public final class FireElement extends AbstractVisual implements SimpleDynamicVi
 		stack.translate(entityX - renderOrigin.getX(), entityY - renderOrigin.getY(), entityZ - renderOrigin.getZ());
 		stack.scale(scale, scale, scale);
 		stack.mulPose(Axis.YP.rotationDegrees(-context.camera()
-				.getYRot()));
+				.yRot()));
 		stack.translate(0.0F, 0.0F, -0.3F + (float) ((int) maxHeight) * 0.02F);
 
 		for (int i = 0; y < maxHeight; ++i) {
@@ -157,7 +159,7 @@ public final class FireElement extends AbstractVisual implements SimpleDynamicVi
 			vertexList.b(i, 1);
 			vertexList.u(i, u);
 			vertexList.v(i, v);
-			vertexList.light(i, LightTexture.FULL_BLOCK);
+			vertexList.light(i, LightCoordsUtil.pack(15, 0));
 			vertexList.normalX(i, 0);
 			vertexList.normalY(i, 1);
 			vertexList.normalZ(i, 0);

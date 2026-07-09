@@ -7,26 +7,26 @@ import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.UnmodifiableView;
 
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 @ApiStatus.NonExtendable
 public interface IdRegistry<T> extends Iterable<T>  {
-	void register(ResourceLocation id, T object);
+	void register(Identifier id, T object);
 
-	<S extends T> S registerAndGet(ResourceLocation id, S object);
-
-	@Nullable
-	T get(ResourceLocation id);
+	<S extends T> S registerAndGet(Identifier id, S object);
 
 	@Nullable
-	ResourceLocation getId(T object);
+	T get(Identifier id);
 
-	T getOrThrow(ResourceLocation id);
+	@Nullable
+	Identifier getId(T object);
 
-	ResourceLocation getIdOrThrow(T object);
+	T getOrThrow(Identifier id);
+
+	Identifier getIdOrThrow(T object);
 
 	@UnmodifiableView
-	Set<ResourceLocation> getAllIds();
+	Set<Identifier> getAllIds();
 
 	@UnmodifiableView
 	Collection<T> getAll();

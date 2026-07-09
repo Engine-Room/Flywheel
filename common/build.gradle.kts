@@ -15,6 +15,15 @@ val stubs = sourceSets.create("stubs")
 val main = sourceSets.getByName("main")
 val vanillin = sourceSets.create("vanillin")
 
+vanillin.java.exclude(
+    "dev/engine_room/vanillin/item/**",
+    "dev/engine_room/vanillin/mixin/item/**",
+    "dev/engine_room/vanillin/visuals/BlockDisplayVisual.java",
+    "dev/engine_room/vanillin/visuals/ItemDisplayVisual.java",
+    "dev/engine_room/vanillin/visuals/ItemFrameVisual.java",
+    "dev/engine_room/vanillin/visuals/ItemVisual.java",
+)
+
 transitiveSourceSets {
     compileClasspath = main.compileClasspath
 
@@ -119,11 +128,15 @@ dependencies {
     modCompileOnly("net.fabricmc:fabric-loader:${property("fabric_loader_version")}")
 
     modCompileOnly("maven.modrinth:sodium:${property("sodium_version")}-fabric")
-    modCompileOnly("maven.modrinth:iris:${property("iris_version")}-fabric")
+
+    if (property("iris_version") != "none") {
+        modCompileOnly("maven.modrinth:iris:${property("iris_version")}-fabric")
+    }
 
     compileOnly(annotationProcessor("io.github.llamalad7:mixinextras-common:0.4.1")!!)
 
     testImplementation("org.junit.jupiter:junit-jupiter:5.8.1")
+    testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
 
 tasks.test {

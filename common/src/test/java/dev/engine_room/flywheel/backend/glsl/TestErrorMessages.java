@@ -7,7 +7,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 import dev.engine_room.flywheel.backend.glsl.error.ErrorBuilder;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 public class TestErrorMessages extends TestBase {
 	@BeforeAll
@@ -54,13 +54,13 @@ public class TestErrorMessages extends TestBase {
 				""", sources, FLW_A);
 	}
 
-	public static void assertErrorMatches(String expected, MockShaderSources sources, ResourceLocation loc) {
+	public static void assertErrorMatches(String expected, MockShaderSources sources, Identifier loc) {
 		var message = assertErrorAndGetMessage(sources, loc).build();
 
 		assertEquals(expected.trim(), message.trim());
 	}
 
-	public static ErrorBuilder assertErrorAndGetMessage(MockShaderSources sources, ResourceLocation loc) {
+	public static ErrorBuilder assertErrorAndGetMessage(MockShaderSources sources, Identifier loc) {
 		var result = sources.find(loc);
 		var failure = assertInstanceOf(LoadResult.Failure.class, result);
 		return failure.error()

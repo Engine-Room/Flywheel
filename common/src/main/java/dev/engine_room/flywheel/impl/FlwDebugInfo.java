@@ -1,6 +1,7 @@
 package dev.engine_room.flywheel.impl;
 
 import java.util.List;
+import java.net.URI;
 
 import org.jetbrains.annotations.Nullable;
 
@@ -66,13 +67,13 @@ public final class FlwDebugInfo {
 		return Component.literal(debugInfoString)
 				.append(Component.literal("\n\nClick to copy debug info to clipboard")
 						.withStyle(Style.EMPTY.withUnderlined(true)
-								.withClickEvent(new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, debugInfoString))
-								.withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.literal(debugInfoString)))))
+								.withClickEvent(new ClickEvent.CopyToClipboard(debugInfoString))
+								.withHoverEvent(new HoverEvent.ShowText(Component.literal(debugInfoString)))))
 				.append(Component.literal("\n\nClick to open an issue on GitHub")
 						.withStyle(Style.EMPTY.withUnderlined(true)
 								.withColor(ChatFormatting.BLUE)
-								.withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, "https://github.com/Engine-Room/Flywheel/issues"))
-								.withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.literal("Opens URL:\nhttps://github.com/Engine-Room/Flywheel/issues")))));
+								.withClickEvent(new ClickEvent.OpenUrl(URI.create("https://github.com/Engine-Room/Flywheel/issues")))
+								.withHoverEvent(new HoverEvent.ShowText(Component.literal("Opens URL:\nhttps://github.com/Engine-Room/Flywheel/issues")))));
 
 	}
 

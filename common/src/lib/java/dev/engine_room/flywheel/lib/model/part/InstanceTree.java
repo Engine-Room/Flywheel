@@ -460,15 +460,15 @@ public final class InstanceTree {
 	}
 
 	public void loadPose(PartPose pose) {
-		x = pose.x;
-		y = pose.y;
-		z = pose.z;
-		xRot = pose.xRot;
-		yRot = pose.yRot;
-		zRot = pose.zRot;
-		xScale = ModelPart.DEFAULT_SCALE;
-		yScale = ModelPart.DEFAULT_SCALE;
-		zScale = ModelPart.DEFAULT_SCALE;
+		x = pose.x();
+		y = pose.y();
+		z = pose.z();
+		xRot = pose.xRot();
+		yRot = pose.yRot();
+		zRot = pose.zRot();
+		xScale = pose.xScale();
+		yScale = pose.yScale();
+		zScale = pose.zScale();
 		setChanged();
 	}
 

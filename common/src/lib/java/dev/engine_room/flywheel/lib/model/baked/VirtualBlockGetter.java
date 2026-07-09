@@ -6,7 +6,8 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.world.level.BlockAndTintGetter;
+import net.minecraft.client.renderer.block.BlockAndTintGetter;
+import net.minecraft.world.level.CardinalLighting;
 import net.minecraft.world.level.ColorResolver;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.Biomes;
@@ -25,9 +26,13 @@ public abstract class VirtualBlockGetter implements BlockAndTintGetter {
 		return getBlockState(pos).getFluidState();
 	}
 
-	@Override
 	public float getShade(Direction direction, boolean shaded) {
 		return 1f;
+	}
+
+	@Override
+	public CardinalLighting cardinalLighting() {
+		return CardinalLighting.DEFAULT;
 	}
 
 	@Override
@@ -37,7 +42,7 @@ public abstract class VirtualBlockGetter implements BlockAndTintGetter {
 
 	@Override
 	public int getBlockTint(BlockPos pos, ColorResolver resolver) {
-		Biome plainsBiome = Minecraft.getInstance().getConnection().registryAccess().registryOrThrow(Registries.BIOME).getOrThrow(Biomes.PLAINS);
+		Biome plainsBiome = Minecraft.getInstance().getConnection().registryAccess().lookupOrThrow(Registries.BIOME).getOrThrow(Biomes.PLAINS).value();
 		return resolver.getColor(plainsBiome, pos.getX(), pos.getZ());
 	}
 }

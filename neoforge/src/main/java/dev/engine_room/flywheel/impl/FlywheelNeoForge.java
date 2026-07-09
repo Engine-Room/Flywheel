@@ -8,22 +8,22 @@ import dev.engine_room.flywheel.api.event.EndClientResourceReloadEvent;
 import dev.engine_room.flywheel.api.event.ReloadLevelRendererEvent;
 import dev.engine_room.flywheel.backend.compile.FlwProgramsReloader;
 import dev.engine_room.flywheel.backend.engine.uniform.Uniforms;
-import dev.engine_room.flywheel.impl.compat.EmbeddiumCompat;
 import dev.engine_room.flywheel.impl.visualization.VisualizationEventHandler;
-import dev.engine_room.flywheel.lib.model.baked.PartialModelEventHandler;
 import dev.engine_room.flywheel.lib.util.LevelAttached;
+import dev.engine_room.flywheel.lib.model.baked.PartialModelEventHandler;
 import dev.engine_room.flywheel.lib.util.RendererReloadCache;
 import dev.engine_room.flywheel.lib.util.ResourceReloadHolder;
 import net.minecraft.client.Minecraft;
 import net.minecraft.commands.synchronization.ArgumentTypeInfos;
+import net.minecraft.resources.Identifier;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.CrashReportCallables;
 import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
-import net.neoforged.neoforge.client.event.CustomizeGuiOverlayEvent;
-import net.neoforged.neoforge.client.event.RegisterClientReloadListenersEvent;
+import net.neoforged.neoforge.client.event.AddClientReloadListenersEvent;
+import net.neoforged.neoforge.client.event.ModelEvent;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.entity.EntityJoinLevelEvent;
 import net.neoforged.neoforge.event.entity.EntityLeaveLevelEvent;
@@ -51,7 +51,6 @@ public final class FlywheelNeoForge {
 		CrashReportCallables.registerCrashCallable("Flywheel Backend", BackendManagerImpl::getBackendString);
 		FlwImpl.init();
 
-		EmbeddiumCompat.init();
 	}
 
 	private static void registerImplEventListeners(IEventBus gameEventBus, IEventBus modEventBus) {
@@ -67,16 +66,6 @@ public final class FlywheelNeoForge {
 		gameEventBus.addListener((EntityLeaveLevelEvent e) -> VisualizationEventHandler.onEntityLeaveLevel(e.getLevel(), e.getEntity()));
 
 		gameEventBus.addListener(FlwCommands::registerClientCommands);
-
-		gameEventBus.addListener((CustomizeGuiOverlayEvent.DebugText e) -> {
-			Minecraft minecraft = Minecraft.getInstance();
-
-			if (!minecraft.getDebugOverlay().showDebugScreen()) {
-				return;
-			}
-
-			FlwDebugInfo.addDebugInfo(minecraft, e.getRight());
-		});
 
 		modEventBus.addListener((EndClientResourceReloadEvent e) -> BackendManagerImpl.onEndClientResourceReload(e.error().isPresent()));
 
@@ -94,16 +83,16 @@ public final class FlywheelNeoForge {
 
 		modEventBus.addListener((EndClientResourceReloadEvent e) -> RendererReloadCache.onReloadLevelRenderer());
 		modEventBus.addListener((EndClientResourceReloadEvent e) -> ResourceReloadHolder.onEndClientResourceReload());
-
-		modEventBus.addListener(PartialModelEventHandler::onRegisterAdditional);
+		modEventBus.addListener(PartialModelEventHandler::onRegisterStandalone);
 		modEventBus.addListener(PartialModelEventHandler::onBakingCompleted);
+
 	}
 
 	private static void registerBackendEventListeners(IEventBus gameEventBus, IEventBus modEventBus) {
 		gameEventBus.addListener((ReloadLevelRendererEvent e) -> Uniforms.onReloadLevelRenderer());
 
-		modEventBus.addListener((RegisterClientReloadListenersEvent e) -> {
-			e.registerReloadListener(FlwProgramsReloader.INSTANCE);
+		modEventBus.addListener((AddClientReloadListenersEvent e) -> {
+			e.addListener(Identifier.fromNamespaceAndPath(Flywheel.ID, "programs"), FlwProgramsReloader.INSTANCE);
 		});
 	}
 

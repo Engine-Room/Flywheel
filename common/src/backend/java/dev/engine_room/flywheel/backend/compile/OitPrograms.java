@@ -11,18 +11,18 @@ import dev.engine_room.flywheel.backend.gl.shader.ShaderType;
 import dev.engine_room.flywheel.backend.glsl.GlslVersion;
 import dev.engine_room.flywheel.backend.glsl.ShaderSources;
 import dev.engine_room.flywheel.lib.util.ResourceUtil;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 public class OitPrograms {
-	private static final ResourceLocation FULLSCREEN = ResourceUtil.rl("internal/fullscreen.vert");
-	static final ResourceLocation OIT_COMPOSITE = ResourceUtil.rl("internal/oit_composite.frag");
-	static final ResourceLocation OIT_DEPTH = ResourceUtil.rl("internal/oit_depth.frag");
+	private static final Identifier FULLSCREEN = ResourceUtil.rl("internal/fullscreen.vert");
+	static final Identifier OIT_COMPOSITE = ResourceUtil.rl("internal/oit_composite.frag");
+	static final Identifier OIT_DEPTH = ResourceUtil.rl("internal/oit_depth.frag");
 
-	private static final Compile<ResourceLocation> COMPILE = new Compile<>();
+	private static final Compile<Identifier> COMPILE = new Compile<>();
 
-	private final CompilationHarness<ResourceLocation> harness;
+	private final CompilationHarness<Identifier> harness;
 
-	public OitPrograms(CompilationHarness<ResourceLocation> harness) {
+	public OitPrograms(CompilationHarness<Identifier> harness) {
 		this.harness = harness;
 	}
 

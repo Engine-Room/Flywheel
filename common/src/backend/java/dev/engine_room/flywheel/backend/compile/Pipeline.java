@@ -9,9 +9,9 @@ import dev.engine_room.flywheel.api.instance.Instance;
 import dev.engine_room.flywheel.api.instance.InstanceType;
 import dev.engine_room.flywheel.backend.gl.shader.GlProgram;
 import dev.engine_room.flywheel.backend.glsl.SourceComponent;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
-public record Pipeline(ResourceLocation vertexMain, ResourceLocation fragmentMain,
+public record Pipeline(Identifier vertexMain, Identifier fragmentMain,
 					   InstanceAssembler assembler, String compilerMarker, Consumer<GlProgram> onLink) {
 
 	@FunctionalInterface
@@ -30,9 +30,9 @@ public record Pipeline(ResourceLocation vertexMain, ResourceLocation fragmentMai
 
 	public static class Builder {
 		@Nullable
-		private ResourceLocation vertexMain;
+		private Identifier vertexMain;
 		@Nullable
-		private ResourceLocation fragmentMain;
+		private Identifier fragmentMain;
 		@Nullable
 		private InstanceAssembler assembler;
 		@Nullable
@@ -40,12 +40,12 @@ public record Pipeline(ResourceLocation vertexMain, ResourceLocation fragmentMai
 		@Nullable
 		private Consumer<GlProgram> onLink;
 
-		public Builder vertexMain(ResourceLocation shader) {
+		public Builder vertexMain(Identifier shader) {
 			this.vertexMain = shader;
 			return this;
 		}
 
-		public Builder fragmentMain(ResourceLocation shader) {
+		public Builder fragmentMain(Identifier shader) {
 			this.fragmentMain = shader;
 			return this;
 		}

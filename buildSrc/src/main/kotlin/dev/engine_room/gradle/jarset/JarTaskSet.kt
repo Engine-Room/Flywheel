@@ -27,8 +27,8 @@ class JarTaskSet(
     val jar: TaskProvider<Jar>,
     val sources: TaskProvider<Jar>,
     val javadocJar: TaskProvider<Jar>,
-    val remapJar: TaskProvider<RemapJarTask>,
-    val remapSources: TaskProvider<RemapSourcesJarTask>
+    val remapJar: TaskProvider<out Jar>,
+    val remapSources: TaskProvider<out Jar>
 ) {
 
     fun publishWithRawSources(action: Action<MavenPublication>): NamedDomainObjectProvider<MavenPublication> {
@@ -87,8 +87,16 @@ class JarTaskSet(
      * Configure the remap tasks with the given action.
      */
     fun configureRemap(action: Action<AbstractRemapJarTask>) {
-        remapJar.configure(action)
-        remapSources.configure(action)
+        remapJar.configure {
+            if (this is AbstractRemapJarTask) {
+                action.execute(this)
+            }
+        }
+        remapSources.configure {
+            if (this is AbstractRemapJarTask) {
+                action.execute(this)
+            }
+        }
     }
 
     /**
@@ -211,11 +219,16 @@ class JarTaskSet(
             project: Project,
             name: String,
             jar: TaskProvider<Jar>
-        ): TaskProvider<RemapJarTask> {
+        ): TaskProvider<out Jar> {
+            if (project.plugins.hasPlugin("dev.architectury.loom-no-remap")) {
+                return jar
+            }
+
             return project.tasks.register<RemapJarTask>("${name}RemapJar") {
                 dependsOn(jar)
                 group = LOOM_GROUP
                 destinationDirectory.set(project.layout.buildDirectory.dir("libs/${name}"))
+                duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 
                 inputFile.set(jar.flatMap { it.archiveFile })
             }
@@ -225,12 +238,17 @@ class JarTaskSet(
             project: Project,
             name: String,
             jar: TaskProvider<Jar>
-        ): TaskProvider<RemapSourcesJarTask> {
+        ): TaskProvider<out Jar> {
+            if (project.plugins.hasPlugin("dev.architectury.loom-no-remap")) {
+                return jar
+            }
+
             return project.tasks.register<RemapSourcesJarTask>("${name}RemapSourcesJar") {
                 dependsOn(jar)
                 group = LOOM_GROUP
                 destinationDirectory.set(project.layout.buildDirectory.dir("libs/${name}"))
                 archiveClassifier.set(SOURCES_CLASSIFIER)
+                duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 
                 inputFile.set(jar.flatMap { it.archiveFile })
             }

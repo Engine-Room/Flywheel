@@ -18,10 +18,10 @@ import dev.engine_room.flywheel.backend.glsl.error.ErrorLevel;
 import dev.engine_room.flywheel.backend.glsl.span.Span;
 import dev.engine_room.flywheel.lib.util.ResourceUtil;
 import dev.engine_room.flywheel.lib.util.StringUtil;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 public class FailedCompilation {
-	public static final ResourceLocation GENERATED_SOURCE_NAME = ResourceUtil.rl("generated_source");
+	public static final Identifier GENERATED_SOURCE_NAME = ResourceUtil.rl("generated_source");
 	private static final Pattern PATTERN_ONE = Pattern.compile("(\\d+)\\((\\d+)\\) : (.*)");
 	private static final Pattern PATTERN_TWO = Pattern.compile("(\\w+): (\\d+):(\\d+):(?: '(.+?)' :)?(.*)");
 	private final List<SourceFile> files;

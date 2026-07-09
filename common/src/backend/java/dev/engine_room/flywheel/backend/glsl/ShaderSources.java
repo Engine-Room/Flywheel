@@ -13,7 +13,7 @@ import org.jetbrains.annotations.VisibleForTesting;
 
 import dev.engine_room.flywheel.backend.compile.FlwPrograms;
 import dev.engine_room.flywheel.lib.util.StringUtil;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.packs.resources.Resource;
 import net.minecraft.server.packs.resources.ResourceManager;
 
@@ -24,7 +24,7 @@ public class ShaderSources {
 	public static final String SHADER_DIR = "flywheel/";
 
 	@VisibleForTesting
-	protected final Map<ResourceLocation, LoadResult> cache;
+	protected final Map<Identifier, LoadResult> cache;
 
 	public ShaderSources(ResourceManager manager) {
 		var sourceFinder = new SourceFinder(manager);
@@ -40,34 +40,34 @@ public class ShaderSources {
 		this.cache = sourceFinder.results;
 	}
 
-	private static ResourceLocation locationWithoutFlywheelPrefix(ResourceLocation loc) {
-		return ResourceLocation.fromNamespaceAndPath(loc.getNamespace(), loc.getPath()
+	private static Identifier locationWithoutFlywheelPrefix(Identifier loc) {
+		return Identifier.fromNamespaceAndPath(loc.getNamespace(), loc.getPath()
 				.substring(SHADER_DIR.length()));
 	}
 
-	public LoadResult find(ResourceLocation location) {
+	public LoadResult find(Identifier location) {
 		return cache.computeIfAbsent(location, loc -> new LoadResult.Failure(new LoadError.ResourceError(loc)));
 	}
 
-	public SourceFile get(ResourceLocation location) {
+	public SourceFile get(Identifier location) {
 		return find(location).unwrap();
 	}
 
-	private static boolean isShader(ResourceLocation loc) {
+	private static boolean isShader(Identifier loc) {
 		var path = loc.getPath();
 		return path.endsWith(".glsl") || path.endsWith(".vert") || path.endsWith(".frag") || path.endsWith(".comp");
 	}
 
 	private static class SourceFinder {
-		private final Deque<ResourceLocation> findStack = new ArrayDeque<>();
-		private final Map<ResourceLocation, LoadResult> results = new HashMap<>();
+		private final Deque<Identifier> findStack = new ArrayDeque<>();
+		private final Map<Identifier, LoadResult> results = new HashMap<>();
 		private final ResourceManager manager;
 
 		public SourceFinder(ResourceManager manager) {
 			this.manager = manager;
 		}
 
-		public void rootLoad(ResourceLocation loc, Resource resource) {
+		public void rootLoad(Identifier loc, Resource resource) {
 			var strippedLoc = locationWithoutFlywheelPrefix(loc);
 
 			if (results.containsKey(strippedLoc)) {
@@ -78,7 +78,7 @@ public class ShaderSources {
 			this.results.put(strippedLoc, readResource(strippedLoc, resource));
 		}
 
-		public LoadResult recursiveLoad(ResourceLocation location) {
+		public LoadResult recursiveLoad(Identifier location) {
 			if (findStack.contains(location)) {
 				// Make a copy of the find stack with the offending location added on top to show the full path.
 				findStack.addLast(location);
@@ -94,7 +94,7 @@ public class ShaderSources {
 			return out;
 		}
 
-		private LoadResult _find(ResourceLocation location) {
+		private LoadResult _find(Identifier location) {
 			// Can't use computeIfAbsent because mutual recursion causes ConcurrentModificationExceptions
 			var out = results.get(location);
 			if (out == null) {
@@ -104,13 +104,13 @@ public class ShaderSources {
 			return out;
 		}
 
-		private LoadResult load(ResourceLocation loc) {
+		private LoadResult load(Identifier loc) {
 			return manager.getResource(loc.withPrefix(SHADER_DIR))
 					.map(resource -> readResource(loc, resource))
 					.orElseGet(() -> new LoadResult.Failure(new LoadError.ResourceError(loc)));
 		}
 
-		private LoadResult readResource(ResourceLocation loc, Resource resource) {
+		private LoadResult readResource(Identifier loc, Resource resource) {
 			try (InputStream stream = resource.open()) {
 				String sourceString = new String(stream.readAllBytes(), StandardCharsets.UTF_8);
 				return SourceFile.parse(this::recursiveLoad, loc, sourceString);
