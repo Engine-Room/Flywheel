@@ -1,9 +1,9 @@
 {
   "schemaVersion": 1,
-  "id" : "${mod_id}",
-  "name" : "${mod_name}",
-  "version" : "${mod_version}",
-  "description" : "${mod_description}",
+  "id": "${mod_id}",
+  "name": "${mod_name}",
+  "version": "${mod_version}",
+  "description": "${mod_description}",
   "authors": [
     "${mod_authors_json}"
   ],
@@ -17,19 +17,18 @@
   "environment": "client",
   "entrypoints": {
     "client": [
-      "dev.engine_room.flywheel.impl.FlywheelFabric"
+      "dev.engine_room.vanillin.VanillinFabric"
     ]
   },
   "mixins": [
-    "flywheel.backend.mixins.json",
-    "flywheel.impl.mixins.json",
-    "flywheel.impl.fabric.mixins.json"
+    "vanillin.mixins.json",
+    "vanillin.fabric.mixins.json"
   ],
   "depends": {
     "minecraft": "${minecraft_version}",
     "fabricloader": ">=${fabric_loader_version}",
     "fabric-api": ">=${fabric_api_version}",
+    "flywheel": "${flywheel_semver_version_range}",
     "java": ">=${java_version}"
-  },
-  "accessWidener": "flywheel.accesswidener"
+  }
 }

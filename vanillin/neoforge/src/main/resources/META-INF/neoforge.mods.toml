@@ -15,11 +15,9 @@ displayURL = "${mod_homepage}"
 displayTest = "IGNORE_ALL_VERSION"
 
 [[mixins]]
-config = "flywheel.backend.mixins.json"
+config = "vanillin.mixins.json"
 [[mixins]]
-config = "flywheel.impl.mixins.json"
-[[mixins]]
-config = "flywheel.impl.neoforge.mixins.json"
+config = "vanillin.neoforge.mixins.json"
 
 [[dependencies."${mod_id}"]]
 modId = "minecraft"
@@ -31,4 +29,10 @@ side = "CLIENT"
 modId = "neoforge"
 type = "required"
 versionRange = "[${neoforge_version},)"
+side = "CLIENT"
+
+[[dependencies."${mod_id}"]]
+modId = "flywheel"
+type = "required"
+versionRange = "${flywheel_maven_version_range}"
 side = "CLIENT"
