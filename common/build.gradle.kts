@@ -10,7 +10,7 @@ val lib = sourceSets.create("lib")
 val backend = sourceSets.create("backend")
 val main = sourceSets.getByName("main")
 
-loom.accessWidenerPath = file("src/main/resources/flywheel.accesswidener")
+loom.accessWidenerPath = project(":flywheel-fabric").file("src/main/resources/flywheel.accesswidener")
 
 transitiveSourceSets {
     compileClasspath = main.compileClasspath

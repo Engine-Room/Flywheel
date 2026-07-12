@@ -54,7 +54,7 @@ transitiveSourceSets {
 }
 
 loom {
-    accessWidenerPath = commonProject.file("src/main/resources/flywheel.accesswidener")
+    accessWidenerPath = file("src/main/resources/flywheel.accesswidener")
 
     mods.getByName(getExt("mod_id")).apply {
         sourceSet(api)
