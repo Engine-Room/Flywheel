@@ -5,7 +5,6 @@ plugins {
     alias(libs.plugins.configure.base)
     alias(libs.plugins.configure.fabric)
     alias(libs.plugins.setup.repositories)
-    alias(libs.plugins.setup.testmod)
 }
 
 val common = projects.flywheelCommon.path
@@ -15,7 +14,6 @@ val api = sourceSets.create("api")
 val lib = sourceSets.create("lib")
 val backend = sourceSets.create("backend")
 val main = sourceSets.getByName("main")
-val testMod = sourceSets.getByName("testMod")
 
 transitiveSourceSets {
     compileClasspath = main.compileClasspath
@@ -45,9 +43,6 @@ transitiveSourceSets {
         bundleFrom(commonProject)
 
         bundleOutput(api, lib, backend)
-    }
-    sourceSet(testMod) {
-        rootCompile()
     }
 
     createCompileConfigurations()

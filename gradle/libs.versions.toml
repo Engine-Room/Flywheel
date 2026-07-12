@@ -59,4 +59,3 @@ configure-common = { id = "configure-common" }
 configure-fabric = { id = "configure-fabric" }
 configure-neoforge = { id = "configure-neoforge" }
 setup-repositories = { id = "setup-repositories" }
-setup-testmod = { id = "setup-testmod" }
