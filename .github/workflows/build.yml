@@ -41,14 +41,15 @@ jobs:
             common/build/libs/
             fabric/build/libs/
             neoforge/build/libs/
-            vanillinFabric/build/libs/
-            vanillinNeoForge/build/libs/
+            vanillin/common/build/libs/
+            vanillin/fabric/build/libs/
+            vanillin/neoforge/build/libs/
 
   test:
     strategy:
       fail-fast: false
       matrix:
-        loader: [ neoforge, fabric ]
+        loader: [ fabric, neoforge ]
     needs: build
     runs-on: ubuntu-latest
     steps:
@@ -62,8 +63,8 @@ jobs:
 
       - name: Setup Environment Variables
         run: |
-          echo "MINECRAFT_VERSION=$(grep '^minecraft_version =' gradle.properties | cut -d'=' -f2 | tr -d ' ')" >> "$GITHUB_ENV"
-          echo "FABRIC_API_VERSION=$(grep '^fabric_api_version =' gradle.properties | cut -d'=' -f2 | tr -d ' ' | sed 's/+.*//')" >> "$GITHUB_ENV"
+          echo "MINECRAFT_VERSION=$(grep -oP '(?<=minecraft = )".*"' gradle/libs.versions.toml | cut -d '"' -f2)" >> "$GITHUB_ENV"
+          echo "FABRIC_API_VERSION=$(grep -oP '(?<=fabric-api = )".*"' gradle/libs.versions.toml | cut -d '"' -f2)" >> "$GITHUB_ENV"
 
       - name: Move Test Mod and Flywheel into run/mods
         # We don't want to recreate the jar name formatting so glob everything over then remove the sources and javadoc jars
@@ -74,7 +75,7 @@ jobs:
 
       # Lock to a specific commit, it would be bad if the tag is re-pushed with unwanted changes
       - name: Run the MC client
-        uses: headlesshq/mc-runtime-test@9d9ea4af8ef6d82648051f750c49905f75d0c3bb
+        uses: headlesshq/mc-runtime-test@ca0d85dd10e6318ea77a3b034309df6722bb51a2
         with:
           mc: ${{ env.MINECRAFT_VERSION }}
           modloader: ${{ matrix.loader }}
