@@ -14,6 +14,8 @@ import net.minecraft.world.level.lighting.LevelLightEngine;
 import net.minecraft.world.level.material.FluidState;
 
 public abstract class VirtualBlockGetter implements BlockAndTintGetter {
+	public static final CardinalLighting FULL_LIGHTING = new CardinalLighting(1F, 1F, 1F, 1F, 1F, 1F);
+
 	protected final VirtualLightEngine lightEngine;
 
 	public VirtualBlockGetter(ToIntFunction<BlockPos> blockLightFunc, ToIntFunction<BlockPos> skyLightFunc) {
@@ -27,7 +29,7 @@ public abstract class VirtualBlockGetter implements BlockAndTintGetter {
 
 	@Override
 	public CardinalLighting cardinalLighting() {
-		return CardinalLighting.DEFAULT;
+		return FULL_LIGHTING;
 	}
 
 	@Override
