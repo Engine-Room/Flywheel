@@ -6,7 +6,6 @@ import dev.engine_room.flywheel.backend.gl.GlObject;
 import dev.engine_room.flywheel.lib.memory.FlwMemoryTracker;
 import dev.engine_room.flywheel.lib.memory.MemoryBlock;
 
-@Deprecated(forRemoval = true)
 public class GlBuffer extends GlObject {
 	protected final GlBufferUsage usage;
 	/**

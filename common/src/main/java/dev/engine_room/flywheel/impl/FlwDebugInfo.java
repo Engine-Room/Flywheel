@@ -282,7 +282,6 @@ public final class FlwDebugInfo {
 				);
 			}
 
-			// TODO b3d-ification: This is not really correct anymore, it no longer tracks the buffers flw creates, it should probably be removed
 			add(displayer, "Memory Usage: CPU: %s, GPU: %s",
 				StringUtil.formatBytes(FlwMemoryTracker.getCpuMemory()),
 				StringUtil.formatBytes(FlwMemoryTracker.getGpuMemory())
