@@ -14,6 +14,9 @@ authors = "${mod_authors}"
 displayURL = "${mod_homepage}"
 displayTest = "IGNORE_ALL_VERSION"
 
+[[accessTransformers]]
+file="accesstransformer.cfg"
+
 [[mixins]]
 config = "flywheel.backend.mixins.json"
 [[mixins]]

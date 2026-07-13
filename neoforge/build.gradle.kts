@@ -48,10 +48,15 @@ transitiveSourceSets {
     createCompileConfigurations()
 }
 
-neoForge.mods.getByName(getExt("mod_id")) {
-    sourceSet(api)
-    sourceSet(lib)
-    sourceSet(backend)
+neoForge {
+    accessTransformers.from(file("src/main/resources/META-INF/accesstransformer.cfg"))
+
+    mods.getByName(getExt("mod_id")) {
+        sourceSet(api)
+        sourceSet(lib)
+        sourceSet(backend)
+    }
+
 }
 
 jarSets {
