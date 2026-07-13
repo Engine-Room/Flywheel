@@ -1,7 +1,7 @@
 {
   "required": true,
   "minVersion": "0.8",
-  "package" : "dev.engine_room.flywheel.impl.mixin.neoforge",
+  "package": "dev.engine_room.flywheel.impl.mixin.neoforge",
   "compatibilityLevel": "JAVA_25",
   "client": [
     "ModelBlockRendererMixin"

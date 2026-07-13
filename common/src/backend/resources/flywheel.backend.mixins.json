@@ -1,9 +1,9 @@
 {
-  "required" : true,
-  "minVersion" : "0.8",
-  "package" : "dev.engine_room.flywheel.backend.mixin",
-  "compatibilityLevel" : "JAVA_25",
-  "client" : [
+  "required": true,
+  "minVersion": "0.8",
+  "package": "dev.engine_room.flywheel.backend.mixin",
+  "compatibilityLevel": "JAVA_25",
+  "client": [
     "AbstractClientPlayerAccessor",
     "CameraAccessor",
     "CameraMixin",
@@ -21,7 +21,7 @@
     "light.SkyDataLayerStorageMapAccessor",
     "light.SkyLightSectionStorageMixin"
   ],
-  "injectors" : {
-    "defaultRequire" : 1
+  "injectors": {
+    "defaultRequire": 1
   }
 }

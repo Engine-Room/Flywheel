@@ -16,7 +16,7 @@ public class CommonCrumbling {
 				.cutout(CutoutShaders.ONE_TENTH)
 				.light(LightShaders.SMOOTH_WHEN_EMBEDDED)
 				.polygonOffset(true)
-				.transparency(Transparency.OPAQUE)
+				.transparency(Transparency.CRUMBLING)
 				.writeMask(WriteMask.COLOR)
 				.useOverlay(false)
 				.useLight(false)

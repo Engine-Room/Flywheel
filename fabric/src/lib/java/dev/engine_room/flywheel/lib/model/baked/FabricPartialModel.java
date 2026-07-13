@@ -3,7 +3,6 @@ package dev.engine_room.flywheel.lib.model.baked;
 import java.util.concurrent.ConcurrentMap;
 
 import org.jetbrains.annotations.ApiStatus;
-import org.jetbrains.annotations.NotNull;
 
 import com.google.common.collect.MapMaker;
 
@@ -22,11 +21,13 @@ import net.minecraft.resources.Identifier;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.packs.resources.ResourceManagerReloadListener;
 
+import org.jspecify.annotations.NullMarked;
+
 @ApiStatus.Internal
 public class FabricPartialModel extends PartialModel {
 	private static final ConcurrentMap<Identifier, FabricPartialModel> ALL = new MapMaker().weakValues().makeMap();
 
-	private final ExtraModelKey<@NotNull BlockStateModel> key;
+	private final ExtraModelKey<BlockStateModel> key;
 
 	public FabricPartialModel(Identifier modelId) {
 		super(modelId);
@@ -49,7 +50,8 @@ public class FabricPartialModel extends PartialModel {
 		}
 	}
 
-	private class Unbaked implements UnbakedExtraModel<@NotNull BlockStateModel> {
+	@NullMarked
+	private class Unbaked implements UnbakedExtraModel<BlockStateModel> {
 		@Override
 		public BlockStateModel bake(ModelBaker baker) {
 			return new SingleVariant(SimpleModelWrapper.bake(baker, modelId, BlockModelRotation.IDENTITY));
@@ -61,6 +63,7 @@ public class FabricPartialModel extends PartialModel {
 		}
 	}
 
+	@NullMarked
 	public static class ResourceReloadListener implements ResourceManagerReloadListener {
 		public static final Identifier ID = IdentifierUtil.id("partial_models");
 

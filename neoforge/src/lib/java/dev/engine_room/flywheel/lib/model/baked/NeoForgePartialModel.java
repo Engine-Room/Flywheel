@@ -3,7 +3,6 @@ package dev.engine_room.flywheel.lib.model.baked;
 import java.util.concurrent.ConcurrentMap;
 
 import org.jetbrains.annotations.ApiStatus;
-import org.jetbrains.annotations.NotNull;
 
 import com.google.common.collect.MapMaker;
 
@@ -20,11 +19,13 @@ import net.neoforged.neoforge.client.event.ModelEvent;
 import net.neoforged.neoforge.client.model.standalone.StandaloneModelKey;
 import net.neoforged.neoforge.client.model.standalone.UnbakedStandaloneModel;
 
+import org.jspecify.annotations.NullMarked;
+
 @ApiStatus.Internal
 public class NeoForgePartialModel extends PartialModel {
 	private static final ConcurrentMap<Identifier, NeoForgePartialModel> ALL = new MapMaker().weakValues().makeMap();
 
-	private final StandaloneModelKey<@NotNull BlockStateModel> key;
+	private final StandaloneModelKey<BlockStateModel> key;
 
 	public NeoForgePartialModel(Identifier modelId) {
 		super(modelId);
@@ -49,9 +50,10 @@ public class NeoForgePartialModel extends PartialModel {
 		}
 	}
 
-	private class Unbaked implements UnbakedStandaloneModel<@NotNull BlockStateModel> {
+	@NullMarked
+	private class Unbaked implements UnbakedStandaloneModel<BlockStateModel> {
 		@Override
-		public @NotNull BlockStateModel bake(ModelBaker baker, ModelDebugName name) {
+		public BlockStateModel bake(ModelBaker baker, ModelDebugName name) {
 			return new SingleVariant(SimpleModelWrapper.bake(baker, modelId, BlockModelRotation.IDENTITY));
 		}
 
