@@ -3,6 +3,7 @@ import dev.engine_room.gradle.versionOf
 
 plugins {
     java
+    idea
     `maven-publish`
 }
 

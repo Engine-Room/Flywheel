@@ -3,7 +3,10 @@ package dev.engine_room.gradle.nullability
 import org.gradle.api.Project
 import org.gradle.api.tasks.Delete
 import org.gradle.api.tasks.SourceSet
+import org.gradle.kotlin.dsl.getByType
 import org.gradle.kotlin.dsl.register
+
+import org.gradle.plugins.ide.idea.model.IdeaModel
 
 open class PackageInfosExtension(private val project: Project) {
     fun sources(vararg sourceSets: SourceSet) {
@@ -27,6 +30,11 @@ open class PackageInfosExtension(private val project: Project) {
             outputDir.set(project.file("src/$sourceSetName/generatedPackageInfos"))
         }
         sourceSet.java.srcDir(task)
+
+        val idea = project.extensions.getByType<IdeaModel>()
+        idea.module {
+            excludeDirs.add(task.flatMap { it.outputDir.asFile }.get())
+        }
 
         project.tasks.matching { it.name == "ideaSyncTask" || it.name == "neoForgeIdeSync" }.configureEach {
             finalizedBy(task)
