@@ -51,6 +51,8 @@ public class ItemVisual extends AbstractEntityVisual<ItemEntity> implements Simp
 	@Override
 	public void beginFrame(Context ctx) {
 		if (!isVisible(ctx.frustum())) {
+			instances.resetCount();
+			instances.discardExtra();
 			return;
 		}
 
