@@ -24,6 +24,7 @@ public final class LevelAttached<T> {
 		ALL.add(thisRef);
 
 		cache = CacheBuilder.newBuilder()
+				.weakKeys() // This prevents Levels from being leaked if invalidateLevel isn't called for them, usually in level wrapper cases
 				.<LevelAccessor, T>removalListener(n -> finalizer.accept(n.getValue()))
 				.build(new CacheLoader<>() {
 					@Override
