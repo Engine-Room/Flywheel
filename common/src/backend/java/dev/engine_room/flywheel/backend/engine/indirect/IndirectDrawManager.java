@@ -151,6 +151,10 @@ public class IndirectDrawManager extends DrawManager<IndirectInstancer<?>> {
 			group.submitSolid();
 		}
 
+		for (var group : cullingGroups.values()) {
+			group.submitTranslucent();
+		}
+
 		// Let's avoid invoking the oit chain if we don't have anything to do
 		boolean useOit = false;
 		for (var group : cullingGroups.values()) {
@@ -166,13 +170,13 @@ public class IndirectDrawManager extends DrawManager<IndirectInstancer<?>> {
 			oitFramebuffer.depthRange();
 
 			for (var group : cullingGroups.values()) {
-				group.submitTransparent(PipelineCompiler.OitMode.DEPTH_RANGE);
+				group.submitOrderIndependent(PipelineCompiler.OitMode.DEPTH_RANGE);
 			}
 
 			oitFramebuffer.renderTransmittance();
 
 			for (var group : cullingGroups.values()) {
-				group.submitTransparent(PipelineCompiler.OitMode.GENERATE_COEFFICIENTS);
+				group.submitOrderIndependent(PipelineCompiler.OitMode.GENERATE_COEFFICIENTS);
 			}
 
 			oitFramebuffer.renderDepthFromTransmittance();
@@ -183,7 +187,7 @@ public class IndirectDrawManager extends DrawManager<IndirectInstancer<?>> {
 			oitFramebuffer.accumulate();
 
 			for (var group : cullingGroups.values()) {
-				group.submitTransparent(PipelineCompiler.OitMode.EVALUATE);
+				group.submitOrderIndependent(PipelineCompiler.OitMode.EVALUATE);
 			}
 
 			oitFramebuffer.composite();
