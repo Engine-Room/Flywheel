@@ -16,6 +16,9 @@ public abstract class CameraMixin {
 	@Shadow
 	public abstract Vector3fc forwardVector();
 
+	/// Adds the camera's forward vector to {@link CameraRenderState}
+	///
+	/// Also see {@link CameraRenderStateMixin} and {@link CameraRenderStateExtension} which add the field to {@link CameraRenderState}
 	@Inject(method = "extractRenderState", at = @At("TAIL"))
 	private void flywheel$extendRenderState(CameraRenderState cameraState, float cameraEntityPartialTicks, CallbackInfo ci) {
 		((CameraRenderStateExtension) cameraState).flywheel$getForwardVector().set(forwardVector());

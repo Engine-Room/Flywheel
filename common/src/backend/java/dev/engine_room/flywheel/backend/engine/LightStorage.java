@@ -2,6 +2,9 @@ package dev.engine_room.flywheel.backend.engine;
 
 import java.util.BitSet;
 
+import dev.engine_room.flywheel.api.model.Model;
+import dev.engine_room.flywheel.lib.model.LineModelBuilder;
+
 import org.jspecify.annotations.Nullable;
 import org.lwjgl.system.MemoryUtil;
 
@@ -18,7 +21,6 @@ import dev.engine_room.flywheel.lib.instance.TransformedInstance;
 import dev.engine_room.flywheel.lib.math.MoreMath;
 import dev.engine_room.flywheel.lib.task.SimplePlan;
 import dev.engine_room.flywheel.lib.visual.SimpleDynamicVisual;
-import dev.engine_room.flywheel.lib.visual.component.HitboxComponent;
 import dev.engine_room.flywheel.lib.visual.util.InstanceRecycler;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 import it.unimi.dsi.fastutil.longs.Long2IntMap;
@@ -256,6 +258,33 @@ public class LightStorage implements Effect {
 	}
 
 	public class DebugVisual implements EffectVisual<LightStorage>, SimpleDynamicVisual {
+		//    010------110
+		//    /|       /|
+		//   / |      / |
+		// 011------111 |
+		//  |  |     |  |
+		//  | 000----|-100
+		//  | /      | /
+		//  |/       |/
+		// 001------101
+		public static final Model BOX_MODEL = new LineModelBuilder(12)
+				// Starting from 0, 0, 0
+				.line(0, 0, 0, 0, 0, 1)
+				.line(0, 0, 0, 0, 1, 0)
+				.line(0, 0, 0, 1, 0, 0)
+				// Starting from 0, 1, 1
+				.line(0, 1, 1, 0, 1, 0)
+				.line(0, 1, 1, 0, 0, 1)
+				.line(0, 1, 1, 1, 1, 1)
+				// Starting from 1, 0, 1
+				.line(1, 0, 1, 1, 0, 0)
+				.line(1, 0, 1, 1, 1, 1)
+				.line(1, 0, 1, 0, 0, 1)
+				// Starting from 1, 1, 0
+				.line(1, 1, 0, 1, 1, 1)
+				.line(1, 1, 0, 1, 0, 0)
+				.line(1, 1, 0, 0, 1, 0)
+				.build();
 
 		private final InstanceRecycler<TransformedInstance> boxes;
 		private final Vec3i renderOrigin;
@@ -263,7 +292,7 @@ public class LightStorage implements Effect {
 		public DebugVisual(VisualizationContext ctx, float partialTick) {
 			renderOrigin = ctx.renderOrigin();
 			boxes = new InstanceRecycler<>(() -> ctx.instancerProvider()
-					.instancer(InstanceTypes.TRANSFORMED, HitboxComponent.BOX_MODEL)
+					.instancer(InstanceTypes.TRANSFORMED, BOX_MODEL)
 					.createInstance());
 		}
 

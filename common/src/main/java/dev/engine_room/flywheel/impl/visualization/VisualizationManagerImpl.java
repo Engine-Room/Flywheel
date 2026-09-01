@@ -367,12 +367,12 @@ public class VisualizationManagerImpl implements VisualizationManager {
 		}
 
 		@Override
-		public void afterEntities(RenderContext ctx) {
+		public void afterSubmitEntities(RenderContext ctx) {
 			render(ctx);
 		}
 
 		@Override
-		public void beforeCrumbling(RenderContext ctx, Long2ObjectMap<SortedSet<BlockDestructionProgress>> destructionProgress) {
+		public void beforeSubmitCrumbling(RenderContext ctx, Long2ObjectMap<SortedSet<BlockDestructionProgress>> destructionProgress) {
 			renderCrumbling(ctx, destructionProgress);
 		}
 	}

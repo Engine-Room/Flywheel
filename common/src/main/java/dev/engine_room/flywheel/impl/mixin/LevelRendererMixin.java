@@ -85,7 +85,7 @@ abstract class LevelRendererMixin {
 		if (flywheel$renderContext != null) {
 			VisualizationManager manager = VisualizationManager.get(level);
 			if (manager != null) {
-				manager.renderDispatcher().afterEntities(flywheel$renderContext);
+				manager.renderDispatcher().afterSubmitEntities(flywheel$renderContext);
 			}
 		}
 	}
@@ -95,7 +95,7 @@ abstract class LevelRendererMixin {
 		if (flywheel$renderContext != null) {
 			VisualizationManager manager = VisualizationManager.get(level);
 			if (manager != null) {
-				manager.renderDispatcher().beforeCrumbling(flywheel$renderContext, destructionProgress);
+				manager.renderDispatcher().beforeSubmitCrumbling(flywheel$renderContext, destructionProgress);
 			}
 		}
 	}

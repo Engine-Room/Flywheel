@@ -78,7 +78,7 @@ public class VanillaVisuals {
 		minecart(EntityType.SPAWNER_MINECART, ModelLayers.SPAWNER_MINECART)
 				.apply(STABLE);
 
-		composable(EntityType.TNT_MINECART).apply(VanillaVisuals::commonElements)
+		composable(EntityType.TNT_MINECART)
 				.with(element(VisualElements.SHADOW).configure(new ShadowElement.Config(0.7f, ShadowElement.Config.DEFAULT_STRENGTH))
 						.build())
 				.with(element(VisualElements.FIRE).build())
@@ -92,7 +92,7 @@ public class VanillaVisuals {
 //		itemFrame(EntityType.GLOW_ITEM_FRAME).apply(EXPERIMENTAL);
 
 		// FIXME 1.21.11: port
-//		composable(EntityType.ITEM).apply(VanillaVisuals::commonElements)
+//		composable(EntityType.ITEM)
 //				.with(element(VisualElements.FIRE).build())
 //				.with(element(VisualElements.SHADOW).configure(new ShadowElement.Config(0.15f, 0.75f))
 //						.build())
@@ -104,14 +104,9 @@ public class VanillaVisuals {
 
 	}
 
-	public static <T extends Entity> void commonElements(EntityBuilder<T> builder) {
-		builder.with(element(VisualElements.HITBOX).configure(false)
-				.build());
-	}
-
 	// FIXME 1.21.11: port
 //	public static <T extends ItemFrame> EntityVisualizerBuilder<T> itemFrame(EntityType<T> type) {
-//		return composable(type).apply(VanillaVisuals::commonElements)
+//		return composable(type)
 //				.with(element(VisualElements.ITEM_FRAME).build())
 //				.shouldVisualize((ctx, entity) -> ItemFrameVisual.shouldVisualize(entity))
 //				.build()
@@ -119,7 +114,7 @@ public class VanillaVisuals {
 //	}
 
 	public static <T extends AbstractMinecart> EntityVisualizerBuilder<T> minecart(EntityType<T> type, ModelLayerLocation variant) {
-		return composable(type).apply(VanillaVisuals::commonElements)
+		return composable(type)
 				.with(element(VisualElements.SHADOW).configure(new ShadowElement.Config(0.7f, ShadowElement.Config.DEFAULT_STRENGTH))
 						.build())
 				.with(element(VisualElements.FIRE).build())
