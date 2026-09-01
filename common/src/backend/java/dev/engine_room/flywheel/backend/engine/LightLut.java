@@ -3,7 +3,7 @@ package dev.engine_room.flywheel.backend.engine;
 import java.util.function.BiConsumer;
 import java.util.function.Supplier;
 
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 import net.minecraft.core.SectionPos;

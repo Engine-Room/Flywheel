@@ -6,8 +6,8 @@ import java.util.function.BiConsumer;
 import com.mojang.blaze3d.vertex.PoseStack;
 
 import dev.engine_room.flywheel.api.model.Model;
-import dev.engine_room.flywheel.lib.model.baked.BakedModelBuilder;
 import dev.engine_room.flywheel.lib.model.baked.BlockModelBuilder;
+import dev.engine_room.flywheel.lib.model.baked.LevelModelBuilder;
 import dev.engine_room.flywheel.lib.model.baked.PartialModel;
 import dev.engine_room.flywheel.lib.model.baked.SinglePosVirtualBlockGetter;
 import dev.engine_room.flywheel.lib.transform.TransformStack;
@@ -23,10 +23,10 @@ import net.minecraft.world.level.block.state.BlockState;
  * method with the same parameters will return the same object.
  */
 public final class Models {
-	private static final RendererReloadCache<BlockState, Model> BLOCK_STATE = new RendererReloadCache<>(it -> new BlockModelBuilder(SinglePosVirtualBlockGetter.createFullDark()
+	private static final RendererReloadCache<BlockState, Model> BLOCK_STATE = new RendererReloadCache<>(it -> new LevelModelBuilder(SinglePosVirtualBlockGetter.createFullDark()
 					.blockState(it), List.of(BlockPos.ZERO))
 			.build());
-	private static final RendererReloadCache<PartialModel, Model> PARTIAL = new RendererReloadCache<>(it -> new BakedModelBuilder(it.get())
+	private static final RendererReloadCache<PartialModel, Model> PARTIAL = new RendererReloadCache<>(it -> new BlockModelBuilder(it.get())
 			.build());
 	private static final RendererReloadCache<TransformedPartial<?>, Model> TRANSFORMED_PARTIAL = new RendererReloadCache<>(TransformedPartial::create);
 
@@ -92,7 +92,7 @@ public final class Models {
 		private Model create() {
 			var stack = new PoseStack();
 			transformer.accept(key, stack);
-			return new BakedModelBuilder(partial.get())
+			return new BlockModelBuilder(partial.get())
 					.poseStack(stack)
 					.build();
 		}

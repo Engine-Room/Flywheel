@@ -1,6 +1,6 @@
 package dev.engine_room.flywheel.backend.gl.shader;
 
-import org.lwjgl.opengl.GL20;
+import com.mojang.blaze3d.opengl.GlStateManager;
 
 import dev.engine_room.flywheel.backend.gl.GlObject;
 
@@ -18,7 +18,7 @@ public class GlShader extends GlObject {
 
 	@Override
 	protected void deleteInternal(int handle) {
-		GL20.glDeleteShader(handle);
+		GlStateManager.glDeleteShader(handle);
 	}
 
 	@Override

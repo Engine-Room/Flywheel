@@ -3,14 +3,15 @@ package dev.engine_room.flywheel.backend.gl.array;
 import java.util.List;
 
 import org.lwjgl.opengl.GL32;
+import org.lwjgl.opengl.GL33C;
 
-import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.opengl.GlStateManager;
 
 import dev.engine_room.flywheel.backend.gl.GlObject;
 import dev.engine_room.flywheel.backend.gl.GlStateTracker;
 
 public abstract class GlVertexArray extends GlObject {
-	protected static final int MAX_ATTRIBS = GL32.glGetInteger(GL32.GL_MAX_VERTEX_ATTRIBS);
+	protected static final int MAX_ATTRIBS = GlStateManager._getInteger(GL32.GL_MAX_VERTEX_ATTRIBS);
 	protected static final int MAX_ATTRIB_BINDINGS = 16;
 
 	public static GlVertexArray create() {
@@ -41,6 +42,6 @@ public abstract class GlVertexArray extends GlObject {
 
 	@Override
 	protected void deleteInternal(int handle) {
-		GlStateManager._glDeleteVertexArrays(handle);
+		GL33C.glDeleteVertexArrays(handle);
 	}
 }

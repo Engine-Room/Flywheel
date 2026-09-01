@@ -2,8 +2,10 @@ package dev.engine_room.flywheel.backend.gl;
 
 import org.lwjgl.opengl.GL32;
 
+import com.mojang.blaze3d.opengl.GlStateManager;
+
 public class TextureBuffer extends GlObject {
-	public static final int MAX_TEXELS = GL32.glGetInteger(GL32.GL_MAX_TEXTURE_BUFFER_SIZE);
+	public static final int MAX_TEXELS = GlStateManager._getInteger(GL32.GL_MAX_TEXTURE_BUFFER_SIZE);
 	public static final int MAX_BYTES = MAX_TEXELS * 16; // 4 channels * 4 bytes
 	private final int format;
 

@@ -1,0 +1,13 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "dev.engine_room.vanillin.mixin",
+  "compatibilityLevel": "JAVA_25",
+  "client": [
+    "BlockModelSetAccessor",
+    "ChestRendererAccessor"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

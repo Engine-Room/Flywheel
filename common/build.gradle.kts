@@ -1,19 +1,16 @@
 plugins {
-    idea
-    java
-    `maven-publish`
-    id("dev.architectury.loom")
-    id("flywheel.subproject")
+    alias(libs.plugins.flywheel.gradle)
+    alias(libs.plugins.configure.base)
+    alias(libs.plugins.configure.common)
+    alias(libs.plugins.setup.repositories)
 }
-
-subproject.init("flywheel-common", "flywheel_group", "flywheel_version")
 
 val api = sourceSets.create("api")
 val lib = sourceSets.create("lib")
 val backend = sourceSets.create("backend")
-val stubs = sourceSets.create("stubs")
 val main = sourceSets.getByName("main")
-val vanillin = sourceSets.create("vanillin")
+
+loom.accessWidenerPath = project(projects.flywheelFabric.path).file("src/main/resources/flywheel.accesswidener")
 
 transitiveSourceSets {
     compileClasspath = main.compileClasspath
@@ -32,10 +29,6 @@ transitiveSourceSets {
         compileClasspath(api, lib)
         outgoing()
     }
-    sourceSet(stubs) {
-        rootCompile()
-        outgoingClasses()
-    }
     sourceSet(main) {
         compileClasspath(api, lib, backend)
         outgoing()
@@ -43,87 +36,29 @@ transitiveSourceSets {
     sourceSet(sourceSets.getByName("test")) {
         implementation(api, lib, backend)
     }
-    sourceSet(vanillin) {
-        rootCompile()
-        compileClasspath(api, lib, main)
-        outgoing()
-    }
 }
 
 defaultPackageInfos {
-    sources(api, lib, backend, main, vanillin)
+    sources(api, lib, backend, main)
 }
 
 jarSets {
-    // For publishing.
     create("api", api, lib).apply {
         addToAssemble()
-        publishWithRemappedSources {
-            artifactId = "flywheel-common-intermediary-api-${property("artifact_minecraft_version")}"
-        }
-
-        configureJar {
-            manifest {
-                attributes("Fabric-Loom-Remap" to "true")
-            }
-        }
-
-        // Don't publish the un-remapped jars because they don't have the correct manifest populated by Loom.
-        forkRemap("apiMojmap").apply {
-            addToAssemble()
-            configureRemap {
-                // "named" == mojmap
-                // We're probably remapping from named to named so Loom should noop this.
-                targetNamespace = "named"
-            }
-
-            publishWithRawSources {
-                artifactId = "flywheel-common-mojmap-api-${property("artifact_minecraft_version")}"
-            }
-        }
-    }
-
-    create("vanillin", vanillin).apply {
-        addToAssemble()
-        publishWithRemappedSources {
-            artifactId = "vanillin-common-intermediary-${property("artifact_minecraft_version")}"
-            version = property("vanillin_version") as String
-            groupId = property("vanillin_group") as String
-        }
-
-        configureJar {
-            manifest {
-                attributes("Fabric-Loom-Remap" to "true")
-            }
-        }
-
-        // Don't publish the un-remapped jars because they don't have the correct manifest populated by Loom.
-        forkRemap("vanillinMojmap").apply {
-            addToAssemble()
-            configureRemap {
-                // "named" == mojmap
-                // We're probably remapping from named to named so Loom should noop this.
-                targetNamespace = "named"
-            }
-
-            publishWithRawSources {
-                artifactId = "vanillin-common-mojmap-${property("artifact_minecraft_version")}"
-                version = property("vanillin_version") as String
-                groupId = property("vanillin_group") as String
-            }
-        }
+        publish()
     }
 }
 
 dependencies {
-    modCompileOnly("net.fabricmc:fabric-loader:${property("fabric_loader_version")}")
+    compileOnly(libs.bundles.mixin)
+    annotationProcessor(libs.mixin.extras)
 
-    modCompileOnly("maven.modrinth:sodium:${property("sodium_version")}-fabric")
-    modCompileOnly("maven.modrinth:iris:${property("iris_version")}-fabric")
+    compileOnly(libs.sodium.fabric.api)
+    compileOnly(libs.iris.fabric)
 
-    compileOnly(annotationProcessor("io.github.llamalad7:mixinextras-common:0.4.1")!!)
-
-    testImplementation("org.junit.jupiter:junit-jupiter:5.8.1")
+    testImplementation(platform(libs.junit.bom))
+    testImplementation(libs.junit.jupiter)
+    testRuntimeOnly(libs.junit.launcher)
 }
 
 tasks.test {

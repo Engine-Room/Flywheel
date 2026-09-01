@@ -1,0 +1,38 @@
+modLoader = "javafml"
+# The loader version doesn't matter. Modify the NeoForge and/or Minecraft version ranges instead.
+loaderVersion = "[0,)"
+license = "${mod_license}"
+issueTrackerURL = "${mod_issues}"
+
+[[mods]]
+modId = "${mod_id}"
+version = "${mod_version}"
+displayName = "${mod_name}"
+description = "${mod_description}"
+logoFile = "logo.png"
+authors = "${mod_authors}"
+displayURL = "${mod_homepage}"
+displayTest = "IGNORE_ALL_VERSION"
+
+[[mixins]]
+config = "vanillin.mixins.json"
+[[mixins]]
+config = "vanillin.neoforge.mixins.json"
+
+[[dependencies."${mod_id}"]]
+modId = "minecraft"
+type = "required"
+versionRange = "[${minecraft_version}]"
+side = "CLIENT"
+
+[[dependencies."${mod_id}"]]
+modId = "neoforge"
+type = "required"
+versionRange = "[${neoforge_version},)"
+side = "CLIENT"
+
+[[dependencies."${mod_id}"]]
+modId = "flywheel"
+type = "required"
+versionRange = "${flywheel_maven_version_range}"
+side = "CLIENT"

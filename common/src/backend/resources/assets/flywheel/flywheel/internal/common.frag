@@ -74,7 +74,7 @@ float _flw_diffuseFactor() {
     if (flw_material.cardinalLightingMode == 2u) {
         return diffuseFromLightDirections(flw_vertexNormal);
     } else if (flw_material.cardinalLightingMode == 1u) {
-        if (flw_constantAmbientLight == 1u) {
+        if (flw_cardinalLightType == 1u) {
             return diffuseNether(flw_vertexNormal);
         } else {
             return diffuse(flw_vertexNormal);

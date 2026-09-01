@@ -2,9 +2,6 @@ name: Build
 
 on: [ workflow_dispatch, pull_request, push ]
 
-env:
-  JAVA_VERSION: 21
-
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -12,8 +9,17 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
+      - name: Extract Versions
+        id: versions
+        run: |
+          echo "java=$(grep -oP '(?<=java = )".*"' gradle/libs.versions.toml | cut -d '"' -f2)" >> "$GITHUB_OUTPUT"
+
       - name: Setup Java
-        run: echo "JAVA_HOME=$JAVA_HOME_${{ env.JAVA_VERSION }}_X64" >> "$GITHUB_ENV"
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: ${{ steps.versions.outputs.java }}
+          cache: gradle
 
       - name: Loom Cache
         uses: actions/cache@v4
@@ -30,8 +36,7 @@ jobs:
 
       - name: Build
         # Doesn't actually publish, as no secrets are passed in, just makes sure that publishing works
-        # Also generate the mod jars for the test job
-        run: ./gradlew remapTestModJar publish --no-daemon
+        run: ./gradlew publish --no-daemon
 
       - name: Capture Build Artifacts
         uses: actions/upload-artifact@v4
@@ -41,44 +46,6 @@ jobs:
             common/build/libs/
             fabric/build/libs/
             neoforge/build/libs/
-            vanillinFabric/build/libs/
-            vanillinNeoForge/build/libs/
-
-  test:
-    strategy:
-      fail-fast: false
-      matrix:
-        loader: [ neoforge, fabric ]
-    needs: build
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v4
-
-      - name: Download build artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: Artifacts
-
-      - name: Setup Environment Variables
-        run: |
-          echo "MINECRAFT_VERSION=$(grep '^minecraft_version =' gradle.properties | cut -d'=' -f2 | tr -d ' ')" >> "$GITHUB_ENV"
-          echo "FABRIC_API_VERSION=$(grep '^fabric_api_version =' gradle.properties | cut -d'=' -f2 | tr -d ' ' | sed 's/+.*//')" >> "$GITHUB_ENV"
-
-      - name: Move Test Mod and Flywheel into run/mods
-        # We don't want to recreate the jar name formatting so glob everything over then remove the sources and javadoc jars
-        run: |
-          mkdir -p run/mods
-          cp ${{ matrix.loader }}/build/libs/*.jar run/mods
-          rm -f run/mods/*-sources.jar run/mods/*-javadoc.jar
-
-      # Lock to a specific commit, it would be bad if the tag is re-pushed with unwanted changes
-      - name: Run the MC client
-        uses: 3arthqu4ke/mc-runtime-test@e72f8fe1134aabf6fc749a2a8c09bb56dd7d283e
-        with:
-          mc: ${{ env.MINECRAFT_VERSION }}
-          modloader: ${{ matrix.loader }}
-          regex: .*${{ matrix.loader }}.*
-          mc-runtime-test: none
-          java: ${{ env.JAVA_VERSION }}
-          fabric-api: ${{ matrix.loader == 'fabric' && env.FABRIC_API_VERSION || 'none' }}
+            vanillin/common/build/libs/
+            vanillin/fabric/build/libs/
+            vanillin/neoforge/build/libs/

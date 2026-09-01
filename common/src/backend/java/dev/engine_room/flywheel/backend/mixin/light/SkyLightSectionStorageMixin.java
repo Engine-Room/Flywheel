@@ -1,9 +1,9 @@
 package dev.engine_room.flywheel.backend.mixin.light;
 
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 
-import dev.engine_room.flywheel.backend.SkyLightSectionStorageExtension;
+import dev.engine_room.flywheel.backend.extension.SkyLightSectionStorageExtension;
 import net.minecraft.core.Direction;
 import net.minecraft.core.SectionPos;
 import net.minecraft.world.level.chunk.DataLayer;

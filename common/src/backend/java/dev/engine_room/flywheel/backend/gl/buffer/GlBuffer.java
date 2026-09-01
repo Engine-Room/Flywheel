@@ -1,6 +1,6 @@
 package dev.engine_room.flywheel.backend.gl.buffer;
 
-import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.opengl.GlStateManager;
 
 import dev.engine_room.flywheel.backend.gl.GlObject;
 import dev.engine_room.flywheel.lib.memory.FlwMemoryTracker;

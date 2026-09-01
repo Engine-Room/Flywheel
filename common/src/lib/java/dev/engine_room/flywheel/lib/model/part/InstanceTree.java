@@ -5,7 +5,7 @@ import java.util.function.Consumer;
 import java.util.function.ObjIntConsumer;
 
 import org.jetbrains.annotations.ApiStatus;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 import org.joml.Matrix4f;
 import org.joml.Matrix4fc;
 import org.joml.Quaternionf;
@@ -460,12 +460,12 @@ public final class InstanceTree {
 	}
 
 	public void loadPose(PartPose pose) {
-		x = pose.x;
-		y = pose.y;
-		z = pose.z;
-		xRot = pose.xRot;
-		yRot = pose.yRot;
-		zRot = pose.zRot;
+		x = pose.x();
+		y = pose.y();
+		z = pose.z();
+		xRot = pose.xRot();
+		yRot = pose.yRot();
+		zRot = pose.zRot();
 		xScale = ModelPart.DEFAULT_SCALE;
 		yScale = ModelPart.DEFAULT_SCALE;
 		zScale = ModelPart.DEFAULT_SCALE;

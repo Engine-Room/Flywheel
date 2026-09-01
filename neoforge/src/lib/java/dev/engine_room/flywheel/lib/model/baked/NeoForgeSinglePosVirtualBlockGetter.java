@@ -2,12 +2,12 @@ package dev.engine_room.flywheel.lib.model.baked;
 
 import java.util.function.ToIntFunction;
 
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
-import net.neoforged.neoforge.client.model.data.ModelData;
+import net.neoforged.neoforge.model.data.ModelData;
 
 public class NeoForgeSinglePosVirtualBlockGetter extends SinglePosVirtualBlockGetter {
 	@Nullable

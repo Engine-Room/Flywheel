@@ -2,7 +2,7 @@ package dev.engine_room.flywheel.api.visual;
 
 import java.util.function.Consumer;
 
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import dev.engine_room.flywheel.api.instance.Instance;
 import net.minecraft.world.level.block.entity.BlockEntity;

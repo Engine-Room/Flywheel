@@ -8,14 +8,14 @@ import org.slf4j.LoggerFactory;
 import dev.engine_room.flywheel.api.Flywheel;
 import dev.engine_room.flywheel.backend.glsl.ShaderSources;
 import dev.engine_room.flywheel.backend.glsl.SourceComponent;
-import dev.engine_room.flywheel.lib.util.ResourceUtil;
-import net.minecraft.resources.ResourceLocation;
+import dev.engine_room.flywheel.lib.util.IdentifierUtil;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.packs.resources.ResourceManager;
 
 public final class FlwPrograms {
 	public static final Logger LOGGER = LoggerFactory.getLogger(Flywheel.ID + "/backend/shaders");
 
-	private static final ResourceLocation COMPONENTS_HEADER_FRAG = ResourceUtil.rl("internal/components_header.frag");
+	private static final Identifier COMPONENTS_HEADER_FRAG = IdentifierUtil.id("internal/components_header.frag");
 
 	public static ShaderSources SOURCES;
 

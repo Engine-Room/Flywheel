@@ -48,7 +48,7 @@ public class TestShaderSourceLoading extends TestBase {
 		var aErr = findAndAssertError(LoadError.IncludeError.class, sources, FLW_A);
 
 		var ioErr = assertSimpleNestedErrorsToDepth(LoadError.IOError.class, aErr, 1);
-		assertEquals(FLW_B, ioErr.location());
+		assertEquals(FLW_B, ioErr.id());
 	}
 
 	@Test

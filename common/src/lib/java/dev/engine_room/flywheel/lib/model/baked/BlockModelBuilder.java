@@ -2,7 +2,7 @@ package dev.engine_room.flywheel.lib.model.baked;
 
 import java.util.function.BiFunction;
 
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 
@@ -10,22 +10,34 @@ import dev.engine_room.flywheel.api.material.Material;
 import dev.engine_room.flywheel.lib.internal.FlwLibXplat;
 import dev.engine_room.flywheel.lib.model.ModelUtil;
 import dev.engine_room.flywheel.lib.model.SimpleModel;
-import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.block.BlockAndTintGetter;
+import net.minecraft.client.renderer.block.dispatch.BlockStateModel;
+import net.minecraft.client.renderer.chunk.ChunkSectionLayer;
 import net.minecraft.core.BlockPos;
-import net.minecraft.world.level.BlockAndTintGetter;
 
 public final class BlockModelBuilder {
-	final BlockAndTintGetter level;
-	final Iterable<BlockPos> positions;
+	final BlockStateModel blockModel;
+	@Nullable
+	BlockAndTintGetter level;
+	@Nullable
+	BlockPos pos;
 	@Nullable
 	PoseStack poseStack;
-	boolean renderFluids = false;
 	@Nullable
 	BlockMaterialFunction materialFunc;
 
-	public BlockModelBuilder(BlockAndTintGetter level, Iterable<BlockPos> positions) {
+	public BlockModelBuilder(BlockStateModel blockModel) {
+		this.blockModel = blockModel;
+	}
+
+	public BlockModelBuilder level(@Nullable BlockAndTintGetter level) {
 		this.level = level;
-		this.positions = positions;
+		return this;
+	}
+
+	public BlockModelBuilder pos(@Nullable BlockPos pos) {
+		this.pos = pos;
+		return this;
 	}
 
 	public BlockModelBuilder poseStack(@Nullable PoseStack poseStack) {
@@ -33,15 +45,10 @@ public final class BlockModelBuilder {
 		return this;
 	}
 
-	public BlockModelBuilder renderFluids(boolean renderFluids) {
-		this.renderFluids = renderFluids;
-		return this;
-	}
-
 	@Deprecated(forRemoval = true)
-	public BlockModelBuilder materialFunc(@Nullable BiFunction<RenderType, Boolean, @Nullable Material> materialFunc) {
+	public BlockModelBuilder materialFunc(@Nullable BiFunction<ChunkSectionLayer, Boolean, @Nullable Material> materialFunc) {
 		if (materialFunc != null) {
-			this.materialFunc = (chunkRenderType, shaded, ambientOcclusion) -> materialFunc.apply(chunkRenderType, shaded);
+			this.materialFunc = (chunkSectionLayer, shaded, ambientOcclusion) -> materialFunc.apply(chunkSectionLayer, shaded);
 		} else {
 			this.materialFunc = null;
 		}
@@ -54,6 +61,12 @@ public final class BlockModelBuilder {
 	}
 
 	public SimpleModel build() {
+		if (level == null) {
+			level = EmptyVirtualBlockGetter.FULL_DARK;
+		}
+		if (pos == null) {
+			pos = BlockPos.ZERO;
+		}
 		if (materialFunc == null) {
 			materialFunc = ModelUtil::getMaterial;
 		}

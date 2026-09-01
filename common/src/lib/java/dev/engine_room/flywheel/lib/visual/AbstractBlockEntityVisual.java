@@ -2,7 +2,7 @@ package dev.engine_room.flywheel.lib.visual;
 
 import java.util.Iterator;
 
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 import org.jetbrains.annotations.UnknownNullability;
 import org.joml.FrustumIntersection;
 
@@ -96,15 +96,15 @@ public abstract class AbstractBlockEntityVisual<T extends BlockEntity> extends A
 	 */
 	public boolean doDistanceLimitThisFrame(DynamicVisual.Context context) {
 		return !context.limiter()
-				.shouldUpdate(pos.distToCenterSqr(context.camera().getPosition()));
+				.shouldUpdate(pos.distToCenterSqr(context.cameraRenderState().pos));
 	}
 
 	protected int computePackedLight() {
-		return LevelRenderer.getLightColor(level, pos);
+		return LevelRenderer.getLightCoords(level, pos);
 	}
 
 	protected void relight(BlockPos pos, @Nullable FlatLit... instances) {
-		FlatLit.relight(LevelRenderer.getLightColor(level, pos), instances);
+		FlatLit.relight(LevelRenderer.getLightCoords(level, pos), instances);
 	}
 
 	protected void relight(@Nullable FlatLit... instances) {
@@ -112,7 +112,7 @@ public abstract class AbstractBlockEntityVisual<T extends BlockEntity> extends A
 	}
 
 	protected void relight(BlockPos pos, Iterator<@Nullable FlatLit> instances) {
-		FlatLit.relight(LevelRenderer.getLightColor(level, pos), instances);
+		FlatLit.relight(LevelRenderer.getLightCoords(level, pos), instances);
 	}
 
 	protected void relight(Iterator<@Nullable FlatLit> instances) {
@@ -120,7 +120,7 @@ public abstract class AbstractBlockEntityVisual<T extends BlockEntity> extends A
 	}
 
 	protected void relight(BlockPos pos, Iterable<@Nullable FlatLit> instances) {
-		FlatLit.relight(LevelRenderer.getLightColor(level, pos), instances);
+		FlatLit.relight(LevelRenderer.getLightCoords(level, pos), instances);
 	}
 
 	protected void relight(Iterable<@Nullable FlatLit> instances) {
