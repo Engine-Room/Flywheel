@@ -52,6 +52,8 @@
 //	@Override
 //	public void beginFrame(Context ctx) {
 //		if (!isVisible(ctx.frustum())) {
+// 			instances.resetCount();
+//			instances.discardExtra();
 //			return;
 //		}
 //

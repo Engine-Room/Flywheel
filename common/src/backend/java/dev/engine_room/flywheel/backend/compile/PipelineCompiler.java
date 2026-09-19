@@ -181,6 +181,20 @@ public final class PipelineCompiler {
 					program.bindAttribLocation("_flw_aOverlay", 3);
 					program.bindAttribLocation("_flw_aLight", 4);
 					program.bindAttribLocation("_flw_aNormal", 5);
+
+					// Explicitly bind the fragment outputs to the color attachment slots the
+					// OitFramebuffer draw buffers expect. Each OIT pass only declares one of these
+					// output groups (guarded by #ifdefs), and binding a name that isn't present is a
+					// no-op, so binding them all unconditionally is safe. Apple's GL driver assigns
+					// implicit output locations in an order that doesn't match declaration order,
+					// which scrambles the coefficient targets and makes OIT geometry invisible.
+					program.bindFragDataLocation("_flw_outputColor", 0);
+					program.bindFragDataLocation("_flw_depthRange_out", 0);
+					program.bindFragDataLocation("_flw_coeffs0", 0);
+					program.bindFragDataLocation("_flw_coeffs1", 1);
+					program.bindFragDataLocation("_flw_coeffs2", 2);
+					program.bindFragDataLocation("_flw_coeffs3", 3);
+					program.bindFragDataLocation("_flw_accumulate", 0);
 				})
 				.postLink((key, program) -> {
 					Uniforms.setUniformBlockBindings(program);

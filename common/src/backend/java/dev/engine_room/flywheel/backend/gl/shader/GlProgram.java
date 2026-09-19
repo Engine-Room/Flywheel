@@ -176,6 +176,22 @@ public class GlProgram extends GlObject {
 		GlStateManager._glBindAttribLocation(handle(), binding, attribute);
 	}
 
+	/**
+	 * Binds a fragment shader output variable to a specific color attachment (draw buffer) slot.
+	 *
+	 * <p>This must happen before the program is linked. Binding a name that isn't an active output
+	 * in the linked program is a no-op, so it's safe to bind every possible output unconditionally.
+	 *
+	 * <p>Without this, the GL implementation is free to assign output locations in any order it
+	 * likes when a fragment shader declares multiple outputs without explicit {@code layout(location)}
+	 * qualifiers. Most desktop drivers happen to assign them in declaration order, but Apple's legacy
+	 * OpenGL driver does not, which scrambles the OIT coefficient targets and makes the transparent
+	 * geometry vanish. Binding the locations explicitly is correct everywhere.
+	 */
+	public void bindFragDataLocation(String name, int binding) {
+		glBindFragDataLocation(handle(), binding, name);
+	}
+
 	@Override
 	protected void deleteInternal(int handle) {
 		GlStateManager.glDeleteProgram(handle);
