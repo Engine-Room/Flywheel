@@ -17,7 +17,7 @@ public final class Materials {
 			.build();
 
 	public static final Material CUTOUT_BLOCK = SimpleMaterial.builder()
-			.cutout(CutoutShaders.HALF)
+			.cutout(CutoutShaders.ONE_TENTH)
 			.build();
 	public static final Material CUTOUT_UNSHADED_BLOCK = SimpleMaterial.builderOf(CUTOUT_BLOCK)
 			.cardinalLightingMode(CardinalLightingMode.OFF)
