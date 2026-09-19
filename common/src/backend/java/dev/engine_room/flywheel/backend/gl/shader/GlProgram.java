@@ -189,7 +189,7 @@ public class GlProgram extends GlObject {
 	 * geometry vanish. Binding the locations explicitly is correct everywhere.
 	 */
 	public void bindFragDataLocation(String name, int binding) {
-		glBindFragDataLocation(handle(), binding, name);
+		GL30.glBindFragDataLocation(handle(), binding, name);
 	}
 
 	@Override
