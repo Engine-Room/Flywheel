@@ -1,14 +1,13 @@
 package dev.engine_room.flywheel.backend.engine.indirect;
 
-import static org.lwjgl.opengl.GL11.GL_TRIANGLES;
-import static org.lwjgl.opengl.GL11.GL_UNSIGNED_INT;
-import static org.lwjgl.opengl.GL42.GL_COMMAND_BARRIER_BIT;
-import static org.lwjgl.opengl.GL42.glMemoryBarrier;
-import static org.lwjgl.opengl.GL43.glDispatchCompute;
-
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+
+import org.lwjgl.opengl.GL42;
+import org.lwjgl.opengl.GL43;
+
+import com.mojang.blaze3d.opengl.GlConst;
 
 import dev.engine_room.flywheel.api.instance.Instance;
 import dev.engine_room.flywheel.api.instance.InstanceType;
@@ -115,12 +114,12 @@ public class IndirectCullingGroup<I extends Instance> {
 		cullProgram.bind();
 
 		buffers.bindForCull();
-		glDispatchCompute(buffers.objectStorage.capacity(), 1, 1);
+		GL43.glDispatchCompute(buffers.objectStorage.capacity(), 1, 1);
 	}
 
 	public void dispatchApply() {
 		buffers.bindForApply();
-		glDispatchCompute(GlCompat.getComputeGroupCount(indirectDraws.size()), 1, 1);
+		GL43.glDispatchCompute(GlCompat.getComputeGroupCount(indirectDraws.size()), 1, 1);
 	}
 
 	public boolean hasOitDraws() {
@@ -243,7 +242,7 @@ public class IndirectCullingGroup<I extends Instance> {
 		if (needsDrawBarrier) {
 			// In theory all command buffer writes will be protected by
 			// the shader storage barrier bit, but better safe than sorry.
-			glMemoryBarrier(GL_COMMAND_BARRIER_BIT);
+			GL42.glMemoryBarrier(GL42.GL_COMMAND_BARRIER_BIT);
 			needsDrawBarrier = false;
 		}
 	}
@@ -288,7 +287,7 @@ public class IndirectCullingGroup<I extends Instance> {
 
 	private record MultiDraw(Material material, boolean embedded, int start, int end) {
 		private void submit(GlProgram drawProgram) {
-			GlCompat.safeMultiDrawElementsIndirect(drawProgram, GL_TRIANGLES, GL_UNSIGNED_INT, this.start, this.end, IndirectBuffers.DRAW_COMMAND_STRIDE);
+			GlCompat.safeMultiDrawElementsIndirect(drawProgram, GlConst.GL_TRIANGLES, GlConst.GL_UNSIGNED_INT, this.start, this.end, IndirectBuffers.DRAW_COMMAND_STRIDE);
 		}
 	}
 }

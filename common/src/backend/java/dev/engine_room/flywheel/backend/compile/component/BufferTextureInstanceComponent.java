@@ -10,7 +10,7 @@ import dev.engine_room.flywheel.backend.glsl.generate.GlslBuilder;
 import dev.engine_room.flywheel.backend.glsl.generate.GlslExpr;
 import dev.engine_room.flywheel.backend.glsl.generate.GlslStmt;
 import dev.engine_room.flywheel.lib.math.MoreMath;
-import dev.engine_room.flywheel.lib.util.ResourceUtil;
+import dev.engine_room.flywheel.lib.util.IdentifierUtil;
 
 public class BufferTextureInstanceComponent extends InstanceAssemblerComponent {
 	private static final String[] SWIZZLE_SELECTORS = { "x", "y", "z", "w" };
@@ -21,7 +21,7 @@ public class BufferTextureInstanceComponent extends InstanceAssemblerComponent {
 
 	@Override
 	public String name() {
-		return ResourceUtil.rl("buffer_texture_instance_assembler").toString();
+		return IdentifierUtil.id("buffer_texture_instance_assembler").toString();
 	}
 
 	@Override

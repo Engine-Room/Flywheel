@@ -15,15 +15,22 @@ abstract class MinecraftMixin {
 	@Shadow
 	public ClientLevel level;
 
-	@Inject(method = "setLevel(Lnet/minecraft/client/multiplayer/ClientLevel;Lnet/minecraft/client/gui/screens/ReceivingLevelScreen$Reason;)V", at = @At("HEAD"))
+	@Inject(method = "setLevel(Lnet/minecraft/client/multiplayer/ClientLevel;)V", at = @At("HEAD"))
 	private void flywheel$onSetLevel(CallbackInfo ci) {
 		if (level != null) {
 			LevelAttached.invalidateLevel(level);
 		}
 	}
 
-	@Inject(method = "disconnect(Lnet/minecraft/client/gui/screens/Screen;)V", at = @At("HEAD"))
+	@Inject(method = "disconnect(Lnet/minecraft/client/gui/screens/Screen;ZZ)V", at = @At("HEAD"))
 	private void flywheel$onDisconnect(CallbackInfo ci) {
+		if (level != null) {
+			LevelAttached.invalidateLevel(level);
+		}
+	}
+
+	@Inject(method = "clearClientLevel", at = @At("HEAD"))
+	private void flywheel$onClearClientLevel(CallbackInfo ci) {
 		if (level != null) {
 			LevelAttached.invalidateLevel(level);
 		}

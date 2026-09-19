@@ -3,7 +3,7 @@ package dev.engine_room.flywheel.backend.glsl.generate;
 import java.util.Collection;
 import java.util.stream.Collectors;
 
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import com.google.common.collect.ImmutableList;
 import com.mojang.datafixers.util.Pair;

@@ -18,7 +18,7 @@ import dev.engine_room.flywheel.backend.glsl.GlslVersion;
 import dev.engine_room.flywheel.backend.glsl.ShaderSources;
 import dev.engine_room.flywheel.backend.glsl.SourceComponent;
 import dev.engine_room.flywheel.lib.util.StringUtil;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 /**
  * A typed provider for shader compiler builders.
@@ -75,12 +75,12 @@ public class Compile<K> {
 			return with((key, $) -> sourceFetcher.apply(key));
 		}
 
-		public ShaderCompiler<K> withResource(Function<K, ResourceLocation> sourceFetcher) {
+		public ShaderCompiler<K> withResource(Function<K, Identifier> sourceFetcher) {
 			return with((key, loader) -> loader.get(sourceFetcher.apply(key)));
 		}
 
-		public ShaderCompiler<K> withResource(ResourceLocation resourceLocation) {
-			return withResource($ -> resourceLocation);
+		public ShaderCompiler<K> withResource(Identifier id) {
+			return withResource($ -> id);
 		}
 
 		public ShaderCompiler<K> onCompile(BiConsumer<K, Compilation> cb) {

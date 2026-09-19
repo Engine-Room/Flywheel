@@ -1,7 +1,5 @@
 package dev.engine_room.flywheel.backend.compile.core;
 
-import org.jetbrains.annotations.NotNull;
-
 import dev.engine_room.flywheel.backend.gl.shader.GlProgram;
 
 public sealed interface LinkResult {
@@ -9,7 +7,6 @@ public sealed interface LinkResult {
 
 	record Success(GlProgram program, String log) implements LinkResult {
 		@Override
-		@NotNull
 		public GlProgram unwrap() {
 			return program;
 		}

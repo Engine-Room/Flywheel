@@ -7,10 +7,13 @@ import java.util.List;
 import org.lwjgl.opengl.GL43C;
 import org.lwjgl.system.Checks;
 
+import com.mojang.blaze3d.opengl.GlConst;
+import com.mojang.blaze3d.opengl.GlStateManager;
+
 import dev.engine_room.flywheel.backend.gl.GlCompat;
 import dev.engine_room.flywheel.backend.gl.GlStateTracker;
 import dev.engine_room.flywheel.backend.gl.buffer.GlBufferType;
-import net.minecraft.Util;
+import net.minecraft.util.Util;
 
 public class GlVertexArraySeparateAttributes extends GlVertexArray {
 	public static final boolean SUPPORTED = isSupported();
@@ -25,7 +28,7 @@ public class GlVertexArraySeparateAttributes extends GlVertexArray {
 	private int elementBufferBinding = 0;
 
 	public GlVertexArraySeparateAttributes() {
-		handle(GL43C.glGenVertexArrays());
+		handle(GlStateManager._glGenVertexArrays());
 	}
 
 	@Override
@@ -55,15 +58,15 @@ public class GlVertexArraySeparateAttributes extends GlVertexArray {
 
 		for (var attribute : vertexAttributes) {
 			if (!attributeEnabled.get(attribIndex)) {
-				GL43C.glEnableVertexAttribArray(attribIndex);
+				GlStateManager._enableVertexAttribArray(attribIndex);
 				attributeEnabled.set(attribIndex);
 			}
 
 			if (!attribute.equals(attributes[attribIndex])) {
 				if (attribute instanceof VertexAttribute.Float f) {
-					GL43C.glVertexAttribFormat(attribIndex, f.size(), f.type().glEnum, f.normalized(), offset);
+					GL43C.glVertexAttribFormat(attribIndex, f.size(), GlConst.toGl(f.type()), f.normalized(), offset);
 				} else if (attribute instanceof VertexAttribute.Int vi) {
-					GL43C.glVertexAttribIFormat(attribIndex, vi.size(), vi.type().glEnum, offset);
+					GL43C.glVertexAttribIFormat(attribIndex, vi.size(), GlConst.toGl(vi.type()), offset);
 				}
 				attributes[attribIndex] = attribute;
 			}

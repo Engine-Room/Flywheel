@@ -2,7 +2,7 @@ package dev.engine_room.flywheel.impl.compat;
 
 import java.lang.reflect.Field;
 
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import dev.engine_room.flywheel.impl.FlwImpl;
 

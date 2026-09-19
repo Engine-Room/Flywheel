@@ -1,6 +1,6 @@
 package dev.engine_room.flywheel.lib.vertex;
 
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 import org.lwjgl.system.MemoryUtil;
 
 import dev.engine_room.flywheel.api.vertex.MutableVertexList;

@@ -2,7 +2,7 @@ package dev.engine_room.flywheel.backend.engine;
 
 import java.util.ArrayList;
 
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import dev.engine_room.flywheel.api.instance.Instance;
 import dev.engine_room.flywheel.backend.util.AtomicBitSet;

@@ -6,6 +6,7 @@ build/
 gradle-app.setting
 out/
 logs/
+.kotlin/
 
 ## IntelliJ IDEA
 
@@ -64,5 +65,4 @@ docs/*.local
 # Other
 .DS_Store
 mcmodsrepo
-src/*/generatedPackageInfos/
-*/src/*/generatedPackageInfos/
+**/src/**/generatedPackageInfos/

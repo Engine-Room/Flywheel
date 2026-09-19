@@ -12,7 +12,8 @@
 
 /*const*/ vec4 flw_sampleColor;
 
-/*const*/ float flw_distance;
+/*const*/ float flw_sphericalDistance;
+/*const*/ float flw_cylindricalDistance;
 
 vec4 flw_fragColor;
 ivec2 flw_fragOverlay;

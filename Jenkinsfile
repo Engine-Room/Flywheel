@@ -11,7 +11,7 @@ pipeline {
     }
 
     tools {
-        jdk "jdk-21"
+        jdk "jdk-25"
     }
 
     stages {
@@ -24,8 +24,7 @@ pipeline {
                 sh './gradlew clean'
 
                 withCredentials([
-                    // build_secrets is parsed in SubprojectExtension#loadSecrets
-                    file(credentialsId: 'build_secrets', variable: 'ORG_GRADLE_PROJECT_secretFile'),
+                    usernamePassword(credentialsId: 'maven_secrets', usernameVariable: 'MAVEN_USERNAME', passwordVariable: 'MAVEN_PASSWORD')
                 ]) {
                     echo 'Building project.'
                     // Sometimes builds freeze, so wrap in a timeout.
@@ -77,8 +76,7 @@ pipeline {
                 sh './gradlew clean'
 
                 withCredentials([
-                    // build_secrets is parsed in SubprojectExtension#loadSecrets
-                    file(credentialsId: 'build_secrets', variable: 'ORG_GRADLE_PROJECT_secretFile'),
+                    usernamePassword(credentialsId: 'maven_secrets', usernameVariable: 'MAVEN_USERNAME', passwordVariable: 'MAVEN_PASSWORD')
                 ]) {
                     echo 'Building project for release.'
                     // Sometimes builds freeze, so wrap in a timeout.

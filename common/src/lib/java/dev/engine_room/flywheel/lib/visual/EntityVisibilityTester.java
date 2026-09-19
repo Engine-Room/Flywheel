@@ -1,8 +1,9 @@
 package dev.engine_room.flywheel.lib.visual;
 
-import org.jetbrains.annotations.Nullable;
 import org.joml.FrustumIntersection;
+import org.jspecify.annotations.Nullable;
 
+import dev.engine_room.flywheel.lib.internal.FlwLibLink;
 import dev.engine_room.flywheel.lib.math.MoreMath;
 import net.minecraft.core.Vec3i;
 import net.minecraft.util.Mth;
@@ -42,7 +43,7 @@ public class EntityVisibilityTester {
 	 * @return {@code true} if the Entity is visible, {@code false} otherwise.
 	 */
 	public boolean check(FrustumIntersection frustum) {
-		AABB aabb = entity.getBoundingBoxForCulling();
+		AABB aabb = FlwLibLink.INSTANCE.getBoundingBoxForCulling(entity);
 
 		// If we've never seen the entity before assume its visible.
 		// Fixes entities freezing when they first spawn.

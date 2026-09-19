@@ -1,0 +1,61 @@
+[versions]
+java = "25"
+minecraft = "26.1.2"
+
+# https://neoforged.net
+mdg = "2.0.+"
+neoforge = "26.1.2.78"
+
+# https://fabricmc.net/develop
+loom = "1.17.+"
+fabric-loader = "0.19.3"
+fabric-api = "0.154.2+26.1.2"
+
+# we need to manually depend on mixin (+extras) in common
+mixin = "0.16.5+mixin.0.8.7"
+mixin-extras = "0.5.3"
+
+# https://maven.caffeinemc.net/#/releases/net/caffeinemc/sodium-fabric
+sodium = "0.9.1+mc26.1.2"
+# https://modrinth.com/mod/iris/versions
+iris-fabric = "1.11.2+26.1-fabric"
+iris-neoforge = "1.11.2+26.1-neoforge"
+
+junit = "6.1.1"
+
+[libraries]
+minecraft = { module = "com.mojang:minecraft", version.ref = "minecraft" }
+
+mdg = { module = "net.neoforged:moddev-gradle", version.ref = "mdg" }
+fabric-loom = { module = "net.fabricmc:fabric-loom", version.ref = "loom" }
+
+fabric-loader = { module = "net.fabricmc:fabric-loader", version.ref = "fabric-loader" }
+fabric-api = { module = "net.fabricmc.fabric-api:fabric-api", version.ref = "fabric-api" }
+
+mixin = { module = "net.fabricmc:sponge-mixin", version.ref = "mixin" }
+mixin-extras = { module = "io.github.llamalad7:mixinextras-common", version.ref = "mixin-extras" }
+
+sodium-fabric-api = { module = "net.caffeinemc:sodium-fabric-api", version.ref = "sodium" }
+sodium-neoforge-api = { module = "net.caffeinemc:sodium-neoforge-api", version.ref = "sodium" }
+
+iris-fabric = { module = "maven.modrinth:iris", version.ref = "iris-fabric" }
+iris-neoforge = { module = "maven.modrinth:iris", version.ref = "iris-neoforge" }
+
+junit-bom = { module = "org.junit:junit-bom", version.ref = "junit" }
+junit-jupiter = { module = "org.junit.jupiter:junit-jupiter" }
+junit-launcher = { module = "org.junit.platform:junit-platform-launcher" }
+
+[bundles]
+mixin = [ "mixin", "mixin-extras" ]
+
+[plugins]
+mdg = { id = "net.neoforged.moddev" }
+fabric-loom = { id = "net.fabricmc.fabric-loom" }
+
+flywheel-gradle = { id = "net.engine-room.flywheel-gradle"}
+
+configure-base = { id = "configure-base" }
+configure-common = { id = "configure-common" }
+configure-fabric = { id = "configure-fabric" }
+configure-neoforge = { id = "configure-neoforge" }
+setup-repositories = { id = "setup-repositories" }

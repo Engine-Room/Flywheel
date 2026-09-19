@@ -93,7 +93,8 @@ void _flw_main(in FlwInstance instance, in uint stableInstanceID, in uint baseVe
 
     flw_vertexNormal = normalize(flw_vertexNormal);
 
-    flw_distance = fogDistance(flw_vertexPos.xyz, flw_cameraPos, flw_fogShape);
+    flw_sphericalDistance = sphericalDistance(flw_vertexPos.xyz, flw_cameraPos);
+    flw_cylindricalDistance = cylindricalDistance(flw_vertexPos.xyz, flw_cameraPos);
 
     gl_Position = flw_viewProjection * flw_vertexPos;
 

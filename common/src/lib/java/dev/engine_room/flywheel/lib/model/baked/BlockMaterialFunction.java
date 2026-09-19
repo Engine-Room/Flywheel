@@ -1,11 +1,11 @@
 package dev.engine_room.flywheel.lib.model.baked;
 
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import dev.engine_room.flywheel.api.material.Material;
-import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.chunk.ChunkSectionLayer;
 
 public interface BlockMaterialFunction {
 	@Nullable
-	Material apply(RenderType chunkRenderType, boolean shaded, boolean ambientOcclusion);
+	Material apply(ChunkSectionLayer chunkSectionLayer, boolean shaded, boolean ambientOcclusion);
 }

@@ -5,7 +5,8 @@ import java.io.FileWriter;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.lwjgl.opengl.GL20;
+import com.mojang.blaze3d.opengl.GlConst;
+import com.mojang.blaze3d.opengl.GlStateManager;
 
 import dev.engine_room.flywheel.backend.compile.FlwPrograms;
 import dev.engine_room.flywheel.backend.gl.GlCompat;
@@ -16,6 +17,7 @@ import dev.engine_room.flywheel.backend.glsl.SourceComponent;
 import dev.engine_room.flywheel.backend.glsl.SourceFile;
 import dev.engine_room.flywheel.lib.util.StringUtil;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.ShaderManager;
 
 /**
  * Builder style class for compiling shaders.
@@ -32,22 +34,22 @@ public class Compilation {
 	private int generatedLines = 0;
 
 	public ShaderResult compile(ShaderType shaderType, String name) {
-		int handle = GL20.glCreateShader(shaderType.glEnum);
+		int handle = GlStateManager.glCreateShader(shaderType.glEnum);
 		var source = fullSource.toString();
 
 		GlCompat.safeShaderSource(handle, source);
-		GL20.glCompileShader(handle);
+		GlStateManager.glCompileShader(handle);
 
 		var shaderName = name + "." + shaderType.extension;
 		dumpSource(source, shaderName);
 
-		var infoLog = GL20.glGetShaderInfoLog(handle);
+		var infoLog = GlStateManager.glGetShaderInfoLog(handle, ShaderManager.MAX_LOG_LENGTH);
 
 		if (compiledSuccessfully(handle)) {
 			return ShaderResult.success(new GlShader(handle, shaderType, shaderName), infoLog);
 		}
 
-		GL20.glDeleteShader(handle);
+		GlStateManager.glDeleteShader(handle);
 		return ShaderResult.failure(new FailedCompilation(shaderName, files, generatedSource.toString(), source, infoLog));
 	}
 
@@ -134,6 +136,6 @@ public class Compilation {
 	}
 
 	public static boolean compiledSuccessfully(int handle) {
-		return GL20.glGetShaderi(handle, GL20.GL_COMPILE_STATUS) == GL20.GL_TRUE;
+		return GlStateManager.glGetShaderi(handle, GlConst.GL_COMPILE_STATUS) == GlConst.GL_TRUE;
 	}
 }

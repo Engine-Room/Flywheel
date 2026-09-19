@@ -9,7 +9,7 @@ import dev.engine_room.flywheel.api.instance.Instance;
 import dev.engine_room.flywheel.api.task.Plan;
 import dev.engine_room.flywheel.api.visualization.VisualizationContext;
 import it.unimi.dsi.fastutil.longs.LongSet;
-import net.minecraft.client.Camera;
+import net.minecraft.client.renderer.state.level.CameraRenderState;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.SectionPos;
 import net.minecraft.core.Vec3i;
@@ -43,7 +43,7 @@ public interface Engine {
 	 *
 	 * @return {@code true} if the render origin changed, {@code false} otherwise.
 	 */
-	boolean updateRenderOrigin(Camera camera);
+	boolean updateRenderOrigin(CameraRenderState cameraRenderState);
 
 	/**
 	 * Assign the set of sections that visuals have requested GPU light for.

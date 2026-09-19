@@ -1,6 +1,6 @@
 package dev.engine_room.flywheel.backend.engine.embed;
 
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 import org.joml.Matrix3f;
 import org.joml.Matrix3fc;
 import org.joml.Matrix4f;

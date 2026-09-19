@@ -8,7 +8,7 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import dev.engine_room.flywheel.backend.glsl.SourceFile;
 import dev.engine_room.flywheel.backend.glsl.SourceLines;
@@ -16,12 +16,12 @@ import dev.engine_room.flywheel.backend.glsl.error.ConsoleColors;
 import dev.engine_room.flywheel.backend.glsl.error.ErrorBuilder;
 import dev.engine_room.flywheel.backend.glsl.error.ErrorLevel;
 import dev.engine_room.flywheel.backend.glsl.span.Span;
-import dev.engine_room.flywheel.lib.util.ResourceUtil;
+import dev.engine_room.flywheel.lib.util.IdentifierUtil;
 import dev.engine_room.flywheel.lib.util.StringUtil;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 public class FailedCompilation {
-	public static final ResourceLocation GENERATED_SOURCE_NAME = ResourceUtil.rl("generated_source");
+	public static final Identifier GENERATED_SOURCE_NAME = IdentifierUtil.id("generated_source");
 	private static final Pattern PATTERN_ONE = Pattern.compile("(\\d+)\\((\\d+)\\) : (.*)");
 	private static final Pattern PATTERN_TWO = Pattern.compile("(\\w+): (\\d+):(\\d+):(?: '(.+?)' :)?(.*)");
 	private final List<SourceFile> files;

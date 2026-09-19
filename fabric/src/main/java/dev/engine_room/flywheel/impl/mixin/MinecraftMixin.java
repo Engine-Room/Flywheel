@@ -31,13 +31,13 @@ abstract class MinecraftMixin {
 		FabricFlwConfig.INSTANCE.load();
 	}
 
-	@Inject(method = "method_53522", at = @At("HEAD"))
+	@Inject(method = "lambda$new$4", at = @At("HEAD"))
 	private void flywheel$onEndInitialResourceReload(@Coerce Object gameLoadCookie, Optional<Throwable> error, CallbackInfo ci) {
 		EndClientResourceReloadCallback.EVENT.invoker()
 				.onEndClientResourceReload((Minecraft) (Object) this, resourceManager, true, error);
 	}
 
-	@Inject(method = "method_24228", at = @At("HEAD"))
+	@Inject(method = "lambda$reloadResourcePacks$0", at = @At("HEAD"))
 	private void flywheel$onEndManualResourceReload(boolean recovery, @Coerce Object gameLoadCookie, CompletableFuture<Void> future,
 													Optional<Throwable> error, CallbackInfo ci) {
 		EndClientResourceReloadCallback.EVENT.invoker()

@@ -3,7 +3,7 @@ package dev.engine_room.flywheel.backend.compile;
 import java.util.Locale;
 import java.util.function.Consumer;
 
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import dev.engine_room.flywheel.backend.Samplers;
 import dev.engine_room.flywheel.backend.compile.core.Compilation;

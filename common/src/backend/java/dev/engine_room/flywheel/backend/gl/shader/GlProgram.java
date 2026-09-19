@@ -1,26 +1,13 @@
 package dev.engine_room.flywheel.backend.gl.shader;
 
-import static org.lwjgl.opengl.GL20.glBindAttribLocation;
-import static org.lwjgl.opengl.GL20.glDeleteProgram;
-import static org.lwjgl.opengl.GL20.glGetUniformLocation;
-import static org.lwjgl.opengl.GL20.glUniform1f;
-import static org.lwjgl.opengl.GL20.glUniform1i;
-import static org.lwjgl.opengl.GL20.glUniform2f;
-import static org.lwjgl.opengl.GL20.glUniform3f;
-import static org.lwjgl.opengl.GL20.glUniform4f;
-import static org.lwjgl.opengl.GL20.glUniformMatrix3fv;
-import static org.lwjgl.opengl.GL20.glUniformMatrix4fv;
-import static org.lwjgl.opengl.GL30.glUniform1ui;
-import static org.lwjgl.opengl.GL30.glUniform2ui;
-import static org.lwjgl.opengl.GL31.GL_INVALID_INDEX;
-import static org.lwjgl.opengl.GL31.glGetUniformBlockIndex;
-import static org.lwjgl.opengl.GL31.glUniformBlockBinding;
-
 import org.joml.Matrix3fc;
 import org.joml.Matrix4fc;
+import org.lwjgl.opengl.GL20;
+import org.lwjgl.opengl.GL30;
+import org.lwjgl.opengl.GL31;
 import org.slf4j.Logger;
 
-import com.mojang.blaze3d.shaders.ProgramManager;
+import com.mojang.blaze3d.opengl.GlStateManager;
 import com.mojang.logging.LogUtils;
 
 import dev.engine_room.flywheel.backend.gl.GlObject;
@@ -38,11 +25,11 @@ public class GlProgram extends GlObject {
 	}
 
 	public void bind() {
-		ProgramManager.glUseProgram(handle());
+		GlStateManager._glUseProgram(handle());
 	}
 
 	public static void unbind() {
-		ProgramManager.glUseProgram(0);
+		GlStateManager._glUseProgram(0);
 	}
 
 	public void setFloat(String glslName, float value) {
@@ -52,7 +39,7 @@ public class GlProgram extends GlObject {
 			return;
 		}
 
-		glUniform1f(uniform, value);
+		GL20.glUniform1f(uniform, value);
 	}
 
 	public void setVec2(String glslName, float x, float y) {
@@ -62,7 +49,7 @@ public class GlProgram extends GlObject {
 			return;
 		}
 
-		glUniform2f(uniform, x, y);
+		GL20.glUniform2f(uniform, x, y);
 	}
 
 	public void setVec3(String glslName, float x, float y, float z) {
@@ -72,7 +59,7 @@ public class GlProgram extends GlObject {
 			return;
 		}
 
-		glUniform3f(uniform, x, y, z);
+		GL20.glUniform3f(uniform, x, y, z);
 	}
 
 	public void setVec4(String glslName, float x, float y, float z, float w) {
@@ -82,7 +69,7 @@ public class GlProgram extends GlObject {
 			return;
 		}
 
-		glUniform4f(uniform, x, y, z, w);
+		GL20.glUniform4f(uniform, x, y, z, w);
 	}
 
 	public void setMat4(String glslName, Matrix4fc matrix) {
@@ -92,7 +79,7 @@ public class GlProgram extends GlObject {
 			return;
 		}
 
-		glUniformMatrix4fv(uniform, false, matrix.get(new float[16]));
+		GL20.glUniformMatrix4fv(uniform, false, matrix.get(new float[16]));
 	}
 
 	public void setMat3(String glslName, Matrix3fc matrix) {
@@ -102,7 +89,7 @@ public class GlProgram extends GlObject {
 			return;
 		}
 
-		glUniformMatrix3fv(uniform, false, matrix.get(new float[9]));
+		GL20.glUniformMatrix3fv(uniform, false, matrix.get(new float[9]));
 	}
 
 	public void setBool(String glslName, boolean bool) {
@@ -116,7 +103,7 @@ public class GlProgram extends GlObject {
 			return;
 		}
 
-		glUniform1ui(uniform, value);
+		GL30.glUniform1ui(uniform, value);
 	}
 
 	public void setUVec2(String name, int x, int y) {
@@ -126,7 +113,7 @@ public class GlProgram extends GlObject {
 			return;
 		}
 
-		glUniform2ui(uniform, x, y);
+		GL30.glUniform2ui(uniform, x, y);
 	}
 
 	public void setInt(String glslName, int value) {
@@ -136,7 +123,7 @@ public class GlProgram extends GlObject {
 			return;
 		}
 
-		glUniform1i(uniform, value);
+		GL20.glUniform1i(uniform, value);
 	}
 
 	/**
@@ -147,7 +134,7 @@ public class GlProgram extends GlObject {
 	 */
 	public int getUniformLocation(String uniform) {
 		return uniformLocationCache.computeIfAbsent(uniform, s -> {
-			int index = glGetUniformLocation(this.handle(), uniform);
+			int index = GlStateManager._glGetUniformLocation(this.handle(), uniform);
 
 			if (index < 0) {
 				LOGGER.debug("No active uniform '{}' exists. Could be unused.", uniform);
@@ -170,27 +157,27 @@ public class GlProgram extends GlObject {
 		int samplerUniform = getUniformLocation(name);
 
 		if (samplerUniform >= 0) {
-			glUniform1i(samplerUniform, binding);
+			GL20.glUniform1i(samplerUniform, binding);
 		}
 	}
 
 	public void setUniformBlockBinding(String name, int binding) {
-		int index = glGetUniformBlockIndex(handle(), name);
+		int index = GL31.glGetUniformBlockIndex(handle(), name);
 
-		if (index == GL_INVALID_INDEX) {
+		if (index == GL31.GL_INVALID_INDEX) {
 			LOGGER.debug("No active uniform block '{}' exists. Could be unused.", name);
 			return;
 		}
 
-		glUniformBlockBinding(handle(), index, binding);
+		GL31.glUniformBlockBinding(handle(), index, binding);
 	}
 
 	public void bindAttribLocation(String attribute, int binding) {
-		glBindAttribLocation(handle(), binding, attribute);
+		GlStateManager._glBindAttribLocation(handle(), binding, attribute);
 	}
 
 	@Override
 	protected void deleteInternal(int handle) {
-		glDeleteProgram(handle);
+		GlStateManager.glDeleteProgram(handle);
 	}
 }

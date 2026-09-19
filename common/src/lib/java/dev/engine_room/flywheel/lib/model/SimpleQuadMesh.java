@@ -1,6 +1,6 @@
 package dev.engine_room.flywheel.lib.model;
 
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 import org.joml.Vector4f;
 import org.joml.Vector4fc;
 

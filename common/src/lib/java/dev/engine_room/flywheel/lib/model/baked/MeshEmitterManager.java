@@ -2,40 +2,34 @@ package dev.engine_room.flywheel.lib.model.baked;
 
 import java.util.function.BiFunction;
 
-import org.jetbrains.annotations.Nullable;
-import org.jetbrains.annotations.UnknownNullability;
-
 import com.google.common.collect.ImmutableList;
-import com.mojang.blaze3d.vertex.BufferBuilder;
 
-import dev.engine_room.flywheel.api.material.Material;
 import dev.engine_room.flywheel.api.model.Model;
 import dev.engine_room.flywheel.lib.model.SimpleModel;
 import it.unimi.dsi.fastutil.objects.Reference2ReferenceArrayMap;
 import it.unimi.dsi.fastutil.objects.Reference2ReferenceMap;
-import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.chunk.ChunkSectionLayer;
 
-class MeshEmitterManager<T extends MeshEmitter> {
-	private static final RenderType[] CHUNK_LAYERS = RenderType.chunkBufferLayers().toArray(RenderType[]::new);
+import org.jetbrains.annotations.ApiStatus;
 
-	private final Reference2ReferenceMap<RenderType, T> emitterMap = new Reference2ReferenceArrayMap<>();
+@ApiStatus.Internal
+public class MeshEmitterManager<T extends MeshEmitter> {
+	private static final ChunkSectionLayer[] CHUNK_LAYERS = ChunkSectionLayer.values();
+
+	final Reference2ReferenceMap<ChunkSectionLayer, T> emitterMap = new Reference2ReferenceArrayMap<>();
 	private final ByteBufferBuilderStack byteBufferBuilderStack = new ByteBufferBuilderStack();
 
-	@UnknownNullability
-	private BlockMaterialFunction blockMaterialFunction;
-
-	MeshEmitterManager(BiFunction<ByteBufferBuilderStack, RenderType, T> meshEmitterFactory) {
-		for (RenderType renderType : CHUNK_LAYERS) {
-			emitterMap.put(renderType, meshEmitterFactory.apply(byteBufferBuilderStack, renderType));
+	MeshEmitterManager(BiFunction<ByteBufferBuilderStack, ChunkSectionLayer, T> meshEmitterFactory) {
+		for (ChunkSectionLayer chunkSectionLayer : CHUNK_LAYERS) {
+			emitterMap.put(chunkSectionLayer, meshEmitterFactory.apply(byteBufferBuilderStack, chunkSectionLayer));
 		}
 	}
 
-	public T getEmitter(RenderType renderType) {
-		return emitterMap.get(renderType);
+	public T getEmitter(ChunkSectionLayer chunkSectionLayer) {
+		return emitterMap.get(chunkSectionLayer);
 	}
 
 	public void prepare(BlockMaterialFunction blockMaterialFunction) {
-		this.blockMaterialFunction = blockMaterialFunction;
 		byteBufferBuilderStack.reset();
 
 		for (MeshEmitter emitter : emitterMap.values()) {
@@ -50,8 +44,6 @@ class MeshEmitterManager<T extends MeshEmitter> {
 	}
 
 	public SimpleModel end() {
-		blockMaterialFunction = null;
-
 		ImmutableList.Builder<Model.ConfiguredMesh> meshes = ImmutableList.builder();
 
 		for (MeshEmitter emitter : emitterMap.values()) {
@@ -59,15 +51,5 @@ class MeshEmitterManager<T extends MeshEmitter> {
 		}
 
 		return new SimpleModel(meshes.build());
-	}
-
-	@Nullable
-	public BufferBuilder getBuffer(RenderType renderType, boolean shade, boolean ao) {
-		Material key = blockMaterialFunction.apply(renderType, shade, ao);
-		if (key != null) {
-			return emitterMap.get(renderType).getBuffer(key);
-		} else {
-			return null;
-		}
 	}
 }

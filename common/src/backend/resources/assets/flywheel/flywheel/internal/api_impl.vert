@@ -9,7 +9,8 @@ flat out ivec2 flw_vertexOverlay;
 out vec2 flw_vertexLight;
 out vec3 flw_vertexNormal;
 
-out float flw_distance;
+out float flw_sphericalDistance;
+out float flw_cylindricalDistance;
 
 FlwMaterial flw_material;
 

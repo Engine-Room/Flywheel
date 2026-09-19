@@ -2,7 +2,7 @@ package dev.engine_room.flywheel.backend.compile;
 
 import java.util.List;
 
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import com.google.common.collect.ImmutableList;
 

@@ -8,7 +8,7 @@ import dev.engine_room.flywheel.api.layout.Layout;
 import dev.engine_room.flywheel.backend.compile.LayoutInterpreter;
 import dev.engine_room.flywheel.backend.glsl.SourceComponent;
 import dev.engine_room.flywheel.backend.glsl.generate.GlslBuilder;
-import dev.engine_room.flywheel.lib.util.ResourceUtil;
+import dev.engine_room.flywheel.lib.util.IdentifierUtil;
 
 public class InstanceStructComponent implements SourceComponent {
 	private static final String STRUCT_NAME = "FlwInstance";
@@ -21,7 +21,7 @@ public class InstanceStructComponent implements SourceComponent {
 
 	@Override
 	public String name() {
-		return ResourceUtil.rl("instance_struct").toString();
+		return IdentifierUtil.id("instance_struct").toString();
 	}
 
 	@Override

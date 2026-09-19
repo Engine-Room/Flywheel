@@ -1,6 +1,6 @@
 package dev.engine_room.flywheel.backend.engine.uniform;
 
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 import org.lwjgl.opengl.GL32;
 
 import dev.engine_room.flywheel.backend.gl.buffer.GlBuffer;

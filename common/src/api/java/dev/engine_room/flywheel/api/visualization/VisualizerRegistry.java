@@ -1,6 +1,6 @@
 package dev.engine_room.flywheel.api.visualization;
 
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import dev.engine_room.flywheel.api.internal.FlwApiLink;
 import net.minecraft.world.entity.Entity;

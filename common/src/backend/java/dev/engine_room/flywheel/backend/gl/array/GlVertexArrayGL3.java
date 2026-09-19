@@ -5,15 +5,15 @@ import java.util.BitSet;
 import java.util.List;
 
 import org.lwjgl.opengl.ARBInstancedArrays;
-import org.lwjgl.opengl.GL20C;
-import org.lwjgl.opengl.GL30;
-import org.lwjgl.opengl.GL32;
 import org.lwjgl.opengl.GL33C;
 import org.lwjgl.system.Checks;
 
+import com.mojang.blaze3d.opengl.GlConst;
+import com.mojang.blaze3d.opengl.GlStateManager;
+
 import dev.engine_room.flywheel.backend.gl.GlCompat;
 import dev.engine_room.flywheel.backend.gl.buffer.GlBufferType;
-import net.minecraft.Util;
+import net.minecraft.util.Util;
 
 public abstract class GlVertexArrayGL3 extends GlVertexArray {
 	private final BitSet attributeDirty = new BitSet(MAX_ATTRIBS);
@@ -28,7 +28,7 @@ public abstract class GlVertexArrayGL3 extends GlVertexArray {
 	private int boundElementBuffer = 0;
 
 	public GlVertexArrayGL3() {
-		handle(GL30.glGenVertexArrays());
+		handle(GlStateManager._glGenVertexArrays());
 	}
 
 	@Override
@@ -106,17 +106,15 @@ public abstract class GlVertexArrayGL3 extends GlVertexArray {
 		}
 
 		GlBufferType.ARRAY_BUFFER.bind(bindingBuffers[bindingIndex]);
-		GL20C.glEnableVertexAttribArray(attribIndex);
+		GlStateManager._enableVertexAttribArray(attribIndex);
 
 		long offset = bindingOffsets[bindingIndex] + attributeOffsets[attribIndex];
 		int stride = bindingStrides[bindingIndex];
 
 		if (attribute instanceof VertexAttribute.Float f) {
-			GL32.glVertexAttribPointer(attribIndex, f.size(), f.type()
-					.glEnum(), f.normalized(), stride, offset);
+			GlStateManager._vertexAttribPointer(attribIndex, f.size(), GlConst.toGl(f.type()), f.normalized(), stride, offset);
 		} else if (attribute instanceof VertexAttribute.Int vi) {
-			GL32.glVertexAttribIPointer(attribIndex, vi.size(), vi.type()
-					.glEnum(), stride, offset);
+			GlStateManager._vertexAttribIPointer(attribIndex, vi.size(), GlConst.toGl(vi.type()), stride, offset);
 		}
 
 		int divisor = bindingDivisors[bindingIndex];

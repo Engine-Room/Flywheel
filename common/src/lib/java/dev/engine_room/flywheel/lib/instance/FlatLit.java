@@ -3,12 +3,12 @@ package dev.engine_room.flywheel.lib.instance;
 import java.util.Iterator;
 import java.util.stream.Stream;
 
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import dev.engine_room.flywheel.api.instance.Instance;
 import dev.engine_room.flywheel.lib.visual.AbstractBlockEntityVisual;
 import dev.engine_room.flywheel.lib.visual.AbstractEntityVisual;
-import net.minecraft.client.renderer.LightTexture;
+import net.minecraft.util.LightCoordsUtil;
 
 /**
  * An interface that implementors of {@link Instance} should also implement if they wish to make use of
@@ -17,7 +17,7 @@ import net.minecraft.client.renderer.LightTexture;
 public interface FlatLit extends Instance {
 	/**
 	 * Set the packed light value for this instance.
-	 * @param packedLight the packed light per {@link LightTexture#pack(int, int)}
+	 * @param packedLight the packed light per {@link LightCoordsUtil#pack(int, int)}
 	 * @return {@code this} for chaining
 	 */
 	FlatLit light(int packedLight);
@@ -29,7 +29,7 @@ public interface FlatLit extends Instance {
 	 * @return {@code this} for chaining
 	 */
 	default FlatLit light(int blockLight, int skyLight) {
-		return light(LightTexture.pack(blockLight, skyLight));
+		return light(LightCoordsUtil.pack(blockLight, skyLight));
 	}
 
 	static void relight(int packedLight, @Nullable FlatLit... instances) {

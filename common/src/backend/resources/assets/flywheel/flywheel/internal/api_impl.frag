@@ -9,7 +9,8 @@ flat in ivec2 flw_vertexOverlay;
 in vec2 flw_vertexLight;
 in vec3 flw_vertexNormal;
 
-in float flw_distance;
+in float flw_sphericalDistance;
+in float flw_cylindricalDistance;
 
 vec4 flw_sampleColor;
 

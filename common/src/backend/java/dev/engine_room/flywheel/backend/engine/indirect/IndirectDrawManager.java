@@ -1,16 +1,21 @@
 package dev.engine_room.flywheel.backend.engine.indirect;
 
-import static org.lwjgl.opengl.GL11.GL_TRIANGLES;
-import static org.lwjgl.opengl.GL11.GL_UNSIGNED_INT;
-import static org.lwjgl.opengl.GL30.glBindBufferRange;
-import static org.lwjgl.opengl.GL40.glDrawElementsIndirect;
-import static org.lwjgl.opengl.GL42.glMemoryBarrier;
-import static org.lwjgl.opengl.GL43.GL_SHADER_STORAGE_BARRIER_BIT;
-import static org.lwjgl.opengl.GL43.GL_SHADER_STORAGE_BUFFER;
-
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.textures.FilterMode;
+import com.mojang.blaze3d.textures.GpuSampler;
+
+import net.minecraft.resources.Identifier;
+
+import org.lwjgl.opengl.GL30;
+import org.lwjgl.opengl.GL40;
+import org.lwjgl.opengl.GL42;
+import org.lwjgl.opengl.GL43;
+
+import com.mojang.blaze3d.opengl.GlConst;
 
 import dev.engine_room.flywheel.api.backend.Engine;
 import dev.engine_room.flywheel.api.instance.Instance;
@@ -119,7 +124,7 @@ public class IndirectDrawManager extends DrawManager<IndirectInstancer<?>> {
 		// We could probably save some driver calls here when there are
 		// actually zero instances, but that feels like a very rare case
 
-		glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
+		GL42.glMemoryBarrier(GL43.GL_SHADER_STORAGE_BARRIER_BIT);
 
 		matrixBuffer.bind();
 
@@ -129,7 +134,7 @@ public class IndirectDrawManager extends DrawManager<IndirectInstancer<?>> {
 			group.dispatchCull();
 		}
 
-		glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
+		GL42.glMemoryBarrier(GL43.GL_SHADER_STORAGE_BARRIER_BIT);
 
 		programs.getApplyProgram()
 				.bind();
@@ -138,7 +143,7 @@ public class IndirectDrawManager extends DrawManager<IndirectInstancer<?>> {
 			group.dispatchApply();
 		}
 
-		glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
+		GL42.glMemoryBarrier(GL43.GL_SHADER_STORAGE_BARRIER_BIT);
 
 		TextureBinder.bindLightAndOverlay();
 
@@ -146,6 +151,7 @@ public class IndirectDrawManager extends DrawManager<IndirectInstancer<?>> {
 		lightBuffers.bind();
 		matrixBuffer.bind();
 		Uniforms.bindAll();
+		TextureBinder.bindRenderTarget(Minecraft.getInstance().getMainRenderTarget());
 
 		for (var group : cullingGroups.values()) {
 			group.submitSolid();
@@ -188,9 +194,6 @@ public class IndirectDrawManager extends DrawManager<IndirectInstancer<?>> {
 
 			oitFramebuffer.composite();
 		}
-
-		MaterialRenderState.reset();
-		TextureBinder.resetLightAndOverlay();
 	}
 
 	@Override
@@ -237,7 +240,8 @@ public class IndirectDrawManager extends DrawManager<IndirectInstancer<?>> {
 
 		// Set up the crumbling program buffers. Nothing changes here between draws.
 		GlBufferType.DRAW_INDIRECT_BUFFER.bind(crumblingDrawBuffer.handle());
-		glBindBufferRange(GL_SHADER_STORAGE_BUFFER, BufferBindings.DRAW, crumblingDrawBuffer.handle(), 0, IndirectBuffers.DRAW_COMMAND_STRIDE);
+		GL30.glBindBufferRange(GL43.GL_SHADER_STORAGE_BUFFER, BufferBindings.DRAW, crumblingDrawBuffer.handle(), 0, IndirectBuffers.DRAW_COMMAND_STRIDE);
+		TextureBinder.bindRenderTarget(Minecraft.getInstance().getMainRenderTarget());
 
 		for (var groupEntry : byType.entrySet()) {
 			var byProgress = groupEntry.getValue();
@@ -250,8 +254,9 @@ public class IndirectDrawManager extends DrawManager<IndirectInstancer<?>> {
 			}
 
 			for (var progressEntry : byProgress.int2ObjectEntrySet()) {
-				Samplers.CRUMBLING.makeActive();
-				TextureBinder.bind(ModelBakery.BREAKING_LOCATIONS.get(progressEntry.getIntKey()));
+				Identifier crumblingTextureId = ModelBakery.BREAKING_LOCATIONS.get(progressEntry.getIntKey());
+				GpuSampler crumblingTextureSampler = RenderSystem.getSamplerCache().getRepeat(FilterMode.NEAREST);
+				TextureBinder.bind(Samplers.CRUMBLING.number, crumblingTextureId, crumblingTextureSampler);
 
 				for (var instanceHandlePair : progressEntry.getValue()) {
 					IndirectInstancer<?> instancer = instanceHandlePair.getFirst();
@@ -270,15 +275,12 @@ public class IndirectDrawManager extends DrawManager<IndirectInstancer<?>> {
 						crumblingDrawBuffer.upload(block);
 
 						// Submit! Everything is already bound by here.
-						glDrawElementsIndirect(GL_TRIANGLES, GL_UNSIGNED_INT, 0);
+						GL40.glDrawElementsIndirect(GlConst.GL_TRIANGLES, GlConst.GL_UNSIGNED_INT, 0);
 					}
 				}
 
 			}
 		}
-
-		MaterialRenderState.reset();
-		TextureBinder.resetLightAndOverlay();
 
 		block.free();
 	}
