@@ -19,8 +19,6 @@ import java.util.*
 
 open class SubprojectExtension(val project: Project) {
     fun init(archiveBase: String, group: String, version: String) {
-        loadSecrets()
-
         setBaseProperties(archiveBase, group, version)
         setupJava()
         addRepositories()
@@ -150,56 +148,21 @@ open class SubprojectExtension(val project: Project) {
 
     private fun setupPublishing() {
         project.the<PublishingExtension>().repositories.apply {
-            maven("file://${project.rootProject.projectDir}/mcmodsrepo")
-
-            if (project.hasProperty("mavendir")) {
-                maven(project.rootProject.file(project.property("mavendir") as String))
-            }
-
             // Sets maven credentials if they are provided. This is generally
             // only used for external/remote uploads.
-            if (project.hasProperty("mavenUsername") && project.hasProperty("mavenPassword") && project.hasProperty("mavenURL")) {
-                project.logger.lifecycle("Adding maven from secrets")
-
+            val mavenUsername = project.providers.environmentVariable("MAVEN_USERNAME")
+            val mavenPassword = project.providers.environmentVariable("MAVEN_PASSWORD")
+            if (mavenUsername.isPresent && mavenPassword.isPresent) {
                 maven {
+                    url = URI.create("https://maven.createmod.net")
                     credentials {
-                        username = project.property("mavenUsername") as String
-                        password = project.property("mavenPassword") as String
+                        username = mavenUsername.get()
+                        password = mavenPassword.get()
                     }
-                    url = URI.create(project.property("mavenURL") as String)
-                }
-            }
-        }
-    }
-
-    private fun loadSecrets() {
-        // Detects the secrets file provided by CI and loads it into the project properties
-        if (project.rootProject.hasProperty("secretFile")) {
-            val secretsFile = project.rootProject.file(project.rootProject.property("secretFile") as String)
-
-            if (secretsFile.exists() && secretsFile.name.endsWith(".properties")) {
-                project.logger.lifecycle("Loading secrets")
-
-                loadProperties(secretsFile)
-            }
-        }
-    }
-
-    private fun loadProperties(propertyFile: File) {
-        if (propertyFile.exists()) {
-            val properties = Properties().apply { load(propertyFile.inputStream()) }
-
-            var count = 0
-            for (entry in properties.entries) {
-                if (entry.key is String) {
-                    project.extra[entry.key as String] = entry.value as String
-                    count++
                 }
             }
 
-            project.logger.lifecycle("Loaded $count properties")
-        } else {
-            project.logger.warn("The property file ${propertyFile.getName()} does not exist")
+            mavenLocal()
         }
     }
 }
