@@ -16,6 +16,7 @@ val modLoader = project.name.split('-').last()
 
 val buildNumber: Provider<String> = providers.environmentVariable("RELEASE")
     .map { it.contentEquals("false", true) }
+    .orElse(true)
     .flatMap { dev ->
         providers.environmentVariable("BUILD_NUMBER")
             .filter { dev }
