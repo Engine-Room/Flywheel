@@ -31,7 +31,7 @@ open class PackageInfosExtension(private val project: Project) {
         }
         sourceSet.java.srcDir(task)
 
-        val idea = project.extensions.getByType<IdeaModel>()
+        val idea = project.rootProject.extensions.getByType<IdeaModel>()
         idea.module {
             excludeDirs.add(task.flatMap { it.outputDir.asFile }.get())
         }
