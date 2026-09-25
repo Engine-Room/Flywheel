@@ -42,6 +42,7 @@ public final class Materials {
 	public static final Material GLINT = SimpleMaterial.builder()
 			.texture(ItemFeatureRenderer.ENCHANTED_GLINT_ITEM)
 			.shaders(StandardMaterialShaders.GLINT)
+			.useLight(false)
 			.transparency(Transparency.GLINT)
 			.writeMask(WriteMask.COLOR)
 			.depthTest(DepthTest.EQUAL)
