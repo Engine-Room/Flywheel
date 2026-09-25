@@ -184,18 +184,25 @@ public final class ShadowElement extends AbstractVisual implements SimpleDynamic
 		int y = pos.getY() - renderOrigin.getY() + 1; // +1 since we moved the pos down.
 		int z = pos.getZ() - renderOrigin.getZ();
 
-		double minX = x + shape.min(Axis.X);
+		double entityLocalX = entityX - renderOrigin.getX();
+		double entityLocalZ = entityZ - renderOrigin.getZ();
+		// Do not submit a whole block for a small-radius shadow; clipping here keeps the
+		// primitive and its UV domain bounded by the same radius.
+		double minX = Math.max(x + shape.min(Axis.X), entityLocalX - radius);
 		double minY = y + shape.min(Axis.Y);
-		double minZ = z + shape.min(Axis.Z);
-		double maxX = x + shape.max(Axis.X);
-		double maxZ = z + shape.max(Axis.Z);
+		double minZ = Math.max(z + shape.min(Axis.Z), entityLocalZ - radius);
+		double maxX = Math.min(x + shape.max(Axis.X), entityLocalX + radius);
+		double maxZ = Math.min(z + shape.max(Axis.Z), entityLocalZ + radius);
+		if (minX >= maxX || minZ >= maxZ) {
+			return;
+		}
 
 		var instance = instances.get();
 		instance.x = (float) minX;
 		instance.y = (float) minY;
 		instance.z = (float) minZ;
-		instance.entityX = (float) (entityX - renderOrigin.getX());
-		instance.entityZ = (float) (entityZ - renderOrigin.getZ());
+		instance.entityX = (float) entityLocalX;
+		instance.entityZ = (float) entityLocalZ;
 		instance.sizeX = (float) (maxX - minX);
 		instance.sizeZ = (float) (maxZ - minZ);
 		instance.alpha = alpha;
