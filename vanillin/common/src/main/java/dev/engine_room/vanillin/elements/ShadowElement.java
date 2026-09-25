@@ -19,6 +19,7 @@ import dev.engine_room.flywheel.lib.model.SingleMeshModel;
 import dev.engine_room.flywheel.lib.visual.AbstractVisual;
 import dev.engine_room.flywheel.lib.visual.SimpleDynamicVisual;
 import dev.engine_room.flywheel.lib.visual.util.InstanceRecycler;
+import dev.engine_room.flywheel.lib.util.ShadersModHelper;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.Lightmap;
 import net.minecraft.client.renderer.texture.OverlayTexture;
@@ -55,6 +56,7 @@ public final class ShadowElement extends AbstractVisual implements SimpleDynamic
 	private static final Model SHADOW_MODEL = new SingleMeshModel(ShadowMesh.INSTANCE, SHADOW_MATERIAL);
 
 	private final Entity entity;
+	private final boolean shaderPackShadowSuppressed;
 	private final BlockPos.MutableBlockPos pos = new BlockPos.MutableBlockPos();
 
 	private final InstanceRecycler<ShadowInstance> instances = new InstanceRecycler<>(this::createInstance);
@@ -66,6 +68,7 @@ public final class ShadowElement extends AbstractVisual implements SimpleDynamic
 	public ShadowElement(VisualizationContext ctx, Entity entity, float partialTick, Config config) {
 		super(ctx, entity.level(), partialTick);
 		this.entity = entity;
+		shaderPackShadowSuppressed = ShadersModHelper.isShaderPackInUse();
 		radius(config.radius);
 		strength(config.strength);
 	}
@@ -118,7 +121,7 @@ public final class ShadowElement extends AbstractVisual implements SimpleDynamic
 
 		boolean shadowsEnabled = Minecraft.getInstance().options.entityShadows()
 				.get();
-		if (shadowsEnabled && radius > 0 && !entity.isInvisible()) {
+		if (shadowsEnabled && !shaderPackShadowSuppressed && radius > 0 && !entity.isInvisible()) {
 			setupInstances(context);
 		}
 

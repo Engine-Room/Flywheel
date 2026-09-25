@@ -17,6 +17,7 @@ import dev.engine_room.flywheel.lib.material.SimpleMaterial;
 import dev.engine_room.flywheel.lib.model.QuadMesh;
 import dev.engine_room.flywheel.lib.model.SingleMeshModel;
 import dev.engine_room.flywheel.lib.visual.util.InstanceRecycler;
+import dev.engine_room.flywheel.lib.util.ShadersModHelper;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.Lightmap;
 import net.minecraft.client.renderer.texture.OverlayTexture;
@@ -56,6 +57,7 @@ public final class ShadowComponent implements EntityComponent {
 	private final VisualizationContext context;
 	private final Entity entity;
 	private final Level level;
+	private final boolean shaderPackShadowSuppressed;
 	private final BlockPos.MutableBlockPos pos = new BlockPos.MutableBlockPos();
 
 	private final InstanceRecycler<ShadowInstance> instances = new InstanceRecycler<>(this::createInstance);
@@ -68,6 +70,7 @@ public final class ShadowComponent implements EntityComponent {
 		this.context = context;
 		this.entity = entity;
 		this.level = entity.level();
+		this.shaderPackShadowSuppressed = ShadersModHelper.isShaderPackInUse();
 	}
 
 	private ShadowInstance createInstance() {
@@ -118,7 +121,7 @@ public final class ShadowComponent implements EntityComponent {
 
 		boolean shadowsEnabled = Minecraft.getInstance().options.entityShadows()
 				.get();
-		if (shadowsEnabled && radius > 0 && !entity.isInvisible()) {
+		if (shadowsEnabled && !shaderPackShadowSuppressed && radius > 0 && !entity.isInvisible()) {
 			setupInstances(context);
 		}
 
