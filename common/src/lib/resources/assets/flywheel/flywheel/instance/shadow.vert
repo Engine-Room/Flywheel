@@ -1,5 +1,4 @@
-// Vanilla reference: net/minecraft/client/renderer/entity/EntityRenderDispatcher.java
-// (renderShadow -> renderBlockShadow -> shadowVertex).
+// Vanilla reference: net.minecraft.client.renderer.feature.ShadowFeatureRenderer#renderTranslucent
 void flw_instanceVertex(in FlwInstance i) {
     // Stretch the quad to the shape of the block the shadow is being cast on,
     // then move it to the correct position.
