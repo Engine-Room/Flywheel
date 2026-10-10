@@ -56,6 +56,7 @@ public class ParallelTaskExecutor implements TaskExecutorImpl {
 		for (int i = 0; i < threadCount; i++) {
 			WorkerThread thread = new WorkerThread(name + " Task Executor #" + i);
 			thread.setPriority(Mth.clamp(Thread.NORM_PRIORITY - 2, Thread.MIN_PRIORITY, Thread.MAX_PRIORITY));
+			taskNotifier.register(thread);
 			thread.start();
 
 			threads.add(thread);
@@ -76,9 +77,7 @@ public class ParallelTaskExecutor implements TaskExecutorImpl {
 		FlwImpl.LOGGER.info("Stopping worker threads");
 
 		// Notify all worker threads to wake up, where they will then terminate
-		synchronized (taskNotifier) {
-			taskNotifier.notifyAll();
-		}
+		taskNotifier.postNotification();
 
 		// Wait for every remaining thread to terminate
 		for (Thread thread : threads) {
@@ -90,6 +89,7 @@ public class ParallelTaskExecutor implements TaskExecutorImpl {
 		}
 
 		threads.clear();
+		taskNotifier.clear();
 		taskQueue.clear();
 		waitGroup._reset();
 	}
@@ -190,6 +190,7 @@ public class ParallelTaskExecutor implements TaskExecutorImpl {
 
 	private class WorkerThread extends Thread {
 		private int errorLogLatch = MAX_ERRORS_LOGGED_PER_THREAD;
+		private final BooleanSupplier shouldWait = () -> running.get() && taskQueue.isEmpty();
 
 		public WorkerThread(String name) {
 			super(name);
@@ -240,7 +241,7 @@ public class ParallelTaskExecutor implements TaskExecutorImpl {
 
 				Thread.onSpinWait();
 			}
-			taskNotifier.awaitNotification();
+			taskNotifier.awaitNotification(shouldWait);
 		}
 	}
 }
