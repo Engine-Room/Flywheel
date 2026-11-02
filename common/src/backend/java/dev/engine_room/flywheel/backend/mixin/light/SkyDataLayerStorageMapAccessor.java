@@ -5,7 +5,7 @@ import org.spongepowered.asm.mixin.gen.Accessor;
 
 import it.unimi.dsi.fastutil.longs.Long2IntOpenHashMap;
 
-@Mixin(targets = "net.minecraft.world.level.lighting.SkyLightSectionStorage.SkyDataLayerStorageMap")
+@Mixin(targets = "net.minecraft.world.level.lighting.SkyLightSectionStorage$SkyDataLayerStorageMap")
 public interface SkyDataLayerStorageMapAccessor {
 	@Accessor("currentLowestY")
 	int flywheel$currentLowestY();
