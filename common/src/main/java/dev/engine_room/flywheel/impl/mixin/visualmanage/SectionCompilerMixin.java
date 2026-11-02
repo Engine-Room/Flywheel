@@ -13,7 +13,7 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 @Mixin(SectionCompiler.class)
 abstract class SectionCompilerMixin {
 	@Inject(method = "handleBlockEntity", at = @At("HEAD"), cancellable = true)
-	private void flywheel$tryAddBlockEntity(@Coerce Object compileResults, BlockEntity blockEntity, CallbackInfo ci) {
+	private void flywheel$tryAddBlockEntity(@Coerce Object results, BlockEntity blockEntity, CallbackInfo ci) {
 		if (VisualizationHelper.tryAddBlockEntity(blockEntity)) {
 			ci.cancel();
 		}

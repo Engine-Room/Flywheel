@@ -16,7 +16,7 @@ import net.minecraft.world.level.chunk.LevelChunk;
 abstract class LevelChunkMixin {
 	@Shadow
 	@Final
-	Level level;
+	private Level level;
 
 	@Inject(method = "setBlockEntity(Lnet/minecraft/world/level/block/entity/BlockEntity;)V",
 			at = @At(value = "INVOKE_ASSIGN", target = "Ljava/util/Map;put(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;"))

@@ -18,10 +18,14 @@ import dev.engine_room.flywheel.lib.model.part.ModelTrees;
 import dev.engine_room.flywheel.lib.visual.AbstractEntityVisual;
 import dev.engine_room.flywheel.lib.visual.SimpleDynamicVisual;
 import dev.engine_room.flywheel.lib.visual.SimpleTickableVisual;
-import dev.engine_room.vanillin.mixin.BlockModelSetAccessor;
+import dev.engine_room.vanillin.mixin.BlockModelRenderStateAccessor;
+import it.unimi.dsi.fastutil.objects.Object2BooleanMap;
+import it.unimi.dsi.fastutil.objects.Object2BooleanOpenHashMap;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.geom.ModelLayerLocation;
-import net.minecraft.client.renderer.block.BlockModelSet;
+import net.minecraft.client.renderer.block.BlockModelRenderState;
+import net.minecraft.client.renderer.block.BlockModelResolver;
+import net.minecraft.client.renderer.block.model.BlockDisplayContext;
 import net.minecraft.resources.Identifier;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.vehicle.minecart.AbstractMinecart;
@@ -38,6 +42,12 @@ public class MinecartVisual<T extends AbstractMinecart> extends AbstractEntityVi
 			.texture(TEXTURE)
 			.mipmap(false)
 			.build();
+
+	private static final Object2BooleanMap<BlockState> HAS_SPECIAL_RENDERER_CACHE = new Object2BooleanOpenHashMap<>();
+
+	private static final BlockModelResolver BLOCK_MODEL_RESOLVER = new BlockModelResolver(Minecraft.getInstance().getModelManager());
+	private static final BlockModelRenderState BLOCK_MODEL_RENDER_STATE = new BlockModelRenderState();
+	private static final BlockDisplayContext BLOCK_DISPLAY_CONTEXT = BlockDisplayContext.create();
 
 	private final InstanceTree instances;
 	@Nullable
@@ -62,12 +72,12 @@ public class MinecartVisual<T extends AbstractMinecart> extends AbstractEntityVi
 	private TransformedInstance createContentsInstance() {
 		RenderShape shape = blockState.getRenderShape();
 
-		if (shape == RenderShape.INVISIBLE) {
+		if (hasSpecialRenderer(blockState)) {
+			instances.visible(false);
 			return null;
 		}
 
-		if (hasSpecialRenderer(blockState)) {
-			instances.visible(false);
+		if (shape == RenderShape.INVISIBLE) {
 			return null;
 		}
 
@@ -215,7 +225,18 @@ public class MinecartVisual<T extends AbstractMinecart> extends AbstractEntityVi
 	}
 
 	private static boolean hasSpecialRenderer(BlockState state) {
-		BlockModelSet blockModelSet = Minecraft.getInstance().getModelManager().getBlockModelSet();
-		return ((BlockModelSetAccessor) blockModelSet).flywheel$getBlockModelByStateCache().containsKey(state);
+		return HAS_SPECIAL_RENDERER_CACHE.computeIfAbsent(state, (BlockState k) -> {
+			BLOCK_MODEL_RESOLVER.update(
+					BLOCK_MODEL_RENDER_STATE,
+					k,
+					BLOCK_DISPLAY_CONTEXT
+			);
+
+			return ((BlockModelRenderStateAccessor) BLOCK_MODEL_RENDER_STATE).vanillin$getSpecialRenderer() != null;
+		});
+	}
+
+	public static void clearSpecialRendererCache() {
+		HAS_SPECIAL_RENDERER_CACHE.clear();
 	}
 }

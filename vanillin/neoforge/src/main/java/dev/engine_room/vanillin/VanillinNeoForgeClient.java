@@ -7,6 +7,7 @@ import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.ModLoadingContext;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.event.config.ModConfigEvent;
+import net.neoforged.neoforge.client.event.AddClientReloadListenersEvent;
 import net.neoforged.neoforge.client.event.RenderFrameEvent;
 import net.neoforged.neoforge.common.NeoForge;
 
@@ -30,8 +31,8 @@ public class VanillinNeoForgeClient {
 		});
 
 		NeoForge.EVENT_BUS.addListener((ReloadLevelRendererEvent e) -> SodiumAnimatedTextureCompat.onReloadRenderer());
-
 		NeoForge.EVENT_BUS.addListener((RenderFrameEvent.Pre stage) -> SodiumAnimatedTextureCompat.beginFrame());
 
+		modEventBus.addListener((AddClientReloadListenersEvent e) -> e.addListener(VanillinClientResourceReloadListener.ID, VanillinClientResourceReloadListener.INSTANCE));
 	}
 }

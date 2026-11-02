@@ -56,7 +56,6 @@ neoForge {
         sourceSet(lib)
         sourceSet(backend)
     }
-
 }
 
 jarSets {

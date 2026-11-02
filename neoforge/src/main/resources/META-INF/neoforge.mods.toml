@@ -15,7 +15,7 @@ displayURL = "${mod_homepage}"
 displayTest = "IGNORE_ALL_VERSION"
 
 [[accessTransformers]]
-file="accesstransformer.cfg"
+file = "META-INF/accesstransformer.cfg"
 
 [[mixins]]
 config = "flywheel.backend.mixins.json"

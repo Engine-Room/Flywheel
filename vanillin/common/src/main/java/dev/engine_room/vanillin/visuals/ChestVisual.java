@@ -76,7 +76,7 @@ public class ChestVisual<T extends BlockEntity & LidBlockEntity> extends Abstrac
 		if (block instanceof AbstractChestBlock<?> chestBlock) {
 			ChestType chestType = blockState.hasProperty(ChestBlock.TYPE) ? blockState.getValue(ChestBlock.TYPE) : ChestType.SINGLE;
 			SpriteId texture = Sheets.chooseSprite(
-					ChestRendererAccessor.flywheel$getChestMaterial(blockEntity, ChestRenderer.xmasTextures()),
+					ChestRendererAccessor.vanillin$getChestMaterial(blockEntity, ChestRenderer.xmasTextures()),
 					chestType
 			);
 			instances = InstanceTree.create(instancerProvider(), ModelTrees.of(LAYER_LOCATIONS.get(chestType), texture, MATERIAL));

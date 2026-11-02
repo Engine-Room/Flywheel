@@ -3,6 +3,7 @@ package dev.engine_room.flywheel.lib.model.baked;
 import java.util.concurrent.ConcurrentMap;
 
 import org.jetbrains.annotations.ApiStatus;
+import org.jspecify.annotations.NullMarked;
 
 import com.google.common.collect.MapMaker;
 
@@ -20,8 +21,6 @@ import net.minecraft.client.resources.model.SimpleModelWrapper;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.packs.resources.ResourceManagerReloadListener;
-
-import org.jspecify.annotations.NullMarked;
 
 @ApiStatus.Internal
 public class FabricPartialModel extends PartialModel {
@@ -68,6 +67,9 @@ public class FabricPartialModel extends PartialModel {
 		public static final Identifier ID = IdentifierUtil.id("partial_models");
 
 		public static final ResourceReloadListener INSTANCE = new ResourceReloadListener();
+
+		private ResourceReloadListener() {
+		}
 
 		@Override
 		public void onResourceManagerReload(ResourceManager resourceManager) {

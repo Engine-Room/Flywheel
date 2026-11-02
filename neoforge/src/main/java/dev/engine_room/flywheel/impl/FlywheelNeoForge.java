@@ -6,12 +6,11 @@ import org.jetbrains.annotations.UnknownNullability;
 import dev.engine_room.flywheel.api.Flywheel;
 import dev.engine_room.flywheel.api.event.EndClientResourceReloadEvent;
 import dev.engine_room.flywheel.api.event.ReloadLevelRendererEvent;
-import dev.engine_room.flywheel.backend.compile.FlwProgramsReloader;
+import dev.engine_room.flywheel.backend.compile.FlwBackendResourceReloader;
 import dev.engine_room.flywheel.backend.engine.uniform.Uniforms;
 import dev.engine_room.flywheel.impl.task.FlwTaskExecutor;
 import dev.engine_room.flywheel.impl.visualization.VisualizationEventHandler;
 import dev.engine_room.flywheel.lib.model.baked.NeoForgePartialModel;
-import dev.engine_room.flywheel.lib.util.IdentifierUtil;
 import dev.engine_room.flywheel.lib.util.LevelAttached;
 import dev.engine_room.flywheel.lib.util.RendererReloadCache;
 import dev.engine_room.flywheel.lib.util.ResourceReloadHolder;
@@ -97,7 +96,7 @@ public final class FlywheelNeoForge {
 		gameEventBus.addListener((ReloadLevelRendererEvent e) -> Uniforms.onReloadLevelRenderer());
 
 		modEventBus.addListener((AddClientReloadListenersEvent e) -> {
-			e.addListener(FlwProgramsReloader.ID, FlwProgramsReloader.INSTANCE);
+			e.addListener(FlwBackendResourceReloader.ID, FlwBackendResourceReloader.INSTANCE);
 		});
 	}
 
