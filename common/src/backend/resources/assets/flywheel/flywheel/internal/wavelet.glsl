@@ -50,7 +50,7 @@ float get_coefficients(in sampler2DArray coefficients, int index) {
 float total_absorbance(in sampler2DArray coefficients) {
     float scale_coefficient = get_coefficients(coefficients, TRANSPARENCY_WAVELET_COEFFICIENT_COUNT - 1);
     if (scale_coefficient == 0) {
-        return 0;
+        return 0.;
     }
 
     int index_b = TRANSPARENCY_WAVELET_COEFFICIENT_COUNT - 1;
@@ -76,7 +76,7 @@ float total_absorbance(in sampler2DArray coefficients) {
 float absorbance(in sampler2DArray coefficients, float depth) {
     float scale_coefficient = get_coefficients(coefficients, TRANSPARENCY_WAVELET_COEFFICIENT_COUNT - 1);
     if (scale_coefficient == 0) {
-        return 0;
+        return 0.;
     }
 
     depth *= float(TRANSPARENCY_WAVELET_COEFFICIENT_COUNT-1) / TRANSPARENCY_WAVELET_COEFFICIENT_COUNT;
@@ -120,7 +120,7 @@ float absorbance(in sampler2DArray coefficients, float depth) {
 float signal_corrected_absorbance(in sampler2DArray coefficients, float depth, float signal) {
     float scale_coefficient = get_coefficients(coefficients, TRANSPARENCY_WAVELET_COEFFICIENT_COUNT - 1);
     if (scale_coefficient == 0) {
-        return 0;
+        return 0.;
     }
 
     depth *= float(TRANSPARENCY_WAVELET_COEFFICIENT_COUNT-1) / TRANSPARENCY_WAVELET_COEFFICIENT_COUNT;
