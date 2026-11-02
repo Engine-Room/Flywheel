@@ -1,4 +1,5 @@
-#!/usr/bin/env groovy
+import org.jenkinsci.plugins.workflow.steps.FlowInterruptedException
+import org.jenkinsci.plugins.workflow.support.steps.input.Rejection
 
 pipeline {
     agent none
@@ -48,14 +49,29 @@ pipeline {
             }
         }
 
-        stage('Release') {
-            // Take the input in our when block so that we don't block any agents.
-            when {
-                expression {
-                    input(message: 'Publish without build number?', ok: 'Yes', cancel: 'No')
-                    // If input is cancelled the entire step will abort. Return true so we continue on confirmation.
-                    return true
+        stage('Approve Release') {
+            agent none
+
+            steps {
+                script {
+                    env.RELEASE_APPROVED = 'false'
+                    try {
+                        input(message: 'Publish without build number?', ok: 'Yes', cancel: 'No')
+                        env.RELEASE_APPROVED = 'true'
+                    } catch (FlowInterruptedException e) {
+                        // only catch the error emitted by "No"
+                        if (!e.causes.any { it instanceof Rejection }) {
+                             throw e
+                        }
+                        echo 'Skipping release.'
+                    }
                 }
+            }
+        }
+
+        stage('Release') {
+            when {
+                expression { env.RELEASE_APPROVED == 'true' }
                 beforeAgent true
             }
 
