@@ -9,7 +9,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 
 public final class LevelUniforms extends UniformWriter {
-	private static final int SIZE = 16 * 4 + 4 * 12;
+	private static final int SIZE = 16 * 4 + 4 * 13;
 	static final UniformBuffer BUFFER = new UniformBuffer(Uniforms.LEVEL_INDEX, SIZE);
 
 	public static final Vector3f LIGHT0_DIRECTION = new Vector3f();
