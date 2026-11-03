@@ -11,7 +11,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.dimension.DimensionType;
 
 public final class LevelUniforms extends UniformWriter {
-	private static final int SIZE = 16 * 4 + 4 * 15;
+	private static final int SIZE = 16 * 4 + 4 * 16;
 	static final UniformBuffer BUFFER = new UniformBuffer(Uniforms.LEVEL_INDEX, SIZE);
 
 	public static final Vector3f LIGHT0_DIRECTION = new Vector3f();
