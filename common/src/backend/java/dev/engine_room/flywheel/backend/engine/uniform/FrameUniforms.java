@@ -20,7 +20,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 
 public final class FrameUniforms extends UniformWriter {
-	private static final int SIZE = 96 + 64 * 9 + 16 * 5 + 8 * 2 + 8 + 4 * 19;
+	private static final int SIZE = 96 + 64 * 9 + 16 * 5 + 8 * 2 + 8 + 4 * 21;
 	static final UniformBuffer BUFFER = new UniformBuffer(Uniforms.FRAME_INDEX, SIZE);
 
 	private static final Matrix4f VIEW = new Matrix4f();
