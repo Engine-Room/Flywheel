@@ -1,11 +1,11 @@
 package dev.engine_room.flywheel.backend.gl;
 
-import static org.lwjgl.opengl.GL32.GL_SIGNALED;
-import static org.lwjgl.opengl.GL32.GL_SYNC_GPU_COMMANDS_COMPLETE;
-import static org.lwjgl.opengl.GL32.GL_SYNC_STATUS;
-import static org.lwjgl.opengl.GL32.glDeleteSync;
-import static org.lwjgl.opengl.GL32.glFenceSync;
-import static org.lwjgl.opengl.GL32.nglGetSynciv;
+import static org.lwjgl.opengl.GL33C.GL_SIGNALED;
+import static org.lwjgl.opengl.GL33C.GL_SYNC_GPU_COMMANDS_COMPLETE;
+import static org.lwjgl.opengl.GL33C.GL_SYNC_STATUS;
+import static org.lwjgl.opengl.GL33C.glDeleteSync;
+import static org.lwjgl.opengl.GL33C.glFenceSync;
+import static org.lwjgl.opengl.GL33C.nglGetSynciv;
 
 import org.lwjgl.system.MemoryStack;
 import org.lwjgl.system.MemoryUtil;

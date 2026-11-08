@@ -3,9 +3,8 @@ package dev.engine_room.flywheel.backend.gl;
 import org.jetbrains.annotations.UnknownNullability;
 import org.lwjgl.PointerBuffer;
 import org.lwjgl.opengl.GL;
-import org.lwjgl.opengl.GL20C;
-import org.lwjgl.opengl.GL40;
-import org.lwjgl.opengl.GL43;
+import org.lwjgl.opengl.GL33C;
+import org.lwjgl.opengl.GL46C;
 import org.lwjgl.opengl.GLCapabilities;
 import org.lwjgl.opengl.KHRShaderSubgroup;
 import org.lwjgl.system.MemoryStack;
@@ -35,10 +34,10 @@ public final class GlCompat {
 		CAPABILITIES = caps;
 	}
 
-	public static final String GL_VENDOR_STRING = safeGetString(GL20C.GL_VENDOR);
-	public static final String GL_RENDERER_STRING = safeGetString(GL20C.GL_RENDERER);
-	public static final String GL_VERSION_STRING = safeGetString(GL20C.GL_VERSION);
-	public static final String GL_SHADING_LANGUAGE_VERSION_STRING = safeGetString(GL20C.GL_SHADING_LANGUAGE_VERSION);
+	public static final String GL_VENDOR_STRING = safeGetString(GL33C.GL_VENDOR);
+	public static final String GL_RENDERER_STRING = safeGetString(GL33C.GL_RENDERER);
+	public static final String GL_VERSION_STRING = safeGetString(GL33C.GL_VERSION);
+	public static final String GL_SHADING_LANGUAGE_VERSION_STRING = safeGetString(GL33C.GL_SHADING_LANGUAGE_VERSION);
 
 	public static final Driver DRIVER = readVendorString();
 	public static final int SUBGROUP_SIZE = subgroupSize();
@@ -64,7 +63,7 @@ public final class GlCompat {
 	 * Modified from:
 	 * <br> <a href="https://github.com/grondag/canvas/commit/820bf754092ccaf8d0c169620c2ff575722d7d96">canvas</a>
 	 *
-	 * <p>Identical in function to {@link GL20C#glShaderSource(int, CharSequence)} but
+	 * <p>Identical in function to {@link GL33C#glShaderSource(int, CharSequence)} but
 	 * passes a null pointer for string length to force the driver to rely on the null
 	 * terminator for string length.  This is a workaround for an apparent flaw with some
 	 * AMD drivers that don't receive or interpret the length correctly, resulting in
@@ -77,13 +76,13 @@ public final class GlCompat {
 			var sourceBuffer = MemoryUtil.memUTF8(source, true);
 			final PointerBuffer pointers = stack.mallocPointer(1);
 			pointers.put(sourceBuffer);
-			GL20C.nglShaderSource(glId, 1, pointers.address0(), 0);
+			GL33C.nglShaderSource(glId, 1, pointers.address0(), 0);
 			MemoryUtil.memFree(sourceBuffer);
 		}
 	}
 
 	/**
-	 * Similar in function to {@link GL43#glMultiDrawElementsIndirect(int, int, long, int, int)},
+	 * Similar in function to {@link GL46C#glMultiDrawElementsIndirect(int, int, long, int, int)},
 	 * but uses consecutive DI instead of MDI if MDI is known to not work well with the current driver.
 	 * Unlike the original function, stride cannot be equal to 0.
 	 */
@@ -95,12 +94,12 @@ public final class GlCompat {
 			// Intel renders garbage with MDI, but consecutive DI works "fine".
 			for (int i = 0; i < count; i++) {
 				drawProgram.setUInt("_flw_baseDraw", start + i);
-				GL40.glDrawElementsIndirect(mode, type, indirect);
+				GL46C.glDrawElementsIndirect(mode, type, indirect);
 				indirect += stride;
 			}
 		} else {
 			drawProgram.setUInt("_flw_baseDraw", start);
-			GL43.glMultiDrawElementsIndirect(mode, type, indirect, count, (int) stride);
+			GL46C.glMultiDrawElementsIndirect(mode, type, indirect, count, (int) stride);
 		}
 	}
 
@@ -163,7 +162,10 @@ public final class GlCompat {
 				&& CAPABILITIES.GL_ARB_multi_draw_indirect
 				&& CAPABILITIES.GL_ARB_shader_draw_parameters
 				&& CAPABILITIES.GL_ARB_shader_storage_buffer_object
-				&& CAPABILITIES.GL_ARB_shading_language_420pack && CAPABILITIES.GL_ARB_vertex_attrib_binding && CAPABILITIES.GL_ARB_shader_image_load_store && CAPABILITIES.GL_ARB_shader_image_size;
+				&& CAPABILITIES.GL_ARB_shading_language_420pack
+				&& CAPABILITIES.GL_ARB_vertex_attrib_binding
+				&& CAPABILITIES.GL_ARB_shader_image_load_store
+				&& CAPABILITIES.GL_ARB_shader_image_size;
 	}
 
 	private static boolean isDsaSupported() {

@@ -1,7 +1,7 @@
 package dev.engine_room.flywheel.backend.gl.buffer;
 
-import org.lwjgl.opengl.GL15;
-import org.lwjgl.opengl.GL45C;
+import org.lwjgl.opengl.GL33C;
+import org.lwjgl.opengl.GL46C;
 import org.lwjgl.system.Checks;
 
 import com.mojang.blaze3d.opengl.GlStateManager;
@@ -20,17 +20,17 @@ public interface Buffer {
 	class DSA implements Buffer {
 		@Override
 		public int create() {
-			return GL45C.glCreateBuffers();
+			return GL46C.glCreateBuffers();
 		}
 
 		@Override
 		public void data(int vbo, long size, long ptr, int glEnum) {
-			GL45C.nglNamedBufferData(vbo, size, ptr, glEnum);
+			GL46C.nglNamedBufferData(vbo, size, ptr, glEnum);
 		}
 
 		@Override
 		public void subData(int vbo, long offset, long size, long ptr) {
-			GL45C.nglNamedBufferSubData(vbo, offset, size, ptr);
+			GL46C.nglNamedBufferSubData(vbo, offset, size, ptr);
 		}
 
 		public Buffer fallback() {
@@ -55,13 +55,13 @@ public interface Buffer {
 		@Override
 		public void data(int vbo, long size, long ptr, int glEnum) {
 			GlBufferType.COPY_WRITE_BUFFER.bind(vbo);
-			GL15.nglBufferData(GlBufferType.COPY_WRITE_BUFFER.glEnum, size, ptr, glEnum);
+			GL33C.nglBufferData(GlBufferType.COPY_WRITE_BUFFER.glEnum, size, ptr, glEnum);
 		}
 
 		@Override
 		public void subData(int vbo, long offset, long size, long ptr) {
 			GlBufferType.COPY_WRITE_BUFFER.bind(vbo);
-			GL15.nglBufferSubData(GlBufferType.COPY_WRITE_BUFFER.glEnum, offset, size, ptr);
+			GL33C.nglBufferSubData(GlBufferType.COPY_WRITE_BUFFER.glEnum, offset, size, ptr);
 		}
 	}
 }

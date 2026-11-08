@@ -1,13 +1,13 @@
 package dev.engine_room.flywheel.backend.gl.shader;
 
-import org.lwjgl.opengl.GL43;
+import org.lwjgl.opengl.GL46C;
 
 import com.mojang.blaze3d.opengl.GlConst;
 
 public enum ShaderType {
 	VERTEX("vertex", "VERTEX_SHADER", "vert", GlConst.GL_VERTEX_SHADER),
 	FRAGMENT("fragment", "FRAGMENT_SHADER", "frag", GlConst.GL_FRAGMENT_SHADER),
-	COMPUTE("compute", "COMPUTE_SHADER", "glsl", GL43.GL_COMPUTE_SHADER),
+	COMPUTE("compute", "COMPUTE_SHADER", "glsl", GL46C.GL_COMPUTE_SHADER),
 	;
 
 	public final String name;

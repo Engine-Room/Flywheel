@@ -1,7 +1,7 @@
 package dev.engine_room.flywheel.backend.engine.uniform;
 
 import org.jspecify.annotations.Nullable;
-import org.lwjgl.opengl.GL32;
+import org.lwjgl.opengl.GL33C;
 
 import dev.engine_room.flywheel.backend.gl.buffer.GlBuffer;
 import dev.engine_room.flywheel.backend.gl.buffer.GlBufferUsage;
@@ -48,7 +48,7 @@ public class UniformBuffer {
 			needsUpload = false;
 		}
 
-		GL32.glBindBufferRange(GL32.GL_UNIFORM_BUFFER, index, buffer.handle(), 0, clientBuffer.size());
+		GL33C.glBindBufferRange(GL33C.GL_UNIFORM_BUFFER, index, buffer.handle(), 0, clientBuffer.size());
 	}
 
 	public void delete() {

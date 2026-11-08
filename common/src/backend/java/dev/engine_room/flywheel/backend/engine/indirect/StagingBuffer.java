@@ -3,8 +3,7 @@ package dev.engine_room.flywheel.backend.engine.indirect;
 import java.util.function.LongConsumer;
 
 import org.jspecify.annotations.Nullable;
-import org.lwjgl.opengl.GL45;
-import org.lwjgl.opengl.GL45C;
+import org.lwjgl.opengl.GL46C;
 import org.lwjgl.system.MemoryUtil;
 
 import dev.engine_room.flywheel.backend.compile.IndirectPrograms;
@@ -20,10 +19,10 @@ import it.unimi.dsi.fastutil.objects.ObjectArrayFIFOQueue;
 // as a reference for implementation. Modified to be less safe and to allow for writing directly into the staging buffer.
 public class StagingBuffer {
 	private static final long DEFAULT_CAPACITY = 1024 * 1024 * 16;
-	private static final int STORAGE_FLAGS = GL45C.GL_MAP_PERSISTENT_BIT | GL45C.GL_MAP_WRITE_BIT | GL45C.GL_CLIENT_STORAGE_BIT;
-	private static final int MAP_FLAGS = GL45C.GL_MAP_PERSISTENT_BIT | GL45C.GL_MAP_WRITE_BIT | GL45C.GL_MAP_FLUSH_EXPLICIT_BIT | GL45C.GL_MAP_INVALIDATE_BUFFER_BIT;
+	private static final int STORAGE_FLAGS = GL46C.GL_MAP_PERSISTENT_BIT | GL46C.GL_MAP_WRITE_BIT | GL46C.GL_CLIENT_STORAGE_BIT;
+	private static final int MAP_FLAGS = GL46C.GL_MAP_PERSISTENT_BIT | GL46C.GL_MAP_WRITE_BIT | GL46C.GL_MAP_FLUSH_EXPLICIT_BIT | GL46C.GL_MAP_INVALIDATE_BUFFER_BIT;
 
-	private static final int SSBO_ALIGNMENT = GL45.glGetInteger(GL45.GL_SHADER_STORAGE_BUFFER_OFFSET_ALIGNMENT);
+	private static final int SSBO_ALIGNMENT = GL46C.glGetInteger(GL46C.GL_SHADER_STORAGE_BUFFER_OFFSET_ALIGNMENT);
 
 	private final int vbo;
 	private final long map;
@@ -72,10 +71,10 @@ public class StagingBuffer {
 	public StagingBuffer(long capacity, IndirectPrograms programs) {
 		this.capacity = capacity;
 		this.programs = programs;
-		vbo = GL45C.glCreateBuffers();
+		vbo = GL46C.glCreateBuffers();
 
-		GL45C.glNamedBufferStorage(vbo, capacity, STORAGE_FLAGS);
-		map = GL45C.nglMapNamedBufferRange(vbo, 0, capacity, MAP_FLAGS);
+		GL46C.glNamedBufferStorage(vbo, capacity, STORAGE_FLAGS);
+		map = GL46C.nglMapNamedBufferRange(vbo, 0, capacity, MAP_FLAGS);
 
 		totalAvailable = capacity;
 
@@ -208,8 +207,8 @@ public class StagingBuffer {
 	}
 
 	public void delete() {
-		GL45C.glUnmapNamedBuffer(vbo);
-		GL45C.glDeleteBuffers(vbo);
+		GL46C.glUnmapNamedBuffer(vbo);
+		GL46C.glDeleteBuffers(vbo);
 		overflow.delete();
 		scatterBuffer.delete();
 
@@ -255,7 +254,7 @@ public class StagingBuffer {
 				.bind();
 
 		// These bindings don't change between dstVbos.
-		GL45.glBindBufferBase(GL45C.GL_SHADER_STORAGE_BUFFER, 1, vbo);
+		GL46C.glBindBufferBase(GL46C.GL_SHADER_STORAGE_BUFFER, 1, vbo);
 
 		int dstVbo;
 		var transferCount = transfers.length();
@@ -284,7 +283,7 @@ public class StagingBuffer {
 		long remaining = capacity - alignedPos;
 		if (scatterSize <= remaining && scatterSize <= totalAvailable) {
 			MemoryUtil.memCopy(scatterList.ptr(), map + alignedPos, scatterSize);
-			GL45.glBindBufferRange(GL45C.GL_SHADER_STORAGE_BUFFER, 0, vbo, alignedPos, scatterSize);
+			GL46C.glBindBufferRange(GL46C.GL_SHADER_STORAGE_BUFFER, 0, vbo, alignedPos, scatterSize);
 
 			long alignmentCost = alignedPos - pos;
 
@@ -293,12 +292,12 @@ public class StagingBuffer {
 			pos += scatterSize + alignmentCost;
 		} else {
 			scatterBuffer.upload(scatterList.ptr(), scatterSize);
-			GL45.glBindBufferBase(GL45C.GL_SHADER_STORAGE_BUFFER, 0, scatterBuffer.handle());
+			GL46C.glBindBufferBase(GL46C.GL_SHADER_STORAGE_BUFFER, 0, scatterBuffer.handle());
 		}
 
-		GL45.glBindBufferBase(GL45C.GL_SHADER_STORAGE_BUFFER, 2, dstVbo);
+		GL46C.glBindBufferBase(GL46C.GL_SHADER_STORAGE_BUFFER, 2, dstVbo);
 
-		GL45.glDispatchCompute(scatterList.copyCount(), 1, 1);
+		GL46C.glDispatchCompute(scatterList.copyCount(), 1, 1);
 
 		scatterList.reset();
 	}
@@ -317,7 +316,7 @@ public class StagingBuffer {
 
 			usedCapacity += size;
 
-			GL45C.glCopyNamedBufferSubData(vbo, transfers.vbo(i), transfers.srcOffset(i), transfers.dstOffset(i), size);
+			GL46C.glCopyNamedBufferSubData(vbo, transfers.vbo(i), transfers.srcOffset(i), transfers.dstOffset(i), size);
 		}
 
 		return usedCapacity;
@@ -326,10 +325,10 @@ public class StagingBuffer {
 	private void flushUsedRegion() {
 		if (pos < start) {
 			// we rolled around, need to flush 2 ranges.
-			GL45C.glFlushMappedNamedBufferRange(vbo, start, capacity - start);
-			GL45C.glFlushMappedNamedBufferRange(vbo, 0, pos);
+			GL46C.glFlushMappedNamedBufferRange(vbo, start, capacity - start);
+			GL46C.glFlushMappedNamedBufferRange(vbo, 0, pos);
 		} else {
-			GL45C.glFlushMappedNamedBufferRange(vbo, start, pos - start);
+			GL46C.glFlushMappedNamedBufferRange(vbo, start, pos - start);
 		}
 	}
 
@@ -340,16 +339,16 @@ public class StagingBuffer {
 		private final int vbo;
 
 		public OverflowStagingBuffer() {
-			vbo = GL45C.glCreateBuffers();
+			vbo = GL46C.glCreateBuffers();
 		}
 
 		public void upload(long ptr, long size, int dstVbo, long dstOffset) {
-			GL45C.nglNamedBufferData(vbo, size, ptr, GL45C.GL_STREAM_COPY);
-			GL45C.glCopyNamedBufferSubData(vbo, dstVbo, 0, dstOffset, size);
+			GL46C.nglNamedBufferData(vbo, size, ptr, GL46C.GL_STREAM_COPY);
+			GL46C.glCopyNamedBufferSubData(vbo, dstVbo, 0, dstOffset, size);
 		}
 
 		public void delete() {
-			GL45C.glDeleteBuffers(vbo);
+			GL46C.glDeleteBuffers(vbo);
 		}
 	}
 }

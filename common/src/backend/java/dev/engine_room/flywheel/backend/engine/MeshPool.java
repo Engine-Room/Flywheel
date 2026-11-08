@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.jspecify.annotations.Nullable;
-import org.lwjgl.opengl.GL32;
+import org.lwjgl.opengl.GL33C;
 
 import com.mojang.blaze3d.opengl.GlConst;
 import com.mojang.blaze3d.vertex.VertexFormat;
@@ -183,9 +183,9 @@ public class MeshPool {
 
 		public void draw(int instanceCount) {
 			if (instanceCount > 1) {
-				GL32.glDrawElementsInstancedBaseVertex(GlConst.toGl(VertexFormat.Mode.TRIANGLES), mesh.indexCount(), GlConst.GL_UNSIGNED_INT, firstIndexByteOffset(), instanceCount, baseVertex);
+				GL33C.glDrawElementsInstancedBaseVertex(GlConst.toGl(VertexFormat.Mode.TRIANGLES), mesh.indexCount(), GlConst.GL_UNSIGNED_INT, firstIndexByteOffset(), instanceCount, baseVertex);
 			} else {
-				GL32.glDrawElementsBaseVertex(GlConst.toGl(VertexFormat.Mode.TRIANGLES), mesh.indexCount(), GlConst.GL_UNSIGNED_INT, firstIndexByteOffset(), baseVertex);
+				GL33C.glDrawElementsBaseVertex(GlConst.toGl(VertexFormat.Mode.TRIANGLES), mesh.indexCount(), GlConst.GL_UNSIGNED_INT, firstIndexByteOffset(), baseVertex);
 			}
 		}
 

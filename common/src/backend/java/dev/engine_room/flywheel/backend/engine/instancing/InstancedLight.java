@@ -1,6 +1,6 @@
 package dev.engine_room.flywheel.backend.engine.instancing;
 
-import org.lwjgl.opengl.GL32;
+import org.lwjgl.opengl.GL33C;
 import org.lwjgl.system.MemoryUtil;
 
 import dev.engine_room.flywheel.backend.Samplers;
@@ -19,8 +19,8 @@ public class InstancedLight {
 	public InstancedLight() {
 		lut = new GlBuffer(GlBufferUsage.DYNAMIC_DRAW);
 		sections = new GlBuffer(GlBufferUsage.DYNAMIC_DRAW);
-		lutTexture = new TextureBuffer(GL32.GL_R32UI);
-		sectionsTexture = new TextureBuffer(GL32.GL_R32UI);
+		lutTexture = new TextureBuffer(GL33C.GL_R32UI);
+		sectionsTexture = new TextureBuffer(GL33C.GL_R32UI);
 	}
 
 	public void bind() {

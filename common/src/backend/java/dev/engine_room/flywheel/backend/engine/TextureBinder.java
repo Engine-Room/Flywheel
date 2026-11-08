@@ -1,12 +1,9 @@
 package dev.engine_room.flywheel.backend.engine;
 
-import java.util.Collections;
-
 import org.jspecify.annotations.Nullable;
 import org.lwjgl.opengl.GL33C;
 
 import com.mojang.blaze3d.opengl.GlConst;
-import com.mojang.blaze3d.opengl.GlDevice;
 import com.mojang.blaze3d.opengl.GlSampler;
 import com.mojang.blaze3d.opengl.GlStateManager;
 import com.mojang.blaze3d.opengl.GlTexture;

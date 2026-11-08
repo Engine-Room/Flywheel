@@ -4,7 +4,7 @@ import java.util.Arrays;
 import java.util.BitSet;
 import java.util.List;
 
-import org.lwjgl.opengl.GL45C;
+import org.lwjgl.opengl.GL46C;
 import org.lwjgl.system.Checks;
 
 import com.mojang.blaze3d.opengl.GlConst;
@@ -25,13 +25,13 @@ public class GlVertexArrayDSA extends GlVertexArray {
 	private int elementBufferBinding = 0;
 
 	public GlVertexArrayDSA() {
-		handle(GL45C.glCreateVertexArrays());
+		handle(GL46C.glCreateVertexArrays());
 	}
 
 	@Override
 	public void bindVertexBuffer(final int bindingIndex, final int vbo, final long offset, final int stride) {
 		if (bindingBuffers[bindingIndex] != vbo || bindingOffsets[bindingIndex] != offset || bindingStrides[bindingIndex] != stride) {
-			GL45C.glVertexArrayVertexBuffer(handle(), bindingIndex, vbo, offset, stride);
+			GL46C.glVertexArrayVertexBuffer(handle(), bindingIndex, vbo, offset, stride);
 			bindingBuffers[bindingIndex] = vbo;
 			bindingOffsets[bindingIndex] = offset;
 			bindingStrides[bindingIndex] = stride;
@@ -41,7 +41,7 @@ public class GlVertexArrayDSA extends GlVertexArray {
 	@Override
 	public void setBindingDivisor(final int bindingIndex, final int divisor) {
 		if (bindingDivisors[bindingIndex] != divisor) {
-			GL45C.glVertexArrayBindingDivisor(handle(), bindingIndex, divisor);
+			GL46C.glVertexArrayBindingDivisor(handle(), bindingIndex, divisor);
 			bindingDivisors[bindingIndex] = divisor;
 		}
 	}
@@ -54,21 +54,21 @@ public class GlVertexArrayDSA extends GlVertexArray {
 
 		for (var attribute : vertexAttributes) {
 			if (!attributeEnabled.get(attribIndex)) {
-				GL45C.glEnableVertexArrayAttrib(handle, attribIndex);
+				GL46C.glEnableVertexArrayAttrib(handle, attribIndex);
 				attributeEnabled.set(attribIndex);
 			}
 
 			if (!attribute.equals(attributes[attribIndex])) {
 				if (attribute instanceof VertexAttribute.Float f) {
-					GL45C.glVertexArrayAttribFormat(handle, attribIndex, f.size(), GlConst.toGl(f.type()), f.normalized(), offset);
+					GL46C.glVertexArrayAttribFormat(handle, attribIndex, f.size(), GlConst.toGl(f.type()), f.normalized(), offset);
 				} else if (attribute instanceof VertexAttribute.Int vi) {
-					GL45C.glVertexArrayAttribIFormat(handle, attribIndex, vi.size(), GlConst.toGl(vi.type()), offset);
+					GL46C.glVertexArrayAttribIFormat(handle, attribIndex, vi.size(), GlConst.toGl(vi.type()), offset);
 				}
 				attributes[attribIndex] = attribute;
 			}
 
 			if (attributeBindings[attribIndex] != bindingIndex) {
-				GL45C.glVertexArrayAttribBinding(handle, attribIndex, bindingIndex);
+				GL46C.glVertexArrayAttribBinding(handle, attribIndex, bindingIndex);
 				attributeBindings[attribIndex] = bindingIndex;
 			}
 
@@ -80,7 +80,7 @@ public class GlVertexArrayDSA extends GlVertexArray {
 	@Override
 	public void setElementBuffer(int ebo) {
 		if (elementBufferBinding != ebo) {
-			GL45C.glVertexArrayElementBuffer(handle(), ebo);
+			GL46C.glVertexArrayElementBuffer(handle(), ebo);
 			elementBufferBinding = ebo;
 		}
 	}

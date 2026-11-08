@@ -2,9 +2,7 @@ package dev.engine_room.flywheel.backend.gl.shader;
 
 import org.joml.Matrix3fc;
 import org.joml.Matrix4fc;
-import org.lwjgl.opengl.GL20;
-import org.lwjgl.opengl.GL30;
-import org.lwjgl.opengl.GL31;
+import org.lwjgl.opengl.GL33C;
 import org.slf4j.Logger;
 
 import com.mojang.blaze3d.opengl.GlStateManager;
@@ -39,7 +37,7 @@ public class GlProgram extends GlObject {
 			return;
 		}
 
-		GL20.glUniform1f(uniform, value);
+		GL33C.glUniform1f(uniform, value);
 	}
 
 	public void setVec2(String glslName, float x, float y) {
@@ -49,7 +47,7 @@ public class GlProgram extends GlObject {
 			return;
 		}
 
-		GL20.glUniform2f(uniform, x, y);
+		GL33C.glUniform2f(uniform, x, y);
 	}
 
 	public void setVec3(String glslName, float x, float y, float z) {
@@ -59,7 +57,7 @@ public class GlProgram extends GlObject {
 			return;
 		}
 
-		GL20.glUniform3f(uniform, x, y, z);
+		GL33C.glUniform3f(uniform, x, y, z);
 	}
 
 	public void setVec4(String glslName, float x, float y, float z, float w) {
@@ -69,7 +67,7 @@ public class GlProgram extends GlObject {
 			return;
 		}
 
-		GL20.glUniform4f(uniform, x, y, z, w);
+		GL33C.glUniform4f(uniform, x, y, z, w);
 	}
 
 	public void setMat4(String glslName, Matrix4fc matrix) {
@@ -79,7 +77,7 @@ public class GlProgram extends GlObject {
 			return;
 		}
 
-		GL20.glUniformMatrix4fv(uniform, false, matrix.get(new float[16]));
+		GL33C.glUniformMatrix4fv(uniform, false, matrix.get(new float[16]));
 	}
 
 	public void setMat3(String glslName, Matrix3fc matrix) {
@@ -89,7 +87,7 @@ public class GlProgram extends GlObject {
 			return;
 		}
 
-		GL20.glUniformMatrix3fv(uniform, false, matrix.get(new float[9]));
+		GL33C.glUniformMatrix3fv(uniform, false, matrix.get(new float[9]));
 	}
 
 	public void setBool(String glslName, boolean bool) {
@@ -103,7 +101,7 @@ public class GlProgram extends GlObject {
 			return;
 		}
 
-		GL30.glUniform1ui(uniform, value);
+		GL33C.glUniform1ui(uniform, value);
 	}
 
 	public void setUVec2(String name, int x, int y) {
@@ -113,7 +111,7 @@ public class GlProgram extends GlObject {
 			return;
 		}
 
-		GL30.glUniform2ui(uniform, x, y);
+		GL33C.glUniform2ui(uniform, x, y);
 	}
 
 	public void setInt(String glslName, int value) {
@@ -123,7 +121,7 @@ public class GlProgram extends GlObject {
 			return;
 		}
 
-		GL20.glUniform1i(uniform, value);
+		GL33C.glUniform1i(uniform, value);
 	}
 
 	/**
@@ -157,19 +155,19 @@ public class GlProgram extends GlObject {
 		int samplerUniform = getUniformLocation(name);
 
 		if (samplerUniform >= 0) {
-			GL20.glUniform1i(samplerUniform, binding);
+			GL33C.glUniform1i(samplerUniform, binding);
 		}
 	}
 
 	public void setUniformBlockBinding(String name, int binding) {
-		int index = GL31.glGetUniformBlockIndex(handle(), name);
+		int index = GL33C.glGetUniformBlockIndex(handle(), name);
 
-		if (index == GL31.GL_INVALID_INDEX) {
+		if (index == GL33C.GL_INVALID_INDEX) {
 			LOGGER.debug("No active uniform block '{}' exists. Could be unused.", name);
 			return;
 		}
 
-		GL31.glUniformBlockBinding(handle(), index, binding);
+		GL33C.glUniformBlockBinding(handle(), index, binding);
 	}
 
 	public void bindAttribLocation(String attribute, int binding) {
@@ -189,7 +187,7 @@ public class GlProgram extends GlObject {
 	 * geometry vanish. Binding the locations explicitly is correct everywhere.
 	 */
 	public void bindFragDataLocation(String name, int binding) {
-		GL30.glBindFragDataLocation(handle(), binding, name);
+		GL33C.glBindFragDataLocation(handle(), binding, name);
 	}
 
 	@Override

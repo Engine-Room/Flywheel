@@ -4,18 +4,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.lwjgl.opengl.GL33C;
+import org.lwjgl.opengl.GL46C;
+
+import com.mojang.blaze3d.opengl.GlConst;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.textures.FilterMode;
 import com.mojang.blaze3d.textures.GpuSampler;
-
-import net.minecraft.resources.Identifier;
-
-import org.lwjgl.opengl.GL30;
-import org.lwjgl.opengl.GL40;
-import org.lwjgl.opengl.GL42;
-import org.lwjgl.opengl.GL43;
-
-import com.mojang.blaze3d.opengl.GlConst;
 
 import dev.engine_room.flywheel.api.backend.Engine;
 import dev.engine_room.flywheel.api.instance.Instance;
@@ -42,6 +37,7 @@ import dev.engine_room.flywheel.lib.material.SimpleMaterial;
 import dev.engine_room.flywheel.lib.memory.MemoryBlock;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.model.ModelBakery;
+import net.minecraft.resources.Identifier;
 
 public class IndirectDrawManager extends DrawManager<IndirectInstancer<?>> {
 	private final IndirectPrograms programs;
@@ -124,7 +120,7 @@ public class IndirectDrawManager extends DrawManager<IndirectInstancer<?>> {
 		// We could probably save some driver calls here when there are
 		// actually zero instances, but that feels like a very rare case
 
-		GL42.glMemoryBarrier(GL43.GL_SHADER_STORAGE_BARRIER_BIT);
+		GL46C.glMemoryBarrier(GL46C.GL_SHADER_STORAGE_BARRIER_BIT);
 
 		matrixBuffer.bind();
 
@@ -134,7 +130,7 @@ public class IndirectDrawManager extends DrawManager<IndirectInstancer<?>> {
 			group.dispatchCull();
 		}
 
-		GL42.glMemoryBarrier(GL43.GL_SHADER_STORAGE_BARRIER_BIT);
+		GL46C.glMemoryBarrier(GL46C.GL_SHADER_STORAGE_BARRIER_BIT);
 
 		programs.getApplyProgram()
 				.bind();
@@ -143,7 +139,7 @@ public class IndirectDrawManager extends DrawManager<IndirectInstancer<?>> {
 			group.dispatchApply();
 		}
 
-		GL42.glMemoryBarrier(GL43.GL_SHADER_STORAGE_BARRIER_BIT);
+		GL46C.glMemoryBarrier(GL46C.GL_SHADER_STORAGE_BARRIER_BIT);
 
 		TextureBinder.bindLightAndOverlay();
 
@@ -244,7 +240,7 @@ public class IndirectDrawManager extends DrawManager<IndirectInstancer<?>> {
 
 		// Set up the crumbling program buffers. Nothing changes here between draws.
 		GlBufferType.DRAW_INDIRECT_BUFFER.bind(crumblingDrawBuffer.handle());
-		GL30.glBindBufferRange(GL43.GL_SHADER_STORAGE_BUFFER, BufferBindings.DRAW, crumblingDrawBuffer.handle(), 0, IndirectBuffers.DRAW_COMMAND_STRIDE);
+		GL33C.glBindBufferRange(GL46C.GL_SHADER_STORAGE_BUFFER, BufferBindings.DRAW, crumblingDrawBuffer.handle(), 0, IndirectBuffers.DRAW_COMMAND_STRIDE);
 		TextureBinder.bindRenderTarget(Minecraft.getInstance().getMainRenderTarget());
 
 		for (var groupEntry : byType.entrySet()) {
@@ -279,7 +275,7 @@ public class IndirectDrawManager extends DrawManager<IndirectInstancer<?>> {
 						crumblingDrawBuffer.upload(block);
 
 						// Submit! Everything is already bound by here.
-						GL40.glDrawElementsIndirect(GlConst.GL_TRIANGLES, GlConst.GL_UNSIGNED_INT, 0);
+						GL46C.glDrawElementsIndirect(GlConst.GL_TRIANGLES, GlConst.GL_UNSIGNED_INT, 0);
 					}
 				}
 

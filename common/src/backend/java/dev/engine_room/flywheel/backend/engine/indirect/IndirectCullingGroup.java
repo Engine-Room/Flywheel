@@ -4,8 +4,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
-import org.lwjgl.opengl.GL42;
-import org.lwjgl.opengl.GL43;
+import org.lwjgl.opengl.GL46C;
 
 import com.mojang.blaze3d.opengl.GlConst;
 
@@ -114,12 +113,12 @@ public class IndirectCullingGroup<I extends Instance> {
 		cullProgram.bind();
 
 		buffers.bindForCull();
-		GL43.glDispatchCompute(buffers.objectStorage.capacity(), 1, 1);
+		GL46C.glDispatchCompute(buffers.objectStorage.capacity(), 1, 1);
 	}
 
 	public void dispatchApply() {
 		buffers.bindForApply();
-		GL43.glDispatchCompute(GlCompat.getComputeGroupCount(indirectDraws.size()), 1, 1);
+		GL46C.glDispatchCompute(GlCompat.getComputeGroupCount(indirectDraws.size()), 1, 1);
 	}
 
 	public boolean hasOitDraws() {
@@ -259,7 +258,7 @@ public class IndirectCullingGroup<I extends Instance> {
 		if (needsDrawBarrier) {
 			// In theory all command buffer writes will be protected by
 			// the shader storage barrier bit, but better safe than sorry.
-			GL42.glMemoryBarrier(GL42.GL_COMMAND_BARRIER_BIT);
+			GL46C.glMemoryBarrier(GL46C.GL_COMMAND_BARRIER_BIT);
 			needsDrawBarrier = false;
 		}
 	}

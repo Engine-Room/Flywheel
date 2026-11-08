@@ -1,6 +1,6 @@
 package dev.engine_room.flywheel.backend.engine.indirect;
 
-import org.lwjgl.opengl.GL32;
+import org.lwjgl.opengl.GL33C;
 import org.lwjgl.opengl.GL46;
 
 import com.mojang.blaze3d.opengl.GlConst;
@@ -65,7 +65,7 @@ public class OitFramebuffer {
 		Samplers.COEFFICIENTS.makeActive();
 		// Bind zero to state manager to make sure we clear its internal state
 		GlStateManager._bindTexture(0);
-		GL32.glBindTexture(GL32.GL_TEXTURE_2D_ARRAY, coefficients);
+		GL33C.glBindTexture(GL33C.GL_TEXTURE_2D_ARRAY, coefficients);
 
 		Samplers.DEPTH_RANGE.makeActive();
 		GlStateManager._bindTexture(depthBounds);
@@ -75,7 +75,7 @@ public class OitFramebuffer {
 
 		GlStateManager._glBindFramebuffer(GlConst.GL_FRAMEBUFFER, fbo);
 		GlTexture depthTexture = (GlTexture) renderTarget.getDepthTexture();
-		GL32.glFramebufferTexture(GlConst.GL_FRAMEBUFFER, GlConst.GL_DEPTH_ATTACHMENT, depthTexture != null ? depthTexture.glId() : 0, 0);
+		GL33C.glFramebufferTexture(GlConst.GL_FRAMEBUFFER, GlConst.GL_DEPTH_ATTACHMENT, depthTexture != null ? depthTexture.glId() : 0, 0);
 	}
 
 	/**
@@ -87,7 +87,7 @@ public class OitFramebuffer {
 		GlStateManager._colorMask(ColorTargetState.WRITE_ALL);
 		GlStateManager._enableBlend();
 		GlStateManager._blendFuncSeparate(GlConst.GL_ONE, GlConst.GL_ONE, GlConst.GL_ONE, GlConst.GL_ONE);
-		GL32.glBlendEquation(GlConst.GL_MAX);
+		GL33C.glBlendEquation(GlConst.GL_MAX);
 
 		float far = Minecraft.getInstance().gameRenderer.getGameRenderState().levelRenderState.cameraRenderState.depthFar;
 
@@ -95,8 +95,8 @@ public class OitFramebuffer {
 			GL46.glNamedFramebufferDrawBuffers(fbo, DEPTH_RANGE_DRAW_BUFFERS);
 			GL46.glClearNamedFramebufferfv(fbo, GL46.GL_COLOR, 0, new float[]{-far, -far, 0, 0});
 		} else {
-			GL32.glDrawBuffers(DEPTH_RANGE_DRAW_BUFFERS);
-			GL32.glClearColor(-far, -far, 0, 0);
+			GL33C.glDrawBuffers(DEPTH_RANGE_DRAW_BUFFERS);
+			GL33C.glClearColor(-far, -far, 0, 0);
 			GlStateManager._clear(GlConst.GL_COLOR_BUFFER_BIT);
 		}
 	}
@@ -110,7 +110,7 @@ public class OitFramebuffer {
 		GlStateManager._colorMask(ColorTargetState.WRITE_ALL);
 		GlStateManager._enableBlend();
 		GlStateManager._blendFuncSeparate(GlConst.GL_ONE, GlConst.GL_ONE, GlConst.GL_ONE, GlConst.GL_ONE);
-		GL32.glBlendEquation(GlConst.GL_FUNC_ADD);
+		GL33C.glBlendEquation(GlConst.GL_FUNC_ADD);
 
 		if (GlCompat.SUPPORTS_DSA) {
 			GL46.glNamedFramebufferDrawBuffers(fbo, RENDER_TRANSMITTANCE_DRAW_BUFFERS);
@@ -120,8 +120,8 @@ public class OitFramebuffer {
 			GL46.glClearNamedFramebufferfv(fbo, GL46.GL_COLOR, 2, CLEAR_TO_ZERO);
 			GL46.glClearNamedFramebufferfv(fbo, GL46.GL_COLOR, 3, CLEAR_TO_ZERO);
 		} else {
-			GL32.glDrawBuffers(RENDER_TRANSMITTANCE_DRAW_BUFFERS);
-			GL32.glClearColor(0, 0, 0, 0);
+			GL33C.glDrawBuffers(RENDER_TRANSMITTANCE_DRAW_BUFFERS);
+			GL33C.glClearColor(0, 0, 0, 0);
 			GlStateManager._clear(GlConst.GL_COLOR_BUFFER_BIT);
 		}
 	}
@@ -140,7 +140,7 @@ public class OitFramebuffer {
 		if (GlCompat.SUPPORTS_DSA) {
 			GL46.glNamedFramebufferDrawBuffers(fbo, DEPTH_ONLY_DRAW_BUFFERS);
 		} else {
-			GL32.glDrawBuffers(DEPTH_ONLY_DRAW_BUFFERS);
+			GL33C.glDrawBuffers(DEPTH_ONLY_DRAW_BUFFERS);
 		}
 
 		programs.getOitDepthProgram()
@@ -158,15 +158,15 @@ public class OitFramebuffer {
 		GlStateManager._colorMask(ColorTargetState.WRITE_ALL);
 		GlStateManager._enableBlend();
 		GlStateManager._blendFuncSeparate(GlConst.GL_ONE, GlConst.GL_ONE, GlConst.GL_ONE, GlConst.GL_ONE);
-		GL32.glBlendEquation(GlConst.GL_FUNC_ADD);
+		GL33C.glBlendEquation(GlConst.GL_FUNC_ADD);
 
 		if (GlCompat.SUPPORTS_DSA) {
 			GL46.glNamedFramebufferDrawBuffers(fbo, ACCUMULATE_DRAW_BUFFERS);
 
 			GL46.glClearNamedFramebufferfv(fbo, GL46.GL_COLOR, 0, CLEAR_TO_ZERO);
 		} else {
-			GL32.glDrawBuffers(ACCUMULATE_DRAW_BUFFERS);
-			GL32.glClearColor(0, 0, 0, 0);
+			GL33C.glDrawBuffers(ACCUMULATE_DRAW_BUFFERS);
+			GL33C.glClearColor(0, 0, 0, 0);
 			GlStateManager._clear(GlConst.GL_COLOR_BUFFER_BIT);
 		}
 	}
@@ -196,7 +196,7 @@ public class OitFramebuffer {
 		// Though note that the alpha value we emit in the fragment shader is actually (1. - transmittance_total).
 		// The extra inversion step is so we can have a sane alpha value written out for the fabulous blit shader to consume.
 		GlStateManager._blendFuncSeparate(GlConst.GL_SRC_ALPHA, GlConst.GL_ONE_MINUS_SRC_ALPHA, GlConst.GL_ONE, GlConst.GL_ONE_MINUS_SRC_ALPHA);
-		GL32.glBlendEquation(GlConst.GL_FUNC_ADD);
+		GL33C.glBlendEquation(GlConst.GL_FUNC_ADD);
 		GlStateManager._depthFunc(GlConst.GL_ALWAYS);
 
 		GlTextureUnit.T0.makeActive();
@@ -222,7 +222,7 @@ public class OitFramebuffer {
 
 	public void delete() {
 		deleteTextures();
-		GL32.glDeleteVertexArrays(vao);
+		GL33C.glDeleteVertexArrays(vao);
 	}
 
 	private void drawFullscreenQuad() {
@@ -271,16 +271,16 @@ public class OitFramebuffer {
 			coefficients = GL46.glCreateTextures(GL46.GL_TEXTURE_2D_ARRAY);
 			accumulate = GL46.glCreateTextures(GL46.GL_TEXTURE_2D);
 
-			GL46.glTextureStorage2D(depthBounds, 1, GL32.GL_RG32F, width, height);
-			GL46.glTextureStorage3D(coefficients, 1, GL32.GL_RGBA16F, width, height, 4);
-			GL46.glTextureStorage2D(accumulate, 1, GL32.GL_RGBA16F, width, height);
+			GL46.glTextureStorage2D(depthBounds, 1, GL33C.GL_RG32F, width, height);
+			GL46.glTextureStorage3D(coefficients, 1, GL33C.GL_RGBA16F, width, height, 4);
+			GL46.glTextureStorage2D(accumulate, 1, GL33C.GL_RGBA16F, width, height);
 
 			GL46.glNamedFramebufferTexture(fbo, GlConst.GL_COLOR_ATTACHMENT0, depthBounds, 0);
-			GL46.glNamedFramebufferTextureLayer(fbo, GL32.GL_COLOR_ATTACHMENT1, coefficients, 0, 0);
-			GL46.glNamedFramebufferTextureLayer(fbo, GL32.GL_COLOR_ATTACHMENT2, coefficients, 0, 1);
-			GL46.glNamedFramebufferTextureLayer(fbo, GL32.GL_COLOR_ATTACHMENT3, coefficients, 0, 2);
-			GL46.glNamedFramebufferTextureLayer(fbo, GL32.GL_COLOR_ATTACHMENT4, coefficients, 0, 3);
-			GL46.glNamedFramebufferTexture(fbo, GL32.GL_COLOR_ATTACHMENT5, accumulate, 0);
+			GL46.glNamedFramebufferTextureLayer(fbo, GL33C.GL_COLOR_ATTACHMENT1, coefficients, 0, 0);
+			GL46.glNamedFramebufferTextureLayer(fbo, GL33C.GL_COLOR_ATTACHMENT2, coefficients, 0, 1);
+			GL46.glNamedFramebufferTextureLayer(fbo, GL33C.GL_COLOR_ATTACHMENT3, coefficients, 0, 2);
+			GL46.glNamedFramebufferTextureLayer(fbo, GL33C.GL_COLOR_ATTACHMENT4, coefficients, 0, 3);
+			GL46.glNamedFramebufferTexture(fbo, GL33C.GL_COLOR_ATTACHMENT5, accumulate, 0);
 		} else {
 			fbo = GL46.glGenFramebuffers();
 
@@ -292,23 +292,23 @@ public class OitFramebuffer {
 			GlStateManager._bindTexture(0);
 
 			GlStateManager._bindTexture(depthBounds);
-			GL32.glTexImage2D(GlConst.GL_TEXTURE_2D, 0, GL32.GL_RG32F, width, height, 0, GL46.GL_RGBA, GL46.GL_BYTE, 0);
+			GL33C.glTexImage2D(GlConst.GL_TEXTURE_2D, 0, GL33C.GL_RG32F, width, height, 0, GL46.GL_RGBA, GL46.GL_BYTE, 0);
 
 			GlStateManager._texParameter(GlConst.GL_TEXTURE_2D, GlConst.GL_TEXTURE_MIN_FILTER, GlConst.GL_NEAREST);
 			GlStateManager._texParameter(GlConst.GL_TEXTURE_2D, GlConst.GL_TEXTURE_MAG_FILTER, GlConst.GL_NEAREST);
 			GlStateManager._texParameter(GlConst.GL_TEXTURE_2D, GlConst.GL_TEXTURE_WRAP_S, GlConst.GL_CLAMP_TO_EDGE);
 			GlStateManager._texParameter(GlConst.GL_TEXTURE_2D, GlConst.GL_TEXTURE_WRAP_T, GlConst.GL_CLAMP_TO_EDGE);
 
-			GL32.glBindTexture(GL32.GL_TEXTURE_2D_ARRAY, coefficients);
-			GL32.glTexImage3D(GL32.GL_TEXTURE_2D_ARRAY, 0, GL32.GL_RGBA16F, width, height, 4, 0, GL46.GL_RGBA, GL46.GL_BYTE, 0);
+			GL33C.glBindTexture(GL33C.GL_TEXTURE_2D_ARRAY, coefficients);
+			GL33C.glTexImage3D(GL33C.GL_TEXTURE_2D_ARRAY, 0, GL33C.GL_RGBA16F, width, height, 4, 0, GL46.GL_RGBA, GL46.GL_BYTE, 0);
 
-			GlStateManager._texParameter(GL32.GL_TEXTURE_2D_ARRAY, GlConst.GL_TEXTURE_MIN_FILTER, GlConst.GL_NEAREST);
-			GlStateManager._texParameter(GL32.GL_TEXTURE_2D_ARRAY, GlConst.GL_TEXTURE_MAG_FILTER, GlConst.GL_NEAREST);
-			GlStateManager._texParameter(GL32.GL_TEXTURE_2D_ARRAY, GlConst.GL_TEXTURE_WRAP_S, GlConst.GL_CLAMP_TO_EDGE);
-			GlStateManager._texParameter(GL32.GL_TEXTURE_2D_ARRAY, GlConst.GL_TEXTURE_WRAP_T, GlConst.GL_CLAMP_TO_EDGE);
+			GlStateManager._texParameter(GL33C.GL_TEXTURE_2D_ARRAY, GlConst.GL_TEXTURE_MIN_FILTER, GlConst.GL_NEAREST);
+			GlStateManager._texParameter(GL33C.GL_TEXTURE_2D_ARRAY, GlConst.GL_TEXTURE_MAG_FILTER, GlConst.GL_NEAREST);
+			GlStateManager._texParameter(GL33C.GL_TEXTURE_2D_ARRAY, GlConst.GL_TEXTURE_WRAP_S, GlConst.GL_CLAMP_TO_EDGE);
+			GlStateManager._texParameter(GL33C.GL_TEXTURE_2D_ARRAY, GlConst.GL_TEXTURE_WRAP_T, GlConst.GL_CLAMP_TO_EDGE);
 
 			GlStateManager._bindTexture(accumulate);
-			GL32.glTexImage2D(GlConst.GL_TEXTURE_2D, 0, GL32.GL_RGBA16F, width, height, 0, GL46.GL_RGBA, GL46.GL_BYTE, 0);
+			GL33C.glTexImage2D(GlConst.GL_TEXTURE_2D, 0, GL33C.GL_RGBA16F, width, height, 0, GL46.GL_RGBA, GL46.GL_BYTE, 0);
 
 			GlStateManager._texParameter(GlConst.GL_TEXTURE_2D, GlConst.GL_TEXTURE_MIN_FILTER, GlConst.GL_NEAREST);
 			GlStateManager._texParameter(GlConst.GL_TEXTURE_2D, GlConst.GL_TEXTURE_MAG_FILTER, GlConst.GL_NEAREST);
@@ -318,11 +318,11 @@ public class OitFramebuffer {
 			GlStateManager._glBindFramebuffer(GlConst.GL_FRAMEBUFFER, fbo);
 
 			GL46.glFramebufferTexture(GlConst.GL_FRAMEBUFFER, GlConst.GL_COLOR_ATTACHMENT0, depthBounds, 0);
-			GL46.glFramebufferTextureLayer(GlConst.GL_FRAMEBUFFER, GL32.GL_COLOR_ATTACHMENT1, coefficients, 0, 0);
-			GL46.glFramebufferTextureLayer(GlConst.GL_FRAMEBUFFER, GL32.GL_COLOR_ATTACHMENT2, coefficients, 0, 1);
-			GL46.glFramebufferTextureLayer(GlConst.GL_FRAMEBUFFER, GL32.GL_COLOR_ATTACHMENT3, coefficients, 0, 2);
-			GL46.glFramebufferTextureLayer(GlConst.GL_FRAMEBUFFER, GL32.GL_COLOR_ATTACHMENT4, coefficients, 0, 3);
-			GL46.glFramebufferTexture(GlConst.GL_FRAMEBUFFER, GL32.GL_COLOR_ATTACHMENT5, accumulate, 0);
+			GL46.glFramebufferTextureLayer(GlConst.GL_FRAMEBUFFER, GL33C.GL_COLOR_ATTACHMENT1, coefficients, 0, 0);
+			GL46.glFramebufferTextureLayer(GlConst.GL_FRAMEBUFFER, GL33C.GL_COLOR_ATTACHMENT2, coefficients, 0, 1);
+			GL46.glFramebufferTextureLayer(GlConst.GL_FRAMEBUFFER, GL33C.GL_COLOR_ATTACHMENT3, coefficients, 0, 2);
+			GL46.glFramebufferTextureLayer(GlConst.GL_FRAMEBUFFER, GL33C.GL_COLOR_ATTACHMENT4, coefficients, 0, 3);
+			GL46.glFramebufferTexture(GlConst.GL_FRAMEBUFFER, GL33C.GL_COLOR_ATTACHMENT5, accumulate, 0);
 		}
 	}
 }

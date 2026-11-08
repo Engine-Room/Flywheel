@@ -1,6 +1,6 @@
 package dev.engine_room.flywheel.backend.engine.indirect;
 
-import org.lwjgl.opengl.GL45;
+import org.lwjgl.opengl.GL46C;
 
 import com.mojang.blaze3d.opengl.GlStateManager;
 
@@ -16,7 +16,7 @@ public class ResizableStorageBuffer extends GlObject {
 	private long capacity = 0;
 
 	public ResizableStorageBuffer() {
-		handle(GL45.glCreateBuffers());
+		handle(GL46C.glCreateBuffers());
 	}
 
 	public long capacity() {
@@ -28,17 +28,17 @@ public class ResizableStorageBuffer extends GlObject {
 
 		if (this.capacity > 0) {
 			int oldHandle = handle();
-			int newHandle = GL45.glCreateBuffers();
+			int newHandle = GL46C.glCreateBuffers();
 
-			GL45.glNamedBufferStorage(newHandle, capacity, 0);
+			GL46C.glNamedBufferStorage(newHandle, capacity, 0);
 
-			GL45.glCopyNamedBufferSubData(oldHandle, newHandle, 0, 0, this.capacity);
+			GL46C.glCopyNamedBufferSubData(oldHandle, newHandle, 0, 0, this.capacity);
 
 			deleteInternal(oldHandle);
 
 			handle(newHandle);
 		} else {
-			GL45.glNamedBufferStorage(handle(), capacity, 0);
+			GL46C.glNamedBufferStorage(handle(), capacity, 0);
 		}
 		this.capacity = capacity;
 		FlwMemoryTracker._allocGpuMemory(this.capacity);

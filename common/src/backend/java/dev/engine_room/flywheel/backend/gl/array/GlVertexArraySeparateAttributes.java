@@ -4,7 +4,7 @@ import java.util.Arrays;
 import java.util.BitSet;
 import java.util.List;
 
-import org.lwjgl.opengl.GL43C;
+import org.lwjgl.opengl.GL46C;
 import org.lwjgl.system.Checks;
 
 import com.mojang.blaze3d.opengl.GlConst;
@@ -35,7 +35,7 @@ public class GlVertexArraySeparateAttributes extends GlVertexArray {
 	public void bindVertexBuffer(final int bindingIndex, final int vbo, final long offset, final int stride) {
 		if (bindingBuffers[bindingIndex] != vbo || bindingOffsets[bindingIndex] != offset || bindingStrides[bindingIndex] != stride) {
 			GlStateTracker.bindVao(handle());
-			GL43C.glBindVertexBuffer(bindingIndex, vbo, offset, stride);
+			GL46C.glBindVertexBuffer(bindingIndex, vbo, offset, stride);
 			bindingBuffers[bindingIndex] = vbo;
 			bindingOffsets[bindingIndex] = offset;
 			bindingStrides[bindingIndex] = stride;
@@ -45,7 +45,7 @@ public class GlVertexArraySeparateAttributes extends GlVertexArray {
 	@Override
 	public void setBindingDivisor(final int bindingIndex, final int divisor) {
 		if (bindingDivisors[bindingIndex] != divisor) {
-			GL43C.glVertexBindingDivisor(bindingIndex, divisor);
+			GL46C.glVertexBindingDivisor(bindingIndex, divisor);
 			bindingDivisors[bindingIndex] = divisor;
 		}
 	}
@@ -64,15 +64,15 @@ public class GlVertexArraySeparateAttributes extends GlVertexArray {
 
 			if (!attribute.equals(attributes[attribIndex])) {
 				if (attribute instanceof VertexAttribute.Float f) {
-					GL43C.glVertexAttribFormat(attribIndex, f.size(), GlConst.toGl(f.type()), f.normalized(), offset);
+					GL46C.glVertexAttribFormat(attribIndex, f.size(), GlConst.toGl(f.type()), f.normalized(), offset);
 				} else if (attribute instanceof VertexAttribute.Int vi) {
-					GL43C.glVertexAttribIFormat(attribIndex, vi.size(), GlConst.toGl(vi.type()), offset);
+					GL46C.glVertexAttribIFormat(attribIndex, vi.size(), GlConst.toGl(vi.type()), offset);
 				}
 				attributes[attribIndex] = attribute;
 			}
 
 			if (attributeBindings[attribIndex] != bindingIndex) {
-				GL43C.glVertexAttribBinding(attribIndex, bindingIndex);
+				GL46C.glVertexAttribBinding(attribIndex, bindingIndex);
 				attributeBindings[attribIndex] = bindingIndex;
 			}
 

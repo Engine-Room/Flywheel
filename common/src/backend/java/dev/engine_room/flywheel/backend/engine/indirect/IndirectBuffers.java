@@ -1,7 +1,6 @@
 package dev.engine_room.flywheel.backend.engine.indirect;
 
-import org.lwjgl.opengl.GL43;
-import org.lwjgl.opengl.GL44;
+import org.lwjgl.opengl.GL46C;
 import org.lwjgl.system.MemoryUtil;
 import org.lwjgl.system.Pointer;
 
@@ -115,7 +114,7 @@ public class IndirectBuffers {
 
 	private void multiBind(int base, int count) {
 		final long ptr = multiBindBlock.ptr();
-		GL44.nglBindBuffersRange(GL43.GL_SHADER_STORAGE_BUFFER, base, count, ptr + base * INT_SIZE, ptr + OFFSET_OFFSET + base * PTR_SIZE, ptr + SIZE_OFFSET + base * PTR_SIZE);
+		GL46C.nglBindBuffersRange(GL46C.GL_SHADER_STORAGE_BUFFER, base, count, ptr + base * INT_SIZE, ptr + OFFSET_OFFSET + base * PTR_SIZE, ptr + SIZE_OFFSET + base * PTR_SIZE);
 	}
 
 	public void delete() {
