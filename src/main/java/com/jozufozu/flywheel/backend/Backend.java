@@ -128,11 +128,11 @@ public class Backend {
 	}
 
 	public boolean canUseInstancing() {
-		return enabled && instancedArrays;
+		return enabled && instancedArrays && !OptifineHandler.usingShaders();
 	}
 
 	public boolean canUseVBOs() {
-		return enabled && gl20();
+		return enabled && gl20() && !OptifineHandler.usingShaders();
 	}
 
 	public boolean gl33() {
@@ -151,8 +151,9 @@ public class Backend {
 
 		instancedArrays = compat.vertexArrayObjectsSupported() && compat.drawInstancedSupported() && compat.instancedArraysSupported();
 
-		enabled = FlwConfig.get()
-				.enabled() && !OptifineHandler.usingShaders();
+		// Keep the user preference separate from current shader-pack state.
+		// Iris/Oculus can change shader state at runtime, so check it in canUse*().
+		enabled = FlwConfig.get().enabled();
 	}
 
 	public boolean canUseInstancing(@Nullable World world) {
