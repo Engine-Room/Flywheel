@@ -69,7 +69,7 @@ public enum BooleanConfig {
 		FlwConfig.get().client.enabled.set(enabled);
 
 		ITextComponent text = boolToText(FlwConfig.get().client.enabled.get()).append(new StringTextComponent(" Flywheel renderer").withStyle(TextFormatting.WHITE));
-		ITextComponent error = new StringTextComponent("Flywheel renderer does not support Optifine Shaders").withStyle(TextFormatting.RED);
+		ITextComponent error = new StringTextComponent("Flywheel renderer does not support shader packs").withStyle(TextFormatting.RED);
 
 		player.displayClientMessage(cannotUse ? error : text, false);
 		Backend.reloadWorldRenderers();
